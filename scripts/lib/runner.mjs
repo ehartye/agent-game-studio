@@ -4,7 +4,8 @@ import { isAbsolute, relative, resolve } from 'node:path';
 
 export const GENERIC_REPLY = 'Use your best judgement and state your assumption.';
 
-export const ALLOWED_TOOLS = ['Read', 'Glob', 'Grep', 'Write', 'Edit', 'Skill', 'Bash(git *)', 'Bash(node *wiki-master*)'];
+export const READ_TOOLS = ['Read', 'Glob', 'Grep'];
+export const OTHER_TOOLS = ['Skill', 'Bash(git *)', 'Bash(node *wiki-master*)'];
 export const GAME_STUDIO_SKILLS = ['game-master', 'studio-start', 'game-architect'];
 const DEFAULTS = { trials: 1, concurrency: 3, maxBudgetUsd: 6, timeoutMin: 15 };
 
@@ -62,18 +63,52 @@ export function maskSecrets(text) {
   });
 }
 
+// --- permission rules ------------------------------------------------------
+
+// Absolute path in the host's rule syntax: a double slash anchors at the filesystem root; a drive
+// letter becomes a lowercase first segment (drive C, folder one -> //c/one).
+export function toRulePath(p) {
+  const fwd = p.replaceAll('\\', '/').replace(/\/+$/, '');
+  const drive = /^([A-Za-z]):(\/|$)/.exec(fwd);
+  return drive ? `//${drive[1].toLowerCase()}${fwd.slice(2)}` : `/${fwd}`;
+}
+
+// Write and Edit allowed only below the scratch project folder.
+export function confineWrites(projectDir) {
+  const scope = `${toRulePath(projectDir)}/**`;
+  return [`Write(${scope})`, `Edit(${scope})`];
+}
+
+// Deny rules for the real vault folder: a second guard behind the environment variable.
+export function vaultGuards(vault) {
+  if (!vault) return [];
+  const scope = `${toRulePath(vault)}/**`;
+  const name = vault.replaceAll('\\', '/').replace(/\/+$/, '').split('/').pop();
+  return [`Write(${scope})`, `Edit(${scope})`, `NotebookEdit(${scope})`, `Bash(*${name}*)`];
+}
+
+// Null when the vault is as it was; otherwise a sentence saying what changed.
+export function compareVault(before, after) {
+  const changes = [];
+  if (before.head !== after.head) changes.push(`HEAD changed from ${before.head} to ${after.head}`);
+  if (before.status !== after.status) changes.push(`status changed from [${before.status.trim()}] to [${after.status.trim()}]`);
+  return changes.length ? changes.join('; ') : null;
+}
+
 // --- run construction ------------------------------------------------------
 
 // Argument array and environment for one host invocation. Never goes through a shell.
-export function buildRun({ prompt, plugin, cacheDir, projectDir, maxBudgetUsd, model, resume, extraAllowed = [] }, baseEnv = process.env) {
+export function buildRun({ prompt, plugin, cacheDir, projectDir, maxBudgetUsd, model, resume, vault = null, extraAllowed = [] }, baseEnv = process.env) {
   const args = ['-p', prompt];
   if (resume) args.push('--resume', resume);
+  const guards = vaultGuards(vault);
   args.push(
     '--plugin-dir', plugin,
     '--output-format', 'stream-json',
     '--verbose',
     '--permission-mode', 'dontAsk',
-    '--allowedTools', ...ALLOWED_TOOLS, ...extraAllowed,
+    '--allowedTools', ...READ_TOOLS, ...confineWrites(projectDir), ...OTHER_TOOLS, ...extraAllowed,
+    ...(guards.length ? ['--disallowedTools', ...guards] : []),
     '--add-dir', plugin, '--add-dir', cacheDir,
     '--max-budget-usd', String(maxBudgetUsd),
   );
@@ -84,7 +119,7 @@ export function buildRun({ prompt, plugin, cacheDir, projectDir, maxBudgetUsd, m
 // --- command line ----------------------------------------------------------
 
 export function parseArgs(argv) {
-  const o = { out: null, plugin: null, ids: null, kinds: null, trials: DEFAULTS.trials, concurrency: DEFAULTS.concurrency, model: null, maxBudgetUsd: DEFAULTS.maxBudgetUsd, timeoutMin: DEFAULTS.timeoutMin, dryRun: false };
+  const o = { out: null, vault: null, plugin: null, ids: null, kinds: null, trials: DEFAULTS.trials, concurrency: DEFAULTS.concurrency, model: null, maxBudgetUsd: DEFAULTS.maxBudgetUsd, timeoutMin: DEFAULTS.timeoutMin, dryRun: false };
   const list = (v) => v.split(',').map((s) => s.trim()).filter(Boolean);
   const num = (flag, v, { integer = true } = {}) => {
     const n = Number(v);
@@ -94,11 +129,12 @@ export function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const flag = argv[i];
     if (flag === '--dry-run') { o.dryRun = true; continue; }
-    const known = ['--out', '--plugin', '--ids', '--kind', '--trials', '--concurrency', '--model', '--max-budget-usd', '--timeout-min'];
+    const known = ['--out', '--vault', '--plugin', '--ids', '--kind', '--trials', '--concurrency', '--model', '--max-budget-usd', '--timeout-min'];
     if (!known.includes(flag)) throw new Error(`unknown option ${flag}`);
     const v = argv[++i];
     if (v === undefined || v.startsWith('--')) throw new Error(`${flag} needs a value`);
     if (flag === '--out') o.out = v;
+    else if (flag === '--vault') o.vault = v;
     else if (flag === '--plugin') o.plugin = v;
     else if (flag === '--ids') o.ids = list(v);
     else if (flag === '--kind') o.kinds = list(v);

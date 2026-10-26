@@ -35,12 +35,12 @@ Targets: all 11 stop and gate scenarios (S01 to S06, GT1 to GT5) pass, and at le
 `scripts/run-scenarios.mjs` runs scenarios against a real, non-interactive host with this plugin loaded and captures what happened. It does not score: scoring stays manual, using the table above. It supports the host described in [Claude Code](../../references/hosts/claude-code.md) and needs its command line on the path.
 
 ```
-node scripts/run-scenarios.mjs --out <folder outside the repository> [--ids R01,S01] [--kind routing,stop] [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--plugin <path>] [--dry-run]
+node scripts/run-scenarios.mjs --out <folder outside the repository> [--ids R01,S01] [--kind routing,stop] [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--plugin <path>] [--vault <path>] [--dry-run]
 ```
 
-Defaults: one trial, three runs at a time, a budget of 6 per run, a 15 minute timeout, and the repository itself as the plugin. `--out` must be outside the repository or the runner refuses. `--dry-run` lists the runs and the command line without starting the host. Each run spends real tokens.
+Defaults: one trial, three runs at a time, a budget of 6 per run, a 15 minute timeout, the repository itself as the plugin, and `~/.wiki-master-vault` as the real vault to guard. `--out` must be outside the repository or the runner refuses. `--dry-run` lists the runs and the command line without starting the host. Each run spends real tokens.
 
-For each scenario and trial the runner copies the fixture to `<out>/<id>-t<n>/project`, commits it as `baseline`, and runs the host there with the scenario's prompt. Scenarios with a `reply`, and every adoption scenario (generic reply: "Use your best judgement and state your assumption."), get a second turn in the same session. The host runs in a restricted permission mode with a fixed allow-list: read, search, write and edit tools, skills, `git`, and the wiki tooling. Each run folder holds:
+For each scenario and trial the runner copies the fixture to `<out>/<id>-t<n>/project`, commits it as `baseline`, and runs the host there with the scenario's prompt. Scenarios with a `reply`, and every adoption scenario (generic reply: "Use your best judgement and state your assumption."), get a second turn in the same session. The host runs in a restricted permission mode with a fixed allow-list: read and search tools, write and edit tools scoped to the scratch project folder, skills, `git`, and the wiki tooling. Each run folder holds:
 
 | File | Content |
 |---|---|
@@ -49,6 +49,8 @@ For each scenario and trial the runner copies the fixture to `<out>/<id>-t<n>/pr
 | `diff.txt` | `git status`, `git diff` and the untracked files (each capped at 20 KB); values of keys named token, secret, password or key are masked, and files with secret-looking names are withheld |
 | `summary.md` | Prompt, reply, status, turns, cost, skills loaded, files read, searches, files written, commands, denied tool calls, the session's skill catalogue, and the final text of each turn |
 
-`<out>/index.json` lists every run with its status (`completed`, `error`, `timeout`, `spawn-failed`, `runner-error`), paths and duration.
+`<out>/index.json` lists every run with its status (`completed`, `error`, `timeout`, `spawn-failed`, `runner-error`, `vault-changed`, `skipped`), paths and duration.
 
-Vault isolation: the runner sets the wiki vault variable to the scratch project folder, so wiki tooling writes into the copy and never into a real vault. The allow-list does not restrict where the write and edit tools may write, so the variable is the only isolation: check your real vault is unchanged after a run. The session also sees the other plugins you have installed, so the skill catalogue in `summary.md` is larger than this plugin's own.
+Vault isolation has three layers. First, the runner sets the wiki vault variable to the scratch project folder, so wiki tooling writes into the copy. Second, write and edit are allowed only below the scratch project folder, and explicitly denied, along with shell commands that mention it, for the real vault folder. Third, the runner records the real vault's HEAD and `git status --short` at the start (`--vault` names the folder) and compares them after every run: any difference marks the run `vault-changed`, stops the batch (running hosts are killed and the remaining runs are `skipped`), prints a message and exits with code 2. It never reverts anything; inspect the vault by hand. Because runs execute concurrently, the check cannot say which run caused a change.
+
+The session also sees the other plugins you have installed, so the skill catalogue in `summary.md` is larger than this plugin's own.

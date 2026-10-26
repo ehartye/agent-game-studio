@@ -5,6 +5,10 @@ import {
   GENERIC_REPLY,
   assertOutsideRepo,
   buildRun,
+  compareVault,
+  confineWrites,
+  toRulePath,
+  vaultGuards,
   isSecretName,
   maskSecrets,
   parseArgs,
@@ -107,7 +111,7 @@ test('maskSecrets hides values of secret-named keys in JSON, env and yaml forms'
 });
 
 test('buildRun builds the argv array and the vault-isolating environment', () => {
-  const run = buildRun({ prompt: 'Add a "grapple" hook.', plugin: '/plug', cacheDir: '/cache', projectDir: '/out/S01-t1/project', maxBudgetUsd: 6 }, { PATH: 'p', WIKI_MASTER_VAULT: '/real' });
+  const run = buildRun({ prompt: 'Add a "grapple" hook.', plugin: '/plug', cacheDir: '/cache', projectDir: '/out/S01-t1/project', maxBudgetUsd: 6, vault: '/real/vault' }, { PATH: 'p', WIKI_MASTER_VAULT: '/real' });
   const a = run.args;
   assert.equal(a[0], '-p');
   assert.equal(a[1], 'Add a "grapple" hook.');
@@ -116,7 +120,10 @@ test('buildRun builds the argv array and the vault-isolating environment', () =>
   assert.ok(a.includes('--verbose'));
   assert.equal(a[a.indexOf('--permission-mode') + 1], 'dontAsk');
   const at = a.indexOf('--allowedTools');
-  assert.deepEqual(a.slice(at + 1, at + 9), ['Read', 'Glob', 'Grep', 'Write', 'Edit', 'Skill', 'Bash(git *)', 'Bash(node *wiki-master*)']);
+  assert.deepEqual(a.slice(at + 1, at + 9), ['Read', 'Glob', 'Grep', 'Write(//out/S01-t1/project/**)', 'Edit(//out/S01-t1/project/**)', 'Skill', 'Bash(git *)', 'Bash(node *wiki-master*)']);
+  assert.ok(!a.includes('Write') && !a.includes('Edit'), 'no unscoped write rules');
+  const dt = a.indexOf('--disallowedTools');
+  assert.ok(dt > 0 && a.includes('Write(//real/vault/**)') && a.includes('Edit(//real/vault/**)') && a.includes('NotebookEdit(//real/vault/**)'));
   assert.deepEqual(a.filter((x, i) => a[i - 1] === '--add-dir'), ['/plug', '/cache']);
   assert.equal(a[a.indexOf('--max-budget-usd') + 1], '6');
   assert.ok(!a.includes('--model'));
@@ -156,9 +163,9 @@ test('assertOutsideRepo refuses folders inside or equal to the repository, inclu
 
 test('parseArgs applies defaults and parses lists and numbers', () => {
   const d = parseArgs(['--out', '/o']);
-  assert.deepEqual({ ...d, ids: d.ids, kinds: d.kinds }, { out: '/o', plugin: null, ids: null, kinds: null, trials: 1, concurrency: 3, model: null, maxBudgetUsd: 6, timeoutMin: 15, dryRun: false });
-  const p = parseArgs(['--out', '/o', '--plugin', '/p', '--ids', 'R01,S01', '--kind', 'routing,stop', '--trials', '2', '--concurrency', '4', '--model', 'opus', '--max-budget-usd', '3.5', '--timeout-min', '5', '--dry-run']);
-  assert.deepEqual(p, { out: '/o', plugin: '/p', ids: ['R01', 'S01'], kinds: ['routing', 'stop'], trials: 2, concurrency: 4, model: 'opus', maxBudgetUsd: 3.5, timeoutMin: 5, dryRun: true });
+  assert.deepEqual(d, { out: '/o', vault: null, plugin: null, ids: null, kinds: null, trials: 1, concurrency: 3, model: null, maxBudgetUsd: 6, timeoutMin: 15, dryRun: false });
+  const p = parseArgs(['--out', '/o', '--vault', '/v', '--plugin', '/p', '--ids', 'R01,S01', '--kind', 'routing,stop', '--trials', '2', '--concurrency', '4', '--model', 'opus', '--max-budget-usd', '3.5', '--timeout-min', '5', '--dry-run']);
+  assert.deepEqual(p, { out: '/o', vault: '/v', plugin: '/p', ids: ['R01', 'S01'], kinds: ['routing', 'stop'], trials: 2, concurrency: 4, model: 'opus', maxBudgetUsd: 3.5, timeoutMin: 5, dryRun: true });
 });
 
 test('parseArgs rejects a missing --out, unknown flags and bad numbers', () => {
@@ -182,4 +189,37 @@ test('renderSummary includes prompt, reply, status, tools, catalogue and each tu
   for (const needle of ['S01', 'Add a grapple hook mechanic.', 'ok then', 'completed', '0.42', 'agent-game-studio:studio-start', '/p/AGENTS.md', 'Write /p/new.md', 'git status --short', 'Phase: concept\nNext step: x\nBlocked by: nothing', 'game-master', '4 skills']) {
     assert.ok(md.includes(needle), `missing ${needle}`);
   }
+});
+
+const win = (p) => p.replaceAll('/', String.fromCharCode(92));
+
+test('toRulePath turns absolute paths into the double-slash anchored form with forward slashes', () => {
+  assert.equal(toRulePath(win('C:/work/scratch/S01-t1/project')), '//c/work/scratch/S01-t1/project');
+  assert.equal(toRulePath('c:/work dir/My Game/project/'), '//c/work dir/My Game/project');
+  assert.equal(toRulePath(win('D:/x')), '//d/x');
+  assert.equal(toRulePath('/srv/out/project'), '//srv/out/project');
+});
+
+test('confineWrites scopes Write and Edit to the project folder only', () => {
+  assert.deepEqual(confineWrites(win('C:/work dir/out/S01-t1/project')), [
+    'Write(//c/work dir/out/S01-t1/project/**)',
+    'Edit(//c/work dir/out/S01-t1/project/**)',
+  ]);
+});
+
+test('vaultGuards deny file edits and shell access to the real vault folder', () => {
+  assert.deepEqual(vaultGuards(win('C:/data/.wiki-master-vault')), [
+    'Write(//c/data/.wiki-master-vault/**)',
+    'Edit(//c/data/.wiki-master-vault/**)',
+    'NotebookEdit(//c/data/.wiki-master-vault/**)',
+    'Bash(*.wiki-master-vault*)',
+  ]);
+  assert.deepEqual(vaultGuards(null), []);
+});
+
+test('compareVault reports nothing for an identical snapshot and names what changed otherwise', () => {
+  const a = { head: 'abc', status: '' };
+  assert.equal(compareVault(a, { head: 'abc', status: '' }), null);
+  assert.match(compareVault(a, { head: 'def', status: '' }), /HEAD changed from abc to def/);
+  assert.match(compareVault(a, { head: 'abc', status: ' M wiki/x.md' }), /status changed[\s\S]*wiki.x.md/);
 });

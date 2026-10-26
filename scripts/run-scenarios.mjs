@@ -2,12 +2,12 @@
 // plugin loaded, and captures what happened. It never scores. Dependency-free.
 //
 //   node scripts/run-scenarios.mjs --out <dir> [--plugin <path>] [--ids R01,S01] [--kind routing,stop]
-//        [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--dry-run]
+//        [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--vault <path>] [--dry-run]
 import { spawn, spawnSync } from 'node:child_process';
 import { cpSync, createWriteStream, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { delimiter, join, resolve } from 'node:path';
-import { GENERIC_REPLY, assertOutsideRepo, buildRun, isSecretName, maskSecrets, parseArgs, parseTranscript, renderSummary, replyFor, selectScenarios } from './lib/runner.mjs';
+import { GENERIC_REPLY, assertOutsideRepo, buildRun, compareVault, isSecretName, maskSecrets, parseArgs, parseTranscript, renderSummary, replyFor, selectScenarios } from './lib/runner.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const FILE_CAP = 20 * 1024;
@@ -41,13 +41,21 @@ function prepareProject(dir, fixture) {
   git(dir, 'commit', '-q', '-m', 'baseline');
 }
 
+// State of the real vault, compared before and after every run. A missing or non-git folder reads as head null.
+function vaultSnapshot(vault) {
+  const run = (...a) => spawnSync('git', ['-C', vault, ...a], { encoding: 'utf8' });
+  const head = run('rev-parse', 'HEAD');
+  const status = run('status', '--short');
+  return { head: head.status === 0 ? head.stdout.trim() : null, status: status.status === 0 ? status.stdout : '' };
+}
+
 function killTree(child) {
   if (process.platform === 'win32') spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
   else child.kill('SIGKILL');
 }
 
 // Runs the host once. Resolves with { exitCode, timedOut, spawnError }.
-function runHost(exe, { args, env }, cwd, transcriptPath, stderrPath, timeoutMs) {
+function runHost(exe, { args, env }, cwd, transcriptPath, stderrPath, timeoutMs, active) {
   return new Promise((done) => {
     const out = createWriteStream(transcriptPath);
     const err = createWriteStream(stderrPath);
@@ -59,11 +67,13 @@ function runHost(exe, { args, env }, cwd, transcriptPath, stderrPath, timeoutMs)
       out.end(); err.end();
       return done({ exitCode: null, timedOut: false, spawnError: String(e) });
     }
+    active.add(child);
     child.stdout.pipe(out);
     child.stderr.pipe(err);
     const timer = setTimeout(() => { timedOut = true; killTree(child); }, timeoutMs);
-    child.on('error', (e) => { clearTimeout(timer); out.end(); err.end(); done({ exitCode: null, timedOut, spawnError: String(e) }); });
+    child.on('error', (e) => { active.delete(child); clearTimeout(timer); out.end(); err.end(); done({ exitCode: null, timedOut, spawnError: String(e) }); });
     child.on('close', (code) => {
+      active.delete(child);
       clearTimeout(timer);
       let pending = 2;
       const fin = () => { if (--pending === 0) done({ exitCode: code, timedOut }); };
@@ -96,25 +106,33 @@ async function runOne(ctx, scenario, trial) {
   const dir = join(outDir, name);
   const project = join(dir, 'project');
   const paths = { dir, project, transcript: join(dir, 'transcript.jsonl'), transcript2: join(dir, 'transcript-2.jsonl'), stderr: join(dir, 'stderr.txt'), diff: join(dir, 'diff.txt'), summary: join(dir, 'summary.md') };
+  if (ctx.abortMessage) return { id: scenario.id, trial, status: 'skipped', exitCode: null, durationMs: 0, paths: {}, reason: 'batch stopped: real vault changed' };
   const started = Date.now();
   const entry = { id: scenario.id, trial, status: 'pending', exitCode: null, durationMs: null, paths: {} };
   try {
     prepareProject(project, scenario.fixture);
-    const base = { plugin, cacheDir, projectDir: project, maxBudgetUsd: opts.maxBudgetUsd, model: opts.model, extraAllowed: ctx.extraAllowed };
+    const base = { plugin, cacheDir, projectDir: project, vault: ctx.vault, maxBudgetUsd: opts.maxBudgetUsd, model: opts.model, extraAllowed: ctx.extraAllowed };
     const timeoutMs = opts.timeoutMin * 60_000;
     const turns = [];
-    let first = await runHost(exe, buildRun({ ...base, prompt: scenario.prompt }), project, paths.transcript, paths.stderr, timeoutMs);
+    let first = await runHost(exe, buildRun({ ...base, prompt: scenario.prompt }), project, paths.transcript, paths.stderr, timeoutMs, ctx.active);
     turns.push(parseTranscript(readIfExists(paths.transcript)));
     let last = first;
     const reply = replyFor(scenario);
     let status = first.spawnError ? 'spawn-failed' : first.timedOut ? 'timeout' : first.exitCode !== 0 || turns[0].isError ? 'error' : 'completed';
     if (reply && turns[0].sessionId && !first.spawnError && !first.timedOut) {
       const elapsed = Date.now() - started;
-      last = await runHost(exe, buildRun({ ...base, prompt: reply, resume: turns[0].sessionId }), project, paths.transcript2, join(dir, 'stderr-2.txt'), Math.max(60_000, timeoutMs - elapsed));
+      last = await runHost(exe, buildRun({ ...base, prompt: reply, resume: turns[0].sessionId }), project, paths.transcript2, join(dir, 'stderr-2.txt'), Math.max(60_000, timeoutMs - elapsed), ctx.active);
       turns.push(parseTranscript(readIfExists(paths.transcript2)));
       if (last.timedOut) status = 'timeout';
       else if (last.spawnError) status = 'spawn-failed';
       else if (last.exitCode !== 0 || turns[1].isError) status = 'error';
+    }
+    const changed = compareVault(ctx.vaultBefore, vaultSnapshot(ctx.vault));
+    if (changed) {
+      status = 'vault-changed';
+      entry.vaultChange = changed;
+      ctx.abortMessage ??= changed;
+      for (const child of ctx.active) killTree(child);
     }
     entry.status = status;
     entry.exitCode = last.exitCode;
@@ -153,16 +171,18 @@ async function main() {
   if (opts.dryRun) {
     console.log(`Would run ${jobs.length} run(s) into ${outDir} with plugin ${plugin}`);
     for (const { s, trial } of jobs) console.log(`  ${s.id}-t${trial}  fixture=${s.fixture}  reply=${replyFor(s) ? JSON.stringify(replyFor(s)) : 'none'}`);
-    const { args } = buildRun({ prompt: '<prompt>', plugin, cacheDir, projectDir: '<project>', maxBudgetUsd: opts.maxBudgetUsd, model: opts.model });
+    const { args } = buildRun({ prompt: '<prompt>', plugin, cacheDir, projectDir: '<project>', vault: join(homedir(), '.wiki-master-vault'), maxBudgetUsd: opts.maxBudgetUsd, model: opts.model });
     console.log(`  claude ${args.map((a) => (/\s/.test(a) ? JSON.stringify(a) : a)).join(' ')}`);
     return;
   }
 
   const exe = resolveHost();
   mkdirSync(outDir, { recursive: true });
-  const ctx = { opts, plugin, cacheDir, exe, outDir, extraAllowed: [] };
+  const vault = resolve(opts.vault ?? join(homedir(), '.wiki-master-vault'));
+  const ctx = { opts, plugin, cacheDir, exe, outDir, vault, vaultBefore: vaultSnapshot(vault), active: new Set(), abortMessage: null, extraAllowed: [] };
+  console.log(`real vault ${vault}: HEAD ${ctx.vaultBefore.head ?? 'none'}, ${ctx.vaultBefore.status.trim() ? ctx.vaultBefore.status.trim().split(/\r?\n/).length : 0} changed file(s) at start`);
   const runs = [];
-  const writeIndex = () => writeFileSync(join(outDir, 'index.json'), `${JSON.stringify({ plugin, model: opts.model, genericReply: GENERIC_REPLY, startedAt, runs }, null, 2)}\n`);
+  const writeIndex = () => writeFileSync(join(outDir, 'index.json'), `${JSON.stringify({ plugin, vault, model: opts.model, genericReply: GENERIC_REPLY, startedAt, runs }, null, 2)}\n`);
   const startedAt = new Date().toISOString();
   await pool(jobs, opts.concurrency, async ({ s, trial }) => {
     console.log(`start ${s.id}-t${trial}`);
@@ -174,6 +194,10 @@ async function main() {
   });
   writeIndex();
   console.log(`index: ${join(outDir, 'index.json')}`);
+  if (ctx.abortMessage) {
+    console.error(`STOPPED: the real vault at ${vault} changed during the batch (${ctx.abortMessage}). It was not reverted. Runs that finished after the change are marked vault-changed, and the rest were skipped. Which run did it is not known; inspect the transcripts and the vault by hand.`);
+    process.exit(2);
+  }
 }
 
 main().catch((e) => { console.error(e.message ?? e); process.exit(1); });
