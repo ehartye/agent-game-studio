@@ -6,7 +6,7 @@ import { isAbsolute, relative, resolve } from 'node:path';
 export const GENERIC_REPLY = 'Use your best judgement and state your assumption.';
 
 export const READ_TOOLS = ['Read', 'Glob', 'Grep'];
-export const OTHER_TOOLS = ['Skill', 'Bash(git *)', 'Bash(node *wiki-master*)'];
+export const OTHER_TOOLS = ['Skill', 'Bash(git *)', 'Bash(node *wiki-master*)', 'Bash(WIKI_MASTER_VAULT=* node *wiki-master*)'];
 export const GAME_STUDIO_SKILLS = ['game-master', 'studio-start', 'game-architect'];
 const DEFAULTS = { trials: 1, concurrency: 3, maxBudgetUsd: 6, timeoutMin: 15 };
 

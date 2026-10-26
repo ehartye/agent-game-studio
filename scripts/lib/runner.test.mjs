@@ -407,3 +407,12 @@ test('renderSummary lists files read and written in the scratch vault separately
   assert.ok(project.includes('Write /out/A01-t1/project/new.md') && !project.includes('wiki/page.md'));
   assert.ok(vault.includes('/out/A01-t1/vault/index.md') && vault.includes('Write /out/A01-t1/vault/wiki/page.md') && vault.includes('?? wiki/page.md'));
 });
+
+test('the allow-list admits wiki tooling commands that set the vault variable inline, and keeps the denials on the real vault', () => {
+  const run = buildRun({ prompt: 'p', plugin: '/plug', cacheDir: '/cache', projectDir: '/out/A01-t1/project', scratchVault: '/out/A01-t1/vault', maxBudgetUsd: 1, vault: '/real/vault' }, {});
+  const a = run.args;
+  const allowed = a.slice(a.indexOf('--allowedTools') + 1, a.indexOf('--disallowedTools'));
+  assert.ok(allowed.includes('Bash(WIKI_MASTER_VAULT=* node *wiki-master*)'));
+  assert.ok(allowed.includes('Bash(node *wiki-master*)'));
+  assert.ok(a.slice(a.indexOf('--disallowedTools')).includes('Bash(*vault*)'));
+});
