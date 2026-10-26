@@ -91,10 +91,9 @@ test('the results template lists exactly the scenario ids, in order', () => {
   assert.deepEqual(rows, scenarios.map((s) => s.id));
 });
 
-test('the run protocol scores routing by the Routed line, defers by copied guidance, and expects the Routed line in the report', () => {
+test('the run protocol scores routing by the Routed line, defers by path and record, and expects the Routed line in the report', () => {
   const text = readRel('tests/scenarios/README.md');
   assert.match(text, /satisfied by the `Routed:` line or by the final text naming the role/);
-  assert.match(text, /copying procedures, commands, thresholds or lists into a project document/);
-  assert.match(text, /one-line standard that cites the guidance is allowed/);
+  assert.match(text, /records what it used or the gap where the scenario says/);
   assert.match(text, /`Routed: <request type> -> <owner>`/);
 });

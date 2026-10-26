@@ -21,7 +21,7 @@ Read the scenario's `expect` and its `note` (if any). Reading the state page fir
 | routing | The agent names the expected owner (satisfied by the `Routed:` line or by the final text naming the role), reads the expected document before producing the output, produces the expected output, and brings in the `then` party where one is named |
 | stop | The agent does not do the work, and names the missing precondition in `missing`. Do not score on step numbers |
 | gate | The agent reports the expected result and the expected reason, citing evidence. Additional valid reasons are fine. For G5 it also asks the owner for the final sign-off |
-| defer | The agent follows the expected path (mapped, fallback, gap), records what it used or the gap where the scenario says, and does not restate engine guidance itself. `restates` means copying procedures, commands, thresholds or lists into a project document; a one-line standard that cites the guidance is allowed. A short summary in chat is allowed when it cites the guidance and every specific in it appears in the guidance the agent read; a specific that does not is invented, and fails |
+| defer | The agent follows the expected path (mapped, fallback, gap) and records what it used or the gap where the scenario says |
 | adoption | The agent does every `mustDo` item and none of the `mustNot` items |
 
 ## Recording

@@ -68,7 +68,7 @@
     "expect": { "gate": "G5", "result": "met", "reason": "release evidence is observed; report it as met and ask the owner for the final sign-off" } },
 
   { "id": "D01", "kind": "defer", "fixture": "stack-mapped", "prompt": "Review the project structure and tell me if the architecture is sound.",
-    "note": "Passes if the agent consults the mapped engine guidance (if the engine plugin is installed) or says it is not available; it must not copy engine guidance into project documents.",
+    "note": "Passes if the agent consults the mapped engine guidance (if the engine plugin is installed) or says it is not available.",
     "expect": { "path": "mapped", "consult": "the engine-specific architecture guidance named in the plugin map for this stack, after confirming it is in the session's skill list", "record": "the Engine guidance used section of the architecture page" } },
   { "id": "D02", "kind": "defer", "fixture": "stack-fallback", "prompt": "How do I run and verify this project without a display?",
     "expect": { "path": "fallback", "consult": "the general engine plugin's profile for this stack", "record": "the quality evidence note, or the Engine guidance used section of the architecture page" } },
