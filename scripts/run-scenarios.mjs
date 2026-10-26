@@ -2,12 +2,12 @@
 // plugin loaded, and captures what happened. It never scores. Dependency-free.
 //
 //   node scripts/run-scenarios.mjs --out <dir> [--plugin <path>] [--ids R01,S01] [--kind routing,stop]
-//        [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--vault <path>] [--dry-run]
+//        [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--vault <path>] [--vault-guard strict|attributable] [--dry-run]
 import { spawn, spawnSync } from 'node:child_process';
-import { cpSync, createWriteStream, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { cpSync, createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { delimiter, join, resolve } from 'node:path';
-import { GENERIC_REPLY, assertOutsideRepo, buildRun, compareVault, isSecretName, maskSecrets, parseArgs, parseTranscript, renderSummary, replyFor, selectScenarios } from './lib/runner.mjs';
+import { GENERIC_REPLY, assertOutsideRepo, buildRun, compareVault, evaluateVault, isSecretName, maskSecrets, parseArgs, parseTranscript, renderSummary, replyFor, selectScenarios, vaultSnapshot } from './lib/runner.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const FILE_CAP = 20 * 1024;
@@ -41,12 +41,11 @@ function prepareProject(dir, fixture) {
   git(dir, 'commit', '-q', '-m', 'baseline');
 }
 
-// State of the real vault, compared before and after every run. A missing or non-git folder reads as head null.
-function vaultSnapshot(vault) {
-  const run = (...a) => spawnSync('git', ['-C', vault, ...a], { encoding: 'utf8' });
-  const head = run('rev-parse', 'HEAD');
-  const status = run('status', '--short');
-  return { head: head.status === 0 ? head.stdout.trim() : null, status: status.status === 0 ? status.stdout : '' };
+// Project slugs a scenario's pages would use in a vault: the fixture's own, plus the one the fixtures share.
+function fixtureSlugs(fixture) {
+  const authored = join(ROOT, 'tests', 'fixtures', fixture, 'wiki', 'authored');
+  const own = existsSync(authored) ? readdirSync(authored, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name) : [];
+  return [...new Set([...own, 'demo-game'])];
 }
 
 function killTree(child) {
@@ -106,11 +105,12 @@ async function runOne(ctx, scenario, trial) {
   const dir = join(outDir, name);
   const project = join(dir, 'project');
   const paths = { dir, project, transcript: join(dir, 'transcript.jsonl'), transcript2: join(dir, 'transcript-2.jsonl'), stderr: join(dir, 'stderr.txt'), diff: join(dir, 'diff.txt'), summary: join(dir, 'summary.md') };
-  if (ctx.abortMessage) return { id: scenario.id, trial, status: 'skipped', exitCode: null, durationMs: 0, paths: {}, reason: 'batch stopped: real vault changed' };
+  if (ctx.abortMessage) return { id: scenario.id, trial, status: 'skipped', exitCode: null, durationMs: 0, paths: {}, reason: 'batch stopped by the vault guard' };
   const started = Date.now();
   const entry = { id: scenario.id, trial, status: 'pending', exitCode: null, durationMs: null, paths: {} };
   try {
     prepareProject(project, scenario.fixture);
+    const vaultBefore = vaultSnapshot(ctx.vault);
     const base = { plugin, cacheDir, projectDir: project, vault: ctx.vault, maxBudgetUsd: opts.maxBudgetUsd, model: opts.model, extraAllowed: ctx.extraAllowed };
     const timeoutMs = opts.timeoutMin * 60_000;
     const turns = [];
@@ -127,11 +127,22 @@ async function runOne(ctx, scenario, trial) {
       else if (last.spawnError) status = 'spawn-failed';
       else if (last.exitCode !== 0 || turns[1].isError) status = 'error';
     }
-    const changed = compareVault(ctx.vaultBefore, vaultSnapshot(ctx.vault));
-    if (changed) {
-      status = 'vault-changed';
-      entry.vaultChange = changed;
-      ctx.abortMessage ??= changed;
+    const after = vaultSnapshot(ctx.vault);
+    entry.runStatus = status;
+    entry.vault = { guard: opts.vaultGuard, before: vaultBefore, after };
+    let stop = null;
+    if (opts.vaultGuard === 'strict') {
+      const changed = compareVault(ctx.vaultBefore, after);
+      if (changed) { status = 'vault-changed'; entry.vault.change = changed; stop = changed; }
+    } else {
+      const texts = [readIfExists(paths.transcript), readIfExists(paths.transcript2)];
+      const verdict = evaluateVault({ texts, vault: ctx.vault, before: vaultBefore, after, slugs: fixtureSlugs(scenario.fixture) });
+      Object.assign(entry.vault, { verdict: verdict.verdict, attempts: verdict.attempts, slugPaths: verdict.slugPaths });
+      if (verdict.verdict === 'touched') { status = 'vault-touched'; stop = verdict.reasons.join('; '); }
+      else if (verdict.verdict === 'attempted') status = 'vault-attempted';
+    }
+    if (stop) {
+      ctx.abortMessage ??= `${name}: ${stop}`;
       for (const child of ctx.active) killTree(child);
     }
     entry.status = status;
@@ -195,7 +206,9 @@ async function main() {
   writeIndex();
   console.log(`index: ${join(outDir, 'index.json')}`);
   if (ctx.abortMessage) {
-    console.error(`STOPPED: the real vault at ${vault} changed during the batch (${ctx.abortMessage}). It was not reverted. Runs that finished after the change are marked vault-changed, and the rest were skipped. Which run did it is not known; inspect the transcripts and the vault by hand.`);
+    console.error(opts.vaultGuard === 'strict'
+      ? `STOPPED: the real vault at ${vault} changed during the batch (${ctx.abortMessage}). It was not reverted. Runs that finished after the change are marked vault-changed, and the rest were skipped. Which run did it is not known; inspect the transcripts and the vault by hand.`
+      : `STOPPED: the real vault at ${vault} was reached by a run (${ctx.abortMessage}). Nothing was reverted. Runs that finished after it are checked on their own, and the rest were skipped. Inspect the transcript of the named run and the vault by hand.`);
     process.exit(2);
   }
 }

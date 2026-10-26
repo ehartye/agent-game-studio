@@ -1,4 +1,5 @@
 // Pure helpers for scripts/run-scenarios.mjs. No I/O except realpath lookups in assertOutsideRepo.
+import { spawnSync } from 'node:child_process';
 import { existsSync, realpathSync } from 'node:fs';
 import { isAbsolute, relative, resolve } from 'node:path';
 
@@ -119,7 +120,7 @@ export function buildRun({ prompt, plugin, cacheDir, projectDir, maxBudgetUsd, m
 // --- command line ----------------------------------------------------------
 
 export function parseArgs(argv) {
-  const o = { out: null, vault: null, plugin: null, ids: null, kinds: null, trials: DEFAULTS.trials, concurrency: DEFAULTS.concurrency, model: null, maxBudgetUsd: DEFAULTS.maxBudgetUsd, timeoutMin: DEFAULTS.timeoutMin, dryRun: false };
+  const o = { out: null, vault: null, vaultGuard: 'attributable', plugin: null, ids: null, kinds: null, trials: DEFAULTS.trials, concurrency: DEFAULTS.concurrency, model: null, maxBudgetUsd: DEFAULTS.maxBudgetUsd, timeoutMin: DEFAULTS.timeoutMin, dryRun: false };
   const list = (v) => v.split(',').map((s) => s.trim()).filter(Boolean);
   const num = (flag, v, { integer = true } = {}) => {
     const n = Number(v);
@@ -129,12 +130,16 @@ export function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const flag = argv[i];
     if (flag === '--dry-run') { o.dryRun = true; continue; }
-    const known = ['--out', '--vault', '--plugin', '--ids', '--kind', '--trials', '--concurrency', '--model', '--max-budget-usd', '--timeout-min'];
+    const known = ['--out', '--vault', '--vault-guard', '--plugin', '--ids', '--kind', '--trials', '--concurrency', '--model', '--max-budget-usd', '--timeout-min'];
     if (!known.includes(flag)) throw new Error(`unknown option ${flag}`);
     const v = argv[++i];
     if (v === undefined || v.startsWith('--')) throw new Error(`${flag} needs a value`);
     if (flag === '--out') o.out = v;
     else if (flag === '--vault') o.vault = v;
+    else if (flag === '--vault-guard') {
+      if (!['strict', 'attributable'].includes(v)) throw new Error(`--vault-guard must be strict or attributable, got "${v}"`);
+      o.vaultGuard = v;
+    }
     else if (flag === '--plugin') o.plugin = v;
     else if (flag === '--ids') o.ids = list(v);
     else if (flag === '--kind') o.kinds = list(v);
@@ -260,4 +265,88 @@ export function renderSummary({ scenario, reply = null, status, exitCode, durati
   );
   turns.forEach((t, i) => lines.push(`## Final text, turn ${i + 1}`, '', fence(t.finalText || '(empty)'), ''));
   return lines.join('\n');
+}
+
+// --- vault attribution -----------------------------------------------------
+
+// State of the real vault. Untracked files are listed one by one. A missing or non-git folder reads as head null.
+export function vaultSnapshot(vault) {
+  const run = (...a) => spawnSync('git', ['-C', vault, ...a], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  const head = run('rev-parse', 'HEAD');
+  const status = run('status', '--short', '-uall');
+  return { head: head.status === 0 ? head.stdout.trim() : null, status: status.status === 0 ? status.stdout : '' };
+}
+
+const norm = (s) => s.replaceAll('\\', '/').toLowerCase();
+
+// Spellings of the vault path to look for: as given, the drive-less and shell-style forms, and ~/<name>.
+function vaultNeedles(vault) {
+  const full = norm(vault).replace(/\/+$/, '');
+  const needles = new Set([full]);
+  const drive = /^([a-z]):(\/.*)$/.exec(full);
+  if (drive) { needles.add(`/${drive[1]}${drive[2]}`); needles.add(drive[2]); }
+  const name = full.split('/').pop();
+  if (name) needles.add(`~/${name}`);
+  return [...needles];
+}
+
+const isDenial = (result, meta) => {
+  const decided = (Array.isArray(meta) ? meta : []).filter((m) => !m.id || m.id === result.tool_use_id);
+  if (decided.some((m) => m.permission_decision?.decision === 'reject')) return true;
+  return result.is_error === true && /\bdenied\b/i.test(resultText(result.content));
+};
+
+// Every tool call whose file_path, path, pattern or command mentions the vault, with whether it was denied.
+export function vaultAttempts(raw, vault) {
+  const needles = vaultNeedles(vault);
+  const calls = [];
+  const byId = new Map();
+  for (const rawLine of raw.split('\n')) {
+    if (!rawLine.trim()) continue;
+    let e;
+    try { e = JSON.parse(rawLine); } catch { continue; }
+    if (e.type === 'assistant') {
+      for (const c of e.message?.content ?? []) {
+        if (c.type !== 'tool_use') continue;
+        const input = c.input ?? {};
+        const hit = ['file_path', 'path', 'pattern', 'command'].map((k) => input[k]).find((v) => typeof v === 'string' && needles.some((n) => norm(v).includes(n)));
+        if (hit === undefined) continue;
+        const call = { tool: c.name, input: hit, denied: false };
+        calls.push(call);
+        byId.set(c.id, call);
+      }
+    } else if (e.type === 'user') {
+      for (const c of Array.isArray(e.message?.content) ? e.message.content : []) {
+        if (c.type === 'tool_result' && byId.has(c.tool_use_id)) byId.get(c.tool_use_id).denied = isDenial(c, e.tool_result_meta);
+      }
+    }
+  }
+  return calls;
+}
+
+const AUTHORED = ['wiki', 'authored'].join('/');
+const statusLines = (s) => s.split(/\r?\n/).filter((l) => l.trim());
+const statusPath = (l) => {
+  const p = l.slice(3).split(' -> ').pop();
+  return p.startsWith('"') && p.endsWith('"') ? p.slice(1, -1) : p;
+};
+
+// Paths under wiki/authored/<slug>/ in the status after a run that were not in the status before it.
+export function vaultDelta(beforeStatus, afterStatus, slugs) {
+  const before = new Set(statusLines(beforeStatus));
+  const prefixes = slugs.map((s) => `${AUTHORED}/${s}/`);
+  return statusLines(afterStatus).filter((l) => !before.has(l)).map(statusPath).filter((p) => prefixes.some((x) => p.startsWith(x)));
+}
+
+// Verdict for one run: clean, attempted (every vault call denied) or touched (an allowed call reached the
+// vault, or the project's own pages appeared in it). Other status changes are informational only.
+export function evaluateVault({ texts, vault, before, after, slugs }) {
+  const attempts = texts.flatMap((t) => vaultAttempts(t, vault));
+  const slugPaths = vaultDelta(before.status, after.status, slugs);
+  const reasons = [];
+  const allowed = attempts.filter((a) => !a.denied);
+  if (allowed.length) reasons.push(`allowed call(s) reached the vault: ${allowed.map((a) => `${a.tool} ${a.input}`).join('; ')}`);
+  if (slugPaths.length) reasons.push(`the vault gained project page(s): ${slugPaths.join(', ')}`);
+  const verdict = reasons.length ? 'touched' : attempts.length ? 'attempted' : 'clean';
+  return { verdict, attempts, slugPaths, reasons };
 }

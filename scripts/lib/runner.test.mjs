@@ -1,11 +1,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   GENERIC_REPLY,
   assertOutsideRepo,
   buildRun,
   compareVault,
+  evaluateVault,
+  vaultAttempts,
+  vaultDelta,
+  vaultSnapshot,
   confineWrites,
   toRulePath,
   vaultGuards,
@@ -163,9 +170,9 @@ test('assertOutsideRepo refuses folders inside or equal to the repository, inclu
 
 test('parseArgs applies defaults and parses lists and numbers', () => {
   const d = parseArgs(['--out', '/o']);
-  assert.deepEqual(d, { out: '/o', vault: null, plugin: null, ids: null, kinds: null, trials: 1, concurrency: 3, model: null, maxBudgetUsd: 6, timeoutMin: 15, dryRun: false });
-  const p = parseArgs(['--out', '/o', '--vault', '/v', '--plugin', '/p', '--ids', 'R01,S01', '--kind', 'routing,stop', '--trials', '2', '--concurrency', '4', '--model', 'opus', '--max-budget-usd', '3.5', '--timeout-min', '5', '--dry-run']);
-  assert.deepEqual(p, { out: '/o', vault: '/v', plugin: '/p', ids: ['R01', 'S01'], kinds: ['routing', 'stop'], trials: 2, concurrency: 4, model: 'opus', maxBudgetUsd: 3.5, timeoutMin: 5, dryRun: true });
+  assert.deepEqual(d, { out: '/o', vault: null, vaultGuard: 'attributable', plugin: null, ids: null, kinds: null, trials: 1, concurrency: 3, model: null, maxBudgetUsd: 6, timeoutMin: 15, dryRun: false });
+  const p = parseArgs(['--out', '/o', '--vault', '/v', '--vault-guard', 'strict', '--plugin', '/p', '--ids', 'R01,S01', '--kind', 'routing,stop', '--trials', '2', '--concurrency', '4', '--model', 'opus', '--max-budget-usd', '3.5', '--timeout-min', '5', '--dry-run']);
+  assert.deepEqual(p, { out: '/o', vault: '/v', vaultGuard: 'strict', plugin: '/p', ids: ['R01', 'S01'], kinds: ['routing', 'stop'], trials: 2, concurrency: 4, model: 'opus', maxBudgetUsd: 3.5, timeoutMin: 5, dryRun: true });
 });
 
 test('parseArgs rejects a missing --out, unknown flags and bad numbers', () => {
@@ -173,6 +180,7 @@ test('parseArgs rejects a missing --out, unknown flags and bad numbers', () => {
   assert.throws(() => parseArgs(['--out', '/o', '--bogus']), /unknown option/);
   assert.throws(() => parseArgs(['--out', '/o', '--trials', '0']), /--trials/);
   assert.throws(() => parseArgs(['--out']), /needs a value/);
+  assert.throws(() => parseArgs(['--out', '/o', '--vault-guard', 'loose']), /--vault-guard/);
 });
 
 test('selectScenarios filters by id and kind and rejects unknown ids', () => {
@@ -222,4 +230,104 @@ test('compareVault reports nothing for an identical snapshot and names what chan
   assert.equal(compareVault(a, { head: 'abc', status: '' }), null);
   assert.match(compareVault(a, { head: 'def', status: '' }), /HEAD changed from abc to def/);
   assert.match(compareVault(a, { head: 'abc', status: ' M wiki/x.md' }), /status changed[\s\S]*wiki.x.md/);
+});
+
+// --- vault attribution -------------------------------------------------------
+
+const A = 'wiki' + '/authored';
+const VAULT = 'C:/data/.wiki-master-vault';
+const denied = (id, message = 'File is in a directory that is denied by your permission settings.') => ({
+  type: 'user',
+  message: { role: 'user', content: [{ type: 'tool_result', tool_use_id: id, content: message, is_error: true }] },
+  tool_result_meta: [{ id, permission_decision: { decision: 'reject', source: 'config', reason_type: 'rule' } }],
+});
+const lines = (events) => events.map(line).join('\n');
+
+test('vaultAttempts records a denied vault write as denied', () => {
+  const raw = lines([toolUse('w1', 'Write', { file_path: VAULT + '/zz.md', content: 'x' }), denied('w1')]);
+  assert.deepEqual(vaultAttempts(raw, VAULT), [{ tool: 'Write', input: VAULT + '/zz.md', denied: true }]);
+});
+
+test('vaultAttempts records an allowed vault read as not denied', () => {
+  const raw = lines([toolUse('r1', 'Read', { file_path: VAULT + '/index.md' }), toolResult('r1', 'contents')]);
+  assert.deepEqual(vaultAttempts(raw, VAULT), [{ tool: 'Read', input: VAULT + '/index.md', denied: false }]);
+});
+
+test('vaultAttempts finds nothing in a transcript that never mentions the vault', () => {
+  assert.deepEqual(vaultAttempts(transcript, VAULT), []);
+});
+
+test('vaultAttempts matches case-insensitively, in either slash form, in commands and patterns', () => {
+  const back = win(VAULT).toUpperCase();
+  const raw = lines([
+    toolUse('a', 'Read', { file_path: back + win('/index.md').toUpperCase() }), toolResult('a', 'ok'),
+    toolUse('b', 'Bash', { command: 'git -C ' + VAULT.toLowerCase() + ' status' }), denied('b', 'Permission to use Bash has been denied.'),
+    toolUse('c', 'Grep', { pattern: 'x', path: VAULT }), toolResult('c', 'ok'),
+    toolUse('d', 'Glob', { pattern: VAULT + '/**/*.md' }), toolResult('d', 'ok'),
+    toolUse('e', 'Read', { file_path: 'C:/work/project/AGENTS.md' }), toolResult('e', 'ok'),
+  ]);
+  const found = vaultAttempts(raw, win(VAULT));
+  assert.deepEqual(found.map((f) => f.tool), ['Read', 'Bash', 'Grep', 'Glob']);
+  assert.deepEqual(found.map((f) => f.denied), [false, true, false, false]);
+});
+
+test('vaultAttempts treats an ordinary tool error as reaching the vault, and a denial message as denied', () => {
+  const raw = lines([
+    toolUse('a', 'Read', { file_path: VAULT + '/missing.md' }), toolResult('a', 'File does not exist.', true),
+    toolUse('b', 'Edit', { file_path: VAULT + '/x.md' }), toolResult('b', 'Permission to use Edit has been denied because of the mode.', true),
+  ]);
+  assert.deepEqual(vaultAttempts(raw, VAULT).map((f) => f.denied), [false, true]);
+});
+
+test('evaluateVault: clean, attempted (all denied) and touched (any allowed)', () => {
+  const none = { head: 'h', status: '' };
+  const base = { vault: VAULT, before: none, after: none, slugs: ['demo-game'] };
+  assert.equal(evaluateVault({ ...base, texts: [transcript] }).verdict, 'clean');
+  const attempted = lines([toolUse('w', 'Write', { file_path: VAULT + '/z.md' }), denied('w')]);
+  const touched = lines([toolUse('r', 'Read', { file_path: VAULT + '/index.md' }), toolResult('r', 'ok')]);
+  assert.equal(evaluateVault({ ...base, texts: [attempted] }).verdict, 'attempted');
+  assert.equal(evaluateVault({ ...base, texts: [attempted, touched] }).verdict, 'touched');
+  const t = evaluateVault({ ...base, texts: [touched] });
+  assert.equal(t.verdict, 'touched');
+  assert.equal(t.attempts.length, 1);
+});
+
+test('evaluateVault: a new path under wiki/authored/<slug>/ is touched, other changes are informational', () => {
+  const before = { head: 'h', status: ' M notes/old.md\n' };
+  const other = { head: 'h2', status: ' M notes/old.md\n?? ' + A + '/someone-else/a.md\n?? raw/x.md\n' };
+  const mine = { head: 'h', status: ' M notes/old.md\n?? ' + A + '/demo-game/reference/studio-state.md\n' };
+  const base = { vault: VAULT, texts: [transcript], before, slugs: ['demo-game'] };
+  assert.equal(evaluateVault({ ...base, after: other }).verdict, 'clean');
+  const t = evaluateVault({ ...base, after: mine });
+  assert.equal(t.verdict, 'touched');
+  assert.deepEqual(t.slugPaths, ['' + A + '/demo-game/reference/studio-state.md']);
+});
+
+test('vaultDelta lists only new lines under the given slugs, including renames, and ignores what was already there', () => {
+  const before = '?? ' + A + '/demo-game/old.md\n';
+  const after = '?? ' + A + '/demo-game/old.md\n M ' + A + '/demo-game/new.md\nR  a.md -> ' + A + '/demo-game/b.md\n?? ' + A + '/other/c.md\n';
+  assert.deepEqual(vaultDelta(before, after, ['demo-game']), ['' + A + '/demo-game/new.md', '' + A + '/demo-game/b.md']);
+  assert.deepEqual(vaultDelta('', after, []), []);
+});
+
+test('vaultSnapshot against a decoy repo sees new files individually, and a missing folder reads as empty', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'decoy-vault-'));
+  try {
+    const git = (...a) => execFileSync('git', ['-C', dir, '-c', 'user.name=t', '-c', 'user.email=t@example.invalid', ...a], { encoding: 'utf8' });
+    git('init', '-q');
+    git('commit', '-q', '--allow-empty', '-m', 'init');
+    const before = vaultSnapshot(dir);
+    assert.match(before.head, /^[0-9a-f]{40}$/);
+    assert.equal(before.status, '');
+    mkdirSync(join(dir, 'wiki', 'authored', 'demo-game'), { recursive: true });
+    mkdirSync(join(dir, 'notes'), { recursive: true });
+    writeFileSync(join(dir, 'wiki', 'authored', 'demo-game', 'state.md'), 'x');
+    writeFileSync(join(dir, 'notes', 'n.md'), 'x');
+    const after = vaultSnapshot(dir);
+    assert.deepEqual(vaultDelta(before.status, after.status, ['demo-game']), ['' + A + '/demo-game/state.md']);
+    assert.equal(evaluateVault({ vault: dir, texts: [transcript], before, after, slugs: ['demo-game'] }).verdict, 'touched');
+    assert.deepEqual(vaultSnapshot(join(dir, 'nope')), { head: null, status: '' });
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

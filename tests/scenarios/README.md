@@ -35,7 +35,7 @@ Targets: all 11 stop and gate scenarios (S01 to S06, GT1 to GT5) pass, and at le
 `scripts/run-scenarios.mjs` runs scenarios against a real, non-interactive host with this plugin loaded and captures what happened. It does not score: scoring stays manual, using the table above. It supports the host described in [Claude Code](../../references/hosts/claude-code.md) and needs its command line on the path.
 
 ```
-node scripts/run-scenarios.mjs --out <folder outside the repository> [--ids R01,S01] [--kind routing,stop] [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--plugin <path>] [--vault <path>] [--dry-run]
+node scripts/run-scenarios.mjs --out <folder outside the repository> [--ids R01,S01] [--kind routing,stop] [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--plugin <path>] [--vault <path>] [--vault-guard attributable|strict] [--dry-run]
 ```
 
 Defaults: one trial, three runs at a time, a budget of 6 per run, a 15 minute timeout, the repository itself as the plugin, and `~/.wiki-master-vault` as the real vault to guard. `--out` must be outside the repository or the runner refuses. `--dry-run` lists the runs and the command line without starting the host. Each run spends real tokens.
@@ -49,8 +49,14 @@ For each scenario and trial the runner copies the fixture to `<out>/<id>-t<n>/pr
 | `diff.txt` | `git status`, `git diff` and the untracked files (each capped at 20 KB); values of keys named token, secret, password or key are masked, and files with secret-looking names are withheld |
 | `summary.md` | Prompt, reply, status, turns, cost, skills loaded, files read, searches, files written, commands, denied tool calls, the session's skill catalogue, and the final text of each turn |
 
-`<out>/index.json` lists every run with its status (`completed`, `error`, `timeout`, `spawn-failed`, `runner-error`, `vault-changed`, `skipped`), paths and duration.
+`<out>/index.json` lists every run with its status (`completed`, `error`, `timeout`, `spawn-failed`, `runner-error`, `vault-attempted`, `vault-touched`, `vault-changed`, `skipped`), paths and duration.
 
-Vault isolation has three layers. First, the runner sets the wiki vault variable to the scratch project folder, so wiki tooling writes into the copy. Second, write and edit are allowed only below the scratch project folder, and explicitly denied, along with shell commands that mention it, for the real vault folder. Third, the runner records the real vault's HEAD and `git status --short` at the start (`--vault` names the folder) and compares them after every run: any difference marks the run `vault-changed`, stops the batch (running hosts are killed and the remaining runs are `skipped`), prints a message and exits with code 2. It never reverts anything; inspect the vault by hand. Because runs execute concurrently, the check cannot say which run caused a change.
+Vault isolation has three layers. First, the runner sets the wiki vault variable to the scratch project folder, so wiki tooling writes into the copy. Second, write and edit are allowed only below the scratch project folder, and explicitly denied, along with shell commands that mention it, for the real vault folder (`--vault` names it). Third, after every run the runner records the vault's HEAD and `git status --short` before and after in `index.json`, and decides from the run's own transcript, so concurrent work by others in the vault does not stop a batch (`--vault-guard attributable`, the default):
+
+- A tool call that mentions the vault path and was denied marks the run `vault-attempted`. It is recorded, and the batch continues.
+- A tool call that mentions the vault path and was allowed (a read, for example), or a new path under `wiki/authored/<project slug>/` in the vault's status after the run, marks the run `vault-touched` and stops the batch: running hosts are killed, the remaining runs are `skipped`, a message is printed and the exit code is 2.
+- Other changes to the vault are informational only. Status differences are not attributed to a run, because runs execute concurrently.
+
+`--vault-guard strict` instead marks a run `vault-changed` and stops the batch on any difference in the vault's HEAD or status since the start of the batch. Neither mode reverts anything; inspect the vault by hand after a stop. A run that was marked keeps its original outcome as `runStatus`.
 
 The session also sees the other plugins you have installed, so the skill catalogue in `summary.md` is larger than this plugin's own.
