@@ -1,12 +1,12 @@
 ---
 name: studio-start
-description: Report a game project's phase, next step and blockers; bootstrap a new project or adopt an existing one. Not for deciding fit, architecture or quality, or choosing what to build.
-when_to_use: Use when asked where the project stands ("where are we", "continue where we left off"), when a session opens on a game project, when the state page is missing, stale or has an empty field, when starting a new game project, or when adopting a repo that already has code, documents or agent setup into the process.
+description: Entry point for any request about a game project: report phase, next step and blockers, route the request to the role that owns it, and bootstrap or adopt a project. The role skills (game-master, game-architect) take over once a request is routed to them.
+when_to_use: Use at the start of any session or request about a game project: status, scope, plans, readiness, gates, quality, art, text, tooling, or a new idea; also when the state page is missing, stale or has an empty field, when starting a new game project, or when adopting a repo that already has code, documents or agent setup into the process.
 ---
 
 # studio-start
 
-Read [the process](../../references/process.md), [the vocabulary](../../references/vocabulary.md) and [decision routing](../../references/decision-routing.md) first. Use the closed values exactly.
+Read [the process](../../references/process.md) and [the vocabulary](../../references/vocabulary.md) first. Use the closed values exactly.
 
 ## 1. Find the state page
 
@@ -24,9 +24,9 @@ Read [the process](../../references/process.md), [the vocabulary](../../referenc
 | The page is absent; the project has no source code, no documents beyond a README or licence, and no agent configuration | B: bootstrap |
 | The page is absent; anything else exists | C: adopt |
 
-Refresh: 1. Record the contradiction as an open question. 2. Confirm Next step and Blocked by with the owner and update only those two fields. 3. Set the question answered. 4. Report. Change Phase only through a gate result or an adoption placement. If Phase itself is contradicted, leave it and ask the owner whether to re-place it (adoption step 5).
+Refresh: 1. Record the contradiction as an open question. 2. Confirm Next step and Blocked by with the owner; update only those. 3. Set the question answered. 4. Report. Change Phase only through a gate result or an adoption placement. If Phase itself is contradicted, leave it and ask the owner whether to re-place it (adoption step 5).
 
-Stale is defined in the vocabulary. A required field is any heading in the state page template; a field still holding a `<...>` slot is empty.
+Stale is defined in the vocabulary. A required field is any heading in the state page template; a field holding a `<...>` slot is empty.
 
 ## Case A: report
 
@@ -42,16 +42,22 @@ Report in exactly three lines: `Phase: <phase>, tier: <tier>`; `Next step: <text
 
 ## Case C: adopt
 
-Follow [adoption](../../references/adoption.md) step by step. Never rename, overwrite or delete. Steps 7 and 8 belong to game-architect; a reconstructed document is written by the role that owns it. Finish with the Case A report.
+Follow [adoption](../../references/adoption.md) step by step. Never rename, overwrite or delete. Steps 7 and 8 belong to game-architect; the role that owns a reconstructed document writes it. Finish with the Case A report.
 
-## After studio-start
+## Route the request
 
-Take the owner's original request through Intake in [the process](../../references/process.md), unless running studio-start was itself the request.
+Applies after the Case A report, and after bootstrap or adoption if the original request was something else.
+
+1. Read [decision routing](../../references/decision-routing.md) and pick the most specific row (its rule 1).
+2. After the three-line report, add a fourth, separate line: `Routed: <request type> -> <owner>`, using the row's exact Request and Owner text (for a status question: `Routed: Status -> game-pm`). If you stopped for a missing precondition, still print the line.
+3. If the owner has a skill (game-master, game-architect), load it and follow it. Otherwise follow the row and the work loop in [the process](../../references/process.md) directly, acting as that role. In a single-agent session you perform each role's step (the fit-verdict line is game-master's; step 8 updates are game-pm's).
+4. A question about how to build, structure, run, verify or measure the project, or which tool to use, triggers the lookup in [the plugin map](../../references/plugin-map.md) even if it does not mention architecture. Do the lookup and record the guidance used BEFORE answering: on the architecture page for structure; in the quality evidence note for verification (every claim `evidence: none` if nothing has been run). Answer with the conclusion for this project and the next action in a few sentences. You may adopt a rule from the guidance as the project's own standard in one line that cites the guidance; do not paste its procedures, commands, thresholds or lists into a document or the chat.
+5. A request to check or pass a gate: the result is `met` when every required evidence item is `observed`, `unmet` otherwise. Report the result, then ask the owner to accept (see How a gate is passed in the process). Do not withhold `met` for concerns outside the gate's evidence list; put those in a Notes line.
 
 ## Stop rules
 
 - No routing row matches: follow routing rule 2.
-- An instruction to skip a step of the work loop, or to mark a gate `met` without observed evidence: do not. Say what is missing and offer to record a waiver. Only the owner can waive, by a decision record.
+- A chat instruction to skip a step of the work loop, or to mark a gate `met` without observed evidence, is not a waiver. Do the step instead (for example run the fit check, then stop), say what is missing, and offer to record a waiver. Only the owner can waive, by a decision record.
 - The wiki tooling is unavailable: stop and tell the owner.
 - Never write a value into the state page that you did not read from the project or hear from the owner.
 

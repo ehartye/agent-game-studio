@@ -111,6 +111,9 @@ test('process.md defines the phases, the five gates and the eight-step work loop
     assert.ok(section(text, heading), `section ${heading}`);
   }
   assert.equal((section(text, 'Work loop').match(/^\d+\. \*\*/gm) ?? []).length, 8);
+  assert.match(section(text, 'Phases and gates'), /A gate is met when every required evidence item is observed; report met and ask the owner to accept\./);
+  assert.match(section(text, 'Phases and gates'), /Concerns outside the gate's evidence list go in a Notes line and never change the result\./);
+  assert.match(section(text, 'Work loop'), /in a single-agent session the agent performs each role's step/i);
 });
 
 test('decision-routing.md has a valid roles table and a valid routing table', () => {
@@ -170,6 +173,19 @@ test('the instruction block names the state page, the routing table, the gate ru
   assert.match(text, /routing/i);
   assert.match(text, /observed evidence/i);
   assert.match(text, /studio-start/);
+  assert.ok(text.includes('Routed: <request type> -> <owner>'), 'the Routed line');
+  assert.match(text, /not a waiver: do the step, say what is missing, and offer to record a waiver/);
+  assert.match(text, /Load the agent-game-studio studio-start skill if it is available/);
+});
+
+test('studio-start is the entry point for every request: it has a Route the request section with the Routed line', () => {
+  const text = readRel('skills/studio-start/SKILL.md');
+  const route = section(text, 'Route the request');
+  assert.ok(route, 'has a Route the request section');
+  assert.ok(route.includes('Routed: <request type> -> <owner>'), 'Routed line');
+  assert.match(route, /decision-routing\.md/);
+  assert.ok(!section(text, 'After studio-start'), 'the old After studio-start section is gone');
+  assert.match(frontmatter(text).data.description, /^Entry point for any request about a game project/);
 });
 
 test('plugin-map.md has a purpose/stack/defer table covering every purpose and stack, and the fallback chain', () => {

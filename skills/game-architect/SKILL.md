@@ -19,7 +19,7 @@ Stay technology-agnostic: decide what must be true and what evidence shows it. E
 
 ## 2. Engine guidance for architecture questions
 
-Follow the lookup and fallback chain in [the plugin map](../../references/plugin-map.md) for "Structure and architecture". Record the guidance used under "Engine guidance used" before you answer. Do not reproduce its procedures or thresholds. Verification and performance questions belong to game-quality.
+Any question about how to build, structure, run or choose a tool for the project triggers the lookup and fallback chain in [the plugin map](../../references/plugin-map.md) for "Structure and architecture", whether or not it mentions architecture. Record the guidance used under "Engine guidance used" before you answer. In the answer give the conclusion for this project and the next action in a few sentences. You may adopt a rule from the guidance as the project's own standard in one line that cites it; do not copy its procedures, commands, thresholds or lists into a project document or into the chat. Verification and performance questions belong to game-quality; their lookup is the same.
 
 ## 3. Architecture page
 
@@ -41,7 +41,7 @@ When work needs a tool or capability that is not ready:
 
 ## 5. Review standard
 
-Record in the architecture page what a change must show before it is accepted (for example, which checks were run and where the evidence is recorded). Review changes against it.
+Record in the architecture page what a change must show before it is accepted (for example, which checks were run and where the evidence is recorded), as the project's own standard; a rule adopted from guidance is one line that cites it. Review changes against it.
 
 ## 6. Gate checks
 

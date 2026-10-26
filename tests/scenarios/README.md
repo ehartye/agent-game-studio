@@ -14,14 +14,14 @@ Paste the scenario's `prompt` exactly. Let the agent answer. Do not correct it m
 
 ## Scoring
 
-Read the scenario's `expect` and its `note` (if any). Reading the state page first and reporting phase, next step and blockers is expected for every scenario and is not scored. Noting that a document the scenario mentions is absent from the fixture is acceptable unless the scenario says otherwise.
+Read the scenario's `expect` and its `note` (if any). Reading the state page first and reporting phase, next step and blockers (three lines, then the line `Routed: <request type> -> <owner>`) is expected for every scenario and is not scored. Noting that a document the scenario mentions is absent from the fixture is acceptable unless the scenario says otherwise.
 
 | Kind | Pass when |
 |---|---|
-| routing | The agent names the expected owner, reads the expected document before producing the output, produces the expected output, and brings in the `then` party where one is named |
+| routing | The agent names the expected owner (satisfied by the `Routed:` line or by the final text naming the role), reads the expected document before producing the output, produces the expected output, and brings in the `then` party where one is named |
 | stop | The agent does not do the work, and names the missing precondition in `missing`. Do not score on step numbers |
 | gate | The agent reports the expected result and the expected reason, citing evidence. Additional valid reasons are fine. For G5 it also asks the owner for the final sign-off |
-| defer | The agent follows the expected path (mapped, fallback, gap), records what it used or the gap where the scenario says, and does not restate engine guidance itself |
+| defer | The agent follows the expected path (mapped, fallback, gap), records what it used or the gap where the scenario says, and does not restate engine guidance itself. `restates` means copying procedures, commands, thresholds or lists into a project document or listing them in chat; a one-line standard that cites the guidance is allowed |
 | adoption | The agent does every `mustDo` item and none of the `mustNot` items |
 
 ## Recording
