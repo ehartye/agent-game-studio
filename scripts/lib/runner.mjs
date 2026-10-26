@@ -6,7 +6,7 @@ import { isAbsolute, relative, resolve } from 'node:path';
 export const GENERIC_REPLY = 'Use your best judgement and state your assumption.';
 
 export const READ_TOOLS = ['Read', 'Glob', 'Grep'];
-export const OTHER_TOOLS = ['Skill', 'Bash(git *)', 'Bash(node *wiki-master*)'];
+export const OTHER_TOOLS = ['Skill', 'Bash(git *)', 'Bash(node *wiki-master*)', 'Bash(WIKI_MASTER_VAULT=* node *wiki-master*)'];
 export const GAME_STUDIO_SKILLS = ['game-master', 'studio-start', 'game-architect'];
 const DEFAULTS = { trials: 1, concurrency: 3, maxBudgetUsd: 6, timeoutMin: 15 };
 
@@ -90,6 +90,31 @@ export function vaultGuards(vault) {
   return [...file, `Bash(*${name}*)`];
 }
 
+// Read, search, write and edit allowed on a scratch vault folder.
+export function scratchVaultRules(dir) {
+  const scope = `${toRulePath(dir)}/**`;
+  return ['Read', 'Glob', 'Grep', 'Write', 'Edit'].map((tool) => `${tool}(${scope})`);
+}
+
+// The scratch vault must never be, contain or sit inside the real vault.
+export function assertDistinctVaults(scratch, real) {
+  const s = resolve(scratch);
+  const r = resolve(real);
+  if (within(r, s) || within(s, r)) throw new Error(`the scratch vault ${s} must be separate from the real vault ${r}`);
+}
+
+// Highest plain x.y.z folder name (temporary or foreign names are ignored), or null.
+export function newestVersion(names) {
+  const plain = names.filter((n) => /^\d+(\.\d+)*$/.test(n));
+  plain.sort((a, b) => {
+    const pa = a.split('.').map(Number);
+    const pb = b.split('.').map(Number);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) if ((pa[i] ?? 0) !== (pb[i] ?? 0)) return (pa[i] ?? 0) - (pb[i] ?? 0);
+    return 0;
+  });
+  return plain.length ? plain.at(-1) : null;
+}
+
 // Null when the vault is as it was; otherwise a sentence saying what changed.
 export function compareVault(before, after) {
   const changes = [];
@@ -101,7 +126,7 @@ export function compareVault(before, after) {
 // --- run construction ------------------------------------------------------
 
 // Argument array and environment for one host invocation. Never goes through a shell.
-export function buildRun({ prompt, plugin, cacheDir, projectDir, maxBudgetUsd, model, resume, vault = null, extraAllowed = [] }, baseEnv = process.env) {
+export function buildRun({ prompt, plugin, cacheDir, projectDir, maxBudgetUsd, model, resume, vault = null, scratchVault = null, extraAllowed = [] }, baseEnv = process.env) {
   const args = ['-p', prompt];
   if (resume) args.push('--resume', resume);
   const guards = vaultGuards(vault);
@@ -110,19 +135,19 @@ export function buildRun({ prompt, plugin, cacheDir, projectDir, maxBudgetUsd, m
     '--output-format', 'stream-json',
     '--verbose',
     '--permission-mode', 'dontAsk',
-    '--allowedTools', ...READ_TOOLS, ...confineWrites(projectDir), ...OTHER_TOOLS, ...extraAllowed,
+    '--allowedTools', ...READ_TOOLS, ...confineWrites(projectDir), ...(scratchVault ? scratchVaultRules(scratchVault) : []), ...OTHER_TOOLS, ...extraAllowed,
     ...(guards.length ? ['--disallowedTools', ...guards] : []),
-    '--add-dir', plugin, '--add-dir', cacheDir,
+    '--add-dir', plugin, '--add-dir', cacheDir, ...(scratchVault ? ['--add-dir', scratchVault] : []),
     '--max-budget-usd', String(maxBudgetUsd),
   );
   if (model) args.push('--model', model);
-  return { args, env: { ...baseEnv, WIKI_MASTER_VAULT: projectDir } };
+  return { args, env: { ...baseEnv, WIKI_MASTER_VAULT: scratchVault ?? projectDir } };
 }
 
 // --- command line ----------------------------------------------------------
 
 export function parseArgs(argv) {
-  const o = { out: null, vault: null, vaultGuard: 'attributable', plugin: null, ids: null, kinds: null, trials: DEFAULTS.trials, concurrency: DEFAULTS.concurrency, model: null, maxBudgetUsd: DEFAULTS.maxBudgetUsd, timeoutMin: DEFAULTS.timeoutMin, dryRun: false };
+  const o = { out: null, vault: null, wikiMaster: null, vaultGuard: 'attributable', plugin: null, ids: null, kinds: null, trials: DEFAULTS.trials, concurrency: DEFAULTS.concurrency, model: null, maxBudgetUsd: DEFAULTS.maxBudgetUsd, timeoutMin: DEFAULTS.timeoutMin, dryRun: false };
   const list = (v) => v.split(',').map((s) => s.trim()).filter(Boolean);
   const num = (flag, v, { integer = true } = {}) => {
     const n = Number(v);
@@ -132,12 +157,13 @@ export function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const flag = argv[i];
     if (flag === '--dry-run') { o.dryRun = true; continue; }
-    const known = ['--out', '--vault', '--vault-guard', '--plugin', '--ids', '--kind', '--trials', '--concurrency', '--model', '--max-budget-usd', '--timeout-min'];
+    const known = ['--out', '--vault', '--wiki-master', '--vault-guard', '--plugin', '--ids', '--kind', '--trials', '--concurrency', '--model', '--max-budget-usd', '--timeout-min'];
     if (!known.includes(flag)) throw new Error(`unknown option ${flag}`);
     const v = argv[++i];
     if (v === undefined || v.startsWith('--')) throw new Error(`${flag} needs a value`);
     if (flag === '--out') o.out = v;
     else if (flag === '--vault') o.vault = v;
+    else if (flag === '--wiki-master') o.wikiMaster = v;
     else if (flag === '--vault-guard') {
       if (!['strict', 'attributable'].includes(v)) throw new Error(`--vault-guard must be strict or attributable, got "${v}"`);
       o.vaultGuard = v;
@@ -233,9 +259,14 @@ const fence = (s) => {
   return `${ticks}text\n${s}\n${ticks}`;
 };
 
-export function renderSummary({ scenario, reply = null, status, exitCode, durationMs, turns }) {
+const under = (p, root) => { const n = norm(String(p)); const r = norm(root).replace(/\/+$/, ''); return n === r || n.startsWith(`${r}/`); };
+const pathOf = (item) => item.replace(/^(?:Write|Edit) /, '');
+
+export function renderSummary({ scenario, reply = null, status, exitCode, durationMs, turns, scratchVault = null }) {
   const first = turns[0] ?? parseTranscript('');
-  const all = (key) => turns.flatMap((t) => t[key]);
+  const inVault = (item) => scratchVault != null && under(pathOf(item), scratchVault.path);
+  const all = (key) => turns.flatMap((t) => t[key]).filter((i) => typeof i !== 'string' || !inVault(i));
+  const vaultOnly = (key) => turns.flatMap((t) => t[key]).filter((i) => typeof i === 'string' && inVault(i));
   const cost = turns.some((t) => t.costUsd != null) ? turns.reduce((n, t) => n + (t.costUsd ?? 0), 0).toFixed(4) : 'not reported';
   const cat = first.catalogue;
   const lines = [
@@ -266,6 +297,16 @@ export function renderSummary({ scenario, reply = null, status, exitCode, durati
     '## Denied or failed tool calls', '', all('toolErrors').length ? all('toolErrors').map((x) => `- ${x.tool} \`${x.input}\`: ${x.message.replace(/\s+/g, ' ')}`).join('\n') : '- none', '',
   );
   turns.forEach((t, i) => lines.push(`## Final text, turn ${i + 1}`, '', fence(t.finalText || '(empty)'), ''));
+  if (scratchVault) {
+    const mentions = turns.flatMap((t) => t.commands).filter((c) => norm(c).includes(norm(scratchVault.path)));
+    lines.push(
+      '## Scratch vault', '', `Folder: ${scratchVault.path}`, '',
+      '### git status --short', '', fence(scratchVault.status.trim() || '(clean)'), '',
+      '### Files read in it', '', bullets(vaultOnly('reads')), '',
+      '### Files written in it', '', bullets(vaultOnly('writes')), '',
+      '### Searches and commands that mention it', '', bullets([...vaultOnly('searches'), ...mentions]), '',
+    );
+  }
   return lines.join('\n');
 }
 
