@@ -24,7 +24,7 @@ Read [the process](../../references/process.md) and [the vocabulary](../../refer
 | The page is absent; the project has no source code, no documents beyond a README or licence, and no agent configuration | B: bootstrap |
 | The page is absent; anything else exists | C: adopt |
 
-Refresh: 1. Record the contradiction as an open question. 2. Confirm Next step and Blocked by with the owner; update only those. 3. Set the question answered. 4. Report. Change Phase only through a gate result or an adoption placement; if Phase itself is contradicted, ask the owner whether to re-place it (adoption step 5).
+Refresh: [refresh a stale page](../../references/entry.md#refresh-a-stale-page).
 
 Stale is defined in the vocabulary. A required field is any heading in the state page template; a field holding a `<...>` slot is empty.
 
@@ -37,7 +37,7 @@ Report in exactly three lines: `Phase: <phase>, tier: <tier>`; `Next step: <text
 1. Get the project slug (see entry) and ask the owner for the rigor tier. Offer `minimal`.
 2. Create the state page from [its template](../../references/templates/state-page.md) through the wiki authoring guidance in [the plugin map](../../references/plugin-map.md), writing it on game-pm's behalf: phase `concept`; the state page's own registry row `draft` and every other row of the chosen tier `absent`; Next step "Write the game brief and pillars (game-master)".
 3. Name the instruction file the host reads ([host adapters](../../references/hosts/README.md), "Instruction files"); if several hosts are used, ask the owner which file is authoritative. Then follow [instruction files](../../references/instruction-files.md) to propose the process block from [its template](../../references/templates/instruction-block.md) as a diff.
-4. Follow game-master section 1 now. Do not write the brief from your own ideas.
+4. Load game-master and follow its section 1 now. Do not write the brief from your own ideas.
 5. Give the Case A report.
 
 ## Case C: adopt
@@ -50,7 +50,7 @@ Applies after the Case A report, and after bootstrap or adoption if the original
 
 1. Read [decision routing](../../references/decision-routing.md) and pick the most specific row (its rule 1).
 2. After the three-line report, add a fourth, separate line: `Routed: <request type> -> <owner>`, using the row's exact Request text and its Owner (for a status question: `Routed: Status -> game-pm`); see [the Routed line](../../references/entry.md#the-routed-line). If you stopped for a missing precondition, still print the line.
-3. If the owner has a skill (game-master, game-architect), load it and follow it. Otherwise follow the row and the work loop in [the process](../../references/process.md), acting as that role; in a single-agent session you perform each role's step (the fit-verdict line is game-master's; step 8 updates are game-pm's).
+3. If the owner has a skill (game-master, game-architect), load it and follow it. Otherwise follow the row and the work loop in [the process](../../references/process.md), acting as that role; in a single-agent session you perform each role's step (the fit-verdict line is game-master's; step 8 updates are game-pm's). When the row names a Then party, name it in your reply and say what it does next.
 4. A how to build, run, verify, structure or measure question, or a which-tool question: do the lookup and write the record BEFORE composing the answer, then answer in a few sentences ([look up guidance](../../references/entry.md#look-up-guidance)).
 5. A request to check or pass a gate: [check or pass a gate](../../references/entry.md#check-or-pass-a-gate).
 6. A scope change after G3: [scope change](../../references/entry.md#scope-change-after-g3).

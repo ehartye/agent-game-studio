@@ -6,7 +6,7 @@ import { ROOT, readRel, tables } from './lib/md.mjs';
 
 const KINDS = ['routing', 'stop', 'gate', 'defer', 'adoption'];
 const scenarios = JSON.parse(readRel('tests/scenarios/scenarios.json'));
-const strip = (cell) => cell.replace(/`/g, '');
+const strip = (cell) => cell.replace(/`/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1');
 const routingRows = () => tables(readRel('references/decision-routing.md')).find((t) => t.header[0] === 'Request').rows;
 const ofKind = (kind) => scenarios.filter((s) => s.kind === kind);
 

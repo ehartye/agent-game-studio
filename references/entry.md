@@ -36,3 +36,12 @@ The result is `met` when every required evidence item is `observed`, `unmet` oth
 1. game-pm writes the change request as a decision record that names the cut, or `none` with the owner's reason.
 2. game-master adds the fit ruling.
 3. Ask the owner to name the cut and to approve. Nothing is built unless the owner approves.
+
+## Refresh a stale page
+
+1. Record the contradiction as an open question.
+2. Confirm Next step and Blocked by with the owner; update only those.
+3. Set the question answered.
+4. Report.
+
+Change Phase only through a gate result or an adoption placement; if Phase itself is contradicted, ask the owner whether to re-place it (adoption step 5).
