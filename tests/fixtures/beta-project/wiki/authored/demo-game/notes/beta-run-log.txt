@@ -1,0 +1,2 @@
+playthrough: 25 min
+line 2: crash on second arena reload

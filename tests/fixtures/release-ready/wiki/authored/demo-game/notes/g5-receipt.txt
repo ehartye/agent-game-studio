@@ -1,0 +1,2 @@
+build id: demo-1.0.0
+assets recorded: 41 (39 human, 2 AI-assisted, 0 AI-generated, 0 placeholders)

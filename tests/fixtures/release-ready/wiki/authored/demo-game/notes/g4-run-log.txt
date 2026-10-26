@@ -1,0 +1,4 @@
+playthrough: 24 min, 0 crashes
+critical defects open: 0
+frame time p95: 13.8 ms (budget 16 ms)
+strings locked: 2026-01-25

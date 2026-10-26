@@ -1,0 +1,1 @@
+{ "mcpServers": { "demo-docs": { "command": "demo-docs-server", "env": { "DEMO_TOKEN": "dummy-token-not-a-real-secret" } } } }

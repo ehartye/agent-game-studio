@@ -1,0 +1,19 @@
+{
+  "name": "agent-game-studio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Technology-agnostic game process skills and references for AI agents",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ehartye/agent-game-studio.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node scripts/check.mjs",
+    "check": "node scripts/check.mjs"
+  }
+}
