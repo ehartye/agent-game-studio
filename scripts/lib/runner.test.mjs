@@ -8,8 +8,10 @@ import {
   GENERIC_REPLY,
   assertOutsideRepo,
   buildRun,
+  assertDistinctVaults,
   compareVault,
   evaluateVault,
+  newestVersion,
   vaultAttempts,
   vaultDelta,
   vaultSnapshot,
@@ -170,9 +172,9 @@ test('assertOutsideRepo refuses folders inside or equal to the repository, inclu
 
 test('parseArgs applies defaults and parses lists and numbers', () => {
   const d = parseArgs(['--out', '/o']);
-  assert.deepEqual(d, { out: '/o', vault: null, vaultGuard: 'attributable', plugin: null, ids: null, kinds: null, trials: 1, concurrency: 3, model: null, maxBudgetUsd: 6, timeoutMin: 15, dryRun: false });
-  const p = parseArgs(['--out', '/o', '--vault', '/v', '--vault-guard', 'strict', '--plugin', '/p', '--ids', 'R01,S01', '--kind', 'routing,stop', '--trials', '2', '--concurrency', '4', '--model', 'opus', '--max-budget-usd', '3.5', '--timeout-min', '5', '--dry-run']);
-  assert.deepEqual(p, { out: '/o', vault: '/v', vaultGuard: 'strict', plugin: '/p', ids: ['R01', 'S01'], kinds: ['routing', 'stop'], trials: 2, concurrency: 4, model: 'opus', maxBudgetUsd: 3.5, timeoutMin: 5, dryRun: true });
+  assert.deepEqual(d, { out: '/o', vault: null, vaultGuard: 'attributable', wikiMaster: null, plugin: null, ids: null, kinds: null, trials: 1, concurrency: 3, model: null, maxBudgetUsd: 6, timeoutMin: 15, dryRun: false });
+  const p = parseArgs(['--out', '/o', '--vault', '/v', '--vault-guard', 'strict', '--wiki-master', '/wm', '--plugin', '/p', '--ids', 'R01,S01', '--kind', 'routing,stop', '--trials', '2', '--concurrency', '4', '--model', 'opus', '--max-budget-usd', '3.5', '--timeout-min', '5', '--dry-run']);
+  assert.deepEqual(p, { out: '/o', vault: '/v', vaultGuard: 'strict', wikiMaster: '/wm', plugin: '/p', ids: ['R01', 'S01'], kinds: ['routing', 'stop'], trials: 2, concurrency: 4, model: 'opus', maxBudgetUsd: 3.5, timeoutMin: 5, dryRun: true });
 });
 
 test('parseArgs rejects a missing --out, unknown flags and bad numbers', () => {
@@ -341,4 +343,67 @@ test('a denied read, search or listing of the vault is an attempt, not a touch',
   const v = evaluateVault({ texts: [raw], vault: VAULT, before: none, after: none, slugs: ['demo-game'] });
   assert.equal(v.verdict, 'attempted');
   assert.deepEqual(v.attempts.map((a) => [a.tool, a.denied]), [['Glob', true], ['Read', true], ['Grep', true]]);
+});
+
+// --- scratch vault ------------------------------------------------------------
+
+test('newestVersion picks the highest plain version folder and ignores temporary or foreign names', () => {
+  assert.equal(newestVersion(['0.9.0', '0.67.0', '0.67.0.tmp~2f3842d1', '0.100.0', 'junk', '0.67.1']), '0.100.0');
+  assert.equal(newestVersion(['0.64.0', '0.7.2']), '0.64.0');
+  assert.equal(newestVersion(['junk']), null);
+  assert.equal(newestVersion([]), null);
+});
+
+test('buildRun with a scratch vault points the vault variable at it, scopes access to it and keeps the real-vault denials', () => {
+  const run = buildRun({ prompt: 'p', plugin: '/plug', cacheDir: '/cache', projectDir: '/out/A01-t1/project', scratchVault: '/out/A01-t1/vault', maxBudgetUsd: 1, vault: '/real/vault' }, {});
+  assert.equal(run.env.WIKI_MASTER_VAULT, '/out/A01-t1/vault');
+  const a = run.args;
+  const allowed = a.slice(a.indexOf('--allowedTools') + 1, a.indexOf('--disallowedTools'));
+  for (const tool of ['Read', 'Glob', 'Grep', 'Write', 'Edit']) assert.ok(allowed.includes(`${tool}(//out/A01-t1/vault/**)`), tool);
+  assert.ok(allowed.includes('Write(//out/A01-t1/project/**)'));
+  assert.ok(allowed.includes('Bash(git *)') && allowed.includes('Bash(node *wiki-master*)'));
+  assert.ok(!allowed.includes('Write') && !allowed.includes('Edit'));
+  const denied = a.slice(a.indexOf('--disallowedTools'));
+  for (const tool of ['Read', 'Glob', 'Grep', 'Write', 'Edit']) assert.ok(denied.includes(`${tool}(//real/vault/**)`) && denied.includes(`${tool}(//real/vault)`), tool);
+  assert.ok(a.filter((x, i) => a[i - 1] === '--add-dir').includes('/out/A01-t1/vault'));
+});
+
+test('buildRun without a scratch vault keeps the vault variable on the project and adds no vault rules', () => {
+  const run = buildRun({ prompt: 'p', plugin: '/plug', cacheDir: '/cache', projectDir: '/out/A01-t1/project', maxBudgetUsd: 1, vault: '/real/vault' }, {});
+  assert.equal(run.env.WIKI_MASTER_VAULT, '/out/A01-t1/project');
+  assert.ok(!run.args.some((x) => x.includes('/out/A01-t1/vault')));
+});
+
+test('assertDistinctVaults refuses a scratch vault that is, contains or sits inside the real vault', () => {
+  assert.throws(() => assertDistinctVaults('/real/vault', '/real/vault'), /scratch vault/);
+  assert.throws(() => assertDistinctVaults('/real/vault/sub', '/real/vault'), /scratch vault/);
+  assert.throws(() => assertDistinctVaults('/real', '/real/vault'), /scratch vault/);
+  if (process.platform === 'win32') assert.throws(() => assertDistinctVaults('C:/Real/Vault', 'c:/real/vault'), /scratch vault/);
+  assert.doesNotThrow(() => assertDistinctVaults('/out/A01-t1/vault', '/real/vault'));
+  assert.doesNotThrow(() => assertDistinctVaults('/real/vault-2', '/real/vault'));
+});
+
+test('parseArgs accepts --wiki-master', () => {
+  assert.equal(parseArgs(['--out', '/o', '--wiki-master', '/wm']).wikiMaster, '/wm');
+  assert.equal(parseArgs(['--out', '/o']).wikiMaster, null);
+});
+
+test('renderSummary lists files read and written in the scratch vault separately from the project', () => {
+  const inVault = [
+    { type: 'system', subtype: 'init', session_id: 's', skills: ['agent-game-studio:game-master'] },
+    toolUse('a', 'Read', { file_path: '/out/A01-t1/project/AGENTS.md' }), toolResult('a', 'ok'),
+    toolUse('b', 'Read', { file_path: '/out/A01-t1/vault/index.md' }), toolResult('b', 'ok'),
+    toolUse('c', 'Write', { file_path: '/out/A01-t1/vault/wiki/page.md', content: 'x' }), toolResult('c', 'ok'),
+    toolUse('d', 'Write', { file_path: '/out/A01-t1/project/new.md', content: 'x' }), toolResult('d', 'ok'),
+    { type: 'result', subtype: 'success', is_error: false, num_turns: 3, total_cost_usd: 0.1, result: 'done', session_id: 's' },
+  ].map(line).join('\n');
+  const md = renderSummary({
+    scenario: { id: 'A01', prompt: 'Start.', kind: 'adoption' }, status: 'completed', exitCode: 0, durationMs: 1000,
+    turns: [parseTranscript(inVault)], scratchVault: { path: '/out/A01-t1/vault', status: '?? wiki/page.md\n' },
+  });
+  const [project, vault] = md.split('## Scratch vault');
+  assert.ok(vault, 'has a Scratch vault heading');
+  assert.ok(project.includes('/out/A01-t1/project/AGENTS.md') && !project.includes('/out/A01-t1/vault/index.md'));
+  assert.ok(project.includes('Write /out/A01-t1/project/new.md') && !project.includes('wiki/page.md'));
+  assert.ok(vault.includes('/out/A01-t1/vault/index.md') && vault.includes('Write /out/A01-t1/vault/wiki/page.md') && vault.includes('?? wiki/page.md'));
 });

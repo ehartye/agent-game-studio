@@ -2,12 +2,12 @@
 // plugin loaded, and captures what happened. It never scores. Dependency-free.
 //
 //   node scripts/run-scenarios.mjs --out <dir> [--plugin <path>] [--ids R01,S01] [--kind routing,stop]
-//        [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--vault <path>] [--vault-guard strict|attributable] [--dry-run]
+//        [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--vault <path>] [--vault-guard strict|attributable] [--wiki-master <path>] [--dry-run]
 import { spawn, spawnSync } from 'node:child_process';
 import { cpSync, createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { delimiter, join, resolve } from 'node:path';
-import { GENERIC_REPLY, assertOutsideRepo, buildRun, compareVault, evaluateVault, isSecretName, maskSecrets, parseArgs, parseTranscript, renderSummary, replyFor, selectScenarios, vaultSnapshot } from './lib/runner.mjs';
+import { GENERIC_REPLY, assertDistinctVaults, assertOutsideRepo, buildRun, compareVault, newestVersion, evaluateVault, isSecretName, maskSecrets, parseArgs, parseTranscript, renderSummary, replyFor, selectScenarios, vaultSnapshot } from './lib/runner.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const FILE_CAP = 20 * 1024;
@@ -33,6 +33,42 @@ function prepareProject(dir, fixture) {
   mkdirSync(dir, { recursive: true });
   cpSync(join(ROOT, 'tests', 'fixtures', fixture), dir, { recursive: true });
   git(dir, 'init', '-q');
+  git(dir, 'config', 'user.name', 'scenario-runner');
+  git(dir, 'config', 'user.email', 'scenario-runner@example.invalid');
+  git(dir, 'config', 'core.autocrlf', 'false');
+  git(dir, 'config', 'commit.gpgsign', 'false');
+  git(dir, 'add', '-A');
+  git(dir, 'commit', '-q', '-m', 'baseline');
+}
+
+const fixtureHasWiki = (fixture) => existsSync(join(ROOT, 'tests', 'fixtures', fixture, 'wiki'));
+
+// The installed wiki tooling: --wiki-master, else the newest version under the host plugin cache.
+function findWikiMaster(override, cacheDir) {
+  if (override) {
+    if (!existsSync(join(override, 'scripts', 'init.mjs'))) throw new Error(`--wiki-master ${override} has no scripts/init.mjs`);
+    return resolve(override);
+  }
+  let best = null;
+  const markets = existsSync(cacheDir) ? readdirSync(cacheDir, { withFileTypes: true }).filter((d) => d.isDirectory()) : [];
+  for (const m of markets) {
+    const base = join(cacheDir, m.name, 'wiki-master');
+    if (!existsSync(base)) continue;
+    const names = readdirSync(base, { withFileTypes: true }).filter((d) => d.isDirectory() && existsSync(join(base, d.name, 'scripts', 'init.mjs'))).map((d) => d.name);
+    const v = newestVersion(names);
+    if (v && (!best || newestVersion([best.version, v]) === v)) best = { version: v, dir: join(base, v) };
+  }
+  if (!best) throw new Error(`cannot find an installed wiki tooling under ${cacheDir}; pass --wiki-master <path>`);
+  return best.dir;
+}
+
+// An empty vault the wiki tooling can reach, committed as a baseline, for scenarios whose fixture has no wiki.
+function createScratchVault(dir, wikiMaster) {
+  mkdirSync(dir, { recursive: true });
+  const env = { ...process.env, WIKI_MASTER_VAULT: dir };
+  const init = spawnSync(process.execPath, [join(wikiMaster, 'scripts', 'init.mjs')], { env, encoding: 'utf8', cwd: dir });
+  if (init.status !== 0) throw new Error(`wiki tooling init failed in ${dir}: ${init.stderr || init.stdout}`);
+  if (!existsSync(join(dir, '.git'))) git(dir, 'init', '-q');
   git(dir, 'config', 'user.name', 'scenario-runner');
   git(dir, 'config', 'user.email', 'scenario-runner@example.invalid');
   git(dir, 'config', 'core.autocrlf', 'false');
@@ -104,14 +140,22 @@ async function runOne(ctx, scenario, trial) {
   const name = `${scenario.id}-t${trial}`;
   const dir = join(outDir, name);
   const project = join(dir, 'project');
-  const paths = { dir, project, transcript: join(dir, 'transcript.jsonl'), transcript2: join(dir, 'transcript-2.jsonl'), stderr: join(dir, 'stderr.txt'), diff: join(dir, 'diff.txt'), summary: join(dir, 'summary.md') };
+  const paths = { dir, project, vault: join(dir, 'vault'), transcript: join(dir, 'transcript.jsonl'), transcript2: join(dir, 'transcript-2.jsonl'), stderr: join(dir, 'stderr.txt'), diff: join(dir, 'diff.txt'), summary: join(dir, 'summary.md') };
   if (ctx.abortMessage) return { id: scenario.id, trial, status: 'skipped', exitCode: null, durationMs: 0, paths: {}, reason: 'batch stopped by the vault guard' };
   const started = Date.now();
   const entry = { id: scenario.id, trial, status: 'pending', exitCode: null, durationMs: null, paths: {} };
   try {
     prepareProject(project, scenario.fixture);
+    let scratchVault = null;
+    if (!fixtureHasWiki(scenario.fixture)) {
+      assertDistinctVaults(paths.vault, ctx.vault);
+      const t0 = Date.now();
+      createScratchVault(paths.vault, ctx.wikiMaster);
+      scratchVault = paths.vault;
+      entry.scratchVault = { path: scratchVault, wikiMaster: ctx.wikiMaster, initMs: Date.now() - t0 };
+    }
     const vaultBefore = vaultSnapshot(ctx.vault);
-    const base = { plugin, cacheDir, projectDir: project, vault: ctx.vault, maxBudgetUsd: opts.maxBudgetUsd, model: opts.model, extraAllowed: ctx.extraAllowed };
+    const base = { plugin, cacheDir, projectDir: project, scratchVault, vault: ctx.vault, maxBudgetUsd: opts.maxBudgetUsd, model: opts.model, extraAllowed: ctx.extraAllowed };
     const timeoutMs = opts.timeoutMin * 60_000;
     const turns = [];
     let first = await runHost(exe, buildRun({ ...base, prompt: scenario.prompt }), project, paths.transcript, paths.stderr, timeoutMs, ctx.active);
@@ -148,8 +192,9 @@ async function runOne(ctx, scenario, trial) {
     entry.status = status;
     entry.exitCode = last.exitCode;
     entry.durationMs = Date.now() - started;
-    writeFileSync(paths.diff, capture(project));
-    writeFileSync(paths.summary, renderSummary({ scenario, reply: reply && turns.length > 1 ? reply : null, status, exitCode: last.exitCode, durationMs: entry.durationMs, turns }));
+    writeFileSync(paths.diff, scratchVault ? `${capture(project)}\n## Scratch vault\n\n${capture(scratchVault)}` : capture(project));
+    const scratch = scratchVault ? { path: scratchVault, status: maskSecrets(git(scratchVault, 'status', '--short')) } : null;
+    writeFileSync(paths.summary, renderSummary({ scenario, reply: reply && turns.length > 1 ? reply : null, status, exitCode: last.exitCode, durationMs: entry.durationMs, turns, scratchVault: scratch }));
     entry.costUsd = turns.some((t) => t.costUsd != null) ? turns.reduce((n, t) => n + (t.costUsd ?? 0), 0) : null;
     entry.sessionId = turns[0].sessionId;
   } catch (e) {
@@ -181,16 +226,17 @@ async function main() {
 
   if (opts.dryRun) {
     console.log(`Would run ${jobs.length} run(s) into ${outDir} with plugin ${plugin}`);
-    for (const { s, trial } of jobs) console.log(`  ${s.id}-t${trial}  fixture=${s.fixture}  reply=${replyFor(s) ? JSON.stringify(replyFor(s)) : 'none'}`);
+    for (const { s, trial } of jobs) console.log(`  ${s.id}-t${trial}  fixture=${s.fixture}  ${fixtureHasWiki(s.fixture) ? 'vault=project copy' : 'vault=scratch vault'}  reply=${replyFor(s) ? JSON.stringify(replyFor(s)) : 'none'}`);
     const { args } = buildRun({ prompt: '<prompt>', plugin, cacheDir, projectDir: '<project>', vault: join(homedir(), '.wiki-master-vault'), maxBudgetUsd: opts.maxBudgetUsd, model: opts.model });
     console.log(`  claude ${args.map((a) => (/\s/.test(a) ? JSON.stringify(a) : a)).join(' ')}`);
     return;
   }
 
   const exe = resolveHost();
+  const wikiMaster = scenarios.some((s) => !fixtureHasWiki(s.fixture)) ? findWikiMaster(opts.wikiMaster, cacheDir) : null;
   mkdirSync(outDir, { recursive: true });
   const vault = resolve(opts.vault ?? join(homedir(), '.wiki-master-vault'));
-  const ctx = { opts, plugin, cacheDir, exe, outDir, vault, vaultBefore: vaultSnapshot(vault), active: new Set(), abortMessage: null, extraAllowed: [] };
+  const ctx = { opts, plugin, cacheDir, exe, outDir, vault, wikiMaster, vaultBefore: vaultSnapshot(vault), active: new Set(), abortMessage: null, extraAllowed: [] };
   console.log(`real vault ${vault}: HEAD ${ctx.vaultBefore.head ?? 'none'}, ${ctx.vaultBefore.status.trim() ? ctx.vaultBefore.status.trim().split(/\r?\n/).length : 0} changed file(s) at start`);
   const runs = [];
   const writeIndex = () => writeFileSync(join(outDir, 'index.json'), `${JSON.stringify({ plugin, vault, model: opts.model, genericReply: GENERIC_REPLY, startedAt, runs }, null, 2)}\n`);
