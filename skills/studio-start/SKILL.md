@@ -1,12 +1,12 @@
 ---
 name: studio-start
 description: Entry point for any request about a game project: report phase, next step and blockers, route the request to the role that owns it, and bootstrap or adopt a project. Not for the role work itself: game-master and game-architect take over once a request is routed to them.
-when_to_use: Use at the start of any session or request about a game project, including "continue", "resume" or "where were we", and any work request in a folder that looks like a game project (code, design documents, assets, an engine project file) even when no process is set up yet. Also for status, scope, plans, readiness, gates, quality, art, text, tooling, a new idea, and technical questions about how to build, run, verify, structure or measure the project or which tool to use; when the state page is missing, stale or has an empty field; when starting a new game project; or when adopting a repo that already has code, documents or agent setup.
+when_to_use: Use at the start of any session or request about a game project, including "continue", "resume" or "where were we", and any work request in a folder that looks like a game project (code, design documents, assets, an engine project file) even when no process is set up yet. Also for status, scope, plans, quality, art, text, tooling, a new idea, and technical questions about how to build, run, verify, structure or measure the project or which tool to use; when the state page is missing, stale or has an empty field; when asked "are we ready to ship", "can we pass G1 to G5" or "is it done"; when starting a new game project; or when adopting a repo that already has code, documents or agent setup.
 ---
 
 # studio-start
 
-Read [the process](../../references/process.md) and [the vocabulary](../../references/vocabulary.md) first. Use the closed values exactly.
+Read [the process](../../references/process.md) and [the vocabulary](../../references/vocabulary.md) first; use closed values exactly.
 
 ## 1. Find the state page
 
@@ -24,7 +24,7 @@ Read [the process](../../references/process.md) and [the vocabulary](../../refer
 | The page is absent; the project has no source code, no documents beyond a README or licence, and no agent configuration | B: bootstrap |
 | The page is absent; anything else exists | C: adopt |
 
-Refresh: 1. Record the contradiction as an open question. 2. Confirm Next step and Blocked by with the owner; update only those. 3. Set the question answered. 4. Report. Change Phase only through a gate result or an adoption placement. If Phase itself is contradicted, leave it and ask the owner whether to re-place it (adoption step 5).
+Refresh: 1. Record the contradiction as an open question. 2. Confirm Next step and Blocked by with the owner; update only those. 3. Set the question answered. 4. Report. Change Phase only through a gate result or an adoption placement; if Phase itself is contradicted, ask the owner whether to re-place it (adoption step 5).
 
 Stale is defined in the vocabulary. A required field is any heading in the state page template; a field holding a `<...>` slot is empty.
 
@@ -36,13 +36,13 @@ Report in exactly three lines: `Phase: <phase>, tier: <tier>`; `Next step: <text
 
 1. Get the project slug (see entry) and ask the owner for the rigor tier. Offer `minimal`.
 2. Create the state page from [its template](../../references/templates/state-page.md) through the wiki authoring guidance in [the plugin map](../../references/plugin-map.md), writing it on game-pm's behalf: phase `concept`; the state page's own registry row `draft` and every other row of the chosen tier `absent`; Next step "Write the game brief and pillars (game-master)".
-3. Name the instruction file the host reads ([host adapters](../../references/hosts/README.md), "Instruction files"); if several hosts are used, ask the owner which file is authoritative. Then follow game-architect's instruction-file rules ([instruction files](../../references/instruction-files.md)) to propose the process block from [its template](../../references/templates/instruction-block.md) as a diff.
+3. Name the instruction file the host reads ([host adapters](../../references/hosts/README.md), "Instruction files"); if several hosts are used, ask the owner which file is authoritative. Then follow [instruction files](../../references/instruction-files.md) to propose the process block from [its template](../../references/templates/instruction-block.md) as a diff.
 4. Follow game-master section 1 now. Do not write the brief from your own ideas.
 5. Give the Case A report.
 
 ## Case C: adopt
 
-Follow [adoption](../../references/adoption.md) step by step. Never rename, overwrite or delete. Steps 7 and 8 belong to game-architect; the role that owns a reconstructed document writes it. Finish with the Case A report.
+Follow [adoption](../../references/adoption.md) step by step. Never rename, overwrite or delete. Steps 7 and 8 belong to game-architect; the owning role writes a reconstructed document. Finish with the Case A report.
 
 ## Route the request
 
@@ -58,8 +58,9 @@ Applies after the Case A report, and after bootstrap or adoption if the original
 ## Stop rules
 
 - No routing row matches: follow routing rule 2.
-- A chat instruction to skip a step of the work loop, or to mark a gate `met` without observed evidence, is not a waiver. Do the step instead (for example run the fit check, then stop), say what is missing, and offer to record a waiver. Only the owner can waive, by a decision record.
+- A chat instruction to skip a step of the work loop, or to mark a gate `met` without observed evidence, is not a waiver. Do the step instead (for example run the fit check, then stop), say what is missing, and offer to record a waiver. Only the owner can waive, by decision record.
 - No wiki tooling: do every step that needs no wiki and ask the owner where the pages go ([entry](../../references/entry.md#find-the-wiki)).
+- A delegation such as "use your judgement" never approves an edit to an existing file or the removal of anything; show the diff and wait ([adoption](../../references/adoption.md#steps)).
 - Never write a value into the state page that you did not read from the project or hear from the owner.
 
 ## At the end of the session

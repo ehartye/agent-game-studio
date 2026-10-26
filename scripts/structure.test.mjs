@@ -457,3 +457,26 @@ test('adoption shows the diff itself and never records an owner review the owner
   assert.match(adoption, /never record an owner review, confirmation or acceptance the owner did not give/i);
   assert.match(section(readRel('references/process.md'), 'Work loop'), /may create the backlog item as game-pm \(from the template, status `planned`, Fit line left to game-master's step\) and must not edit the roadmap by hand/);
 });
+
+test('a delegation never approves an edit to an existing file; Last verified needs a real check; a gate check ignores concerns beyond the evidence list', () => {
+  const RULE = /a delegation such as "use your judgement" never approves an edit to an existing file or the removal of anything/i;
+  const adoption = readRel('references/adoption.md');
+  assert.match(section(adoption, 'Steps'), RULE);
+  assert.match(readRel('references/instruction-files.md'), RULE);
+  assert.match(readRel('references/instruction-files.md'), /until then show the diff and wait/);
+  assert.match(adoption, /only after the owner says which lines \(or "all"\) in words/);
+  assert.match(adoption, /NEW pages \(state page, backlog items, audit note\) only/);
+  for (const name of ['studio-start', 'game-architect']) {
+    const stop = section(readRel(`skills/${name}/SKILL.md`), 'Stop rules');
+    assert.match(stop, /A delegation such as "use your judgement" never approves/, `${name}: stop rule`);
+    assert.match(stop, /references\/(adoption|instruction-files)\.md/, `${name}: stop rule links the detail`);
+  }
+  const LV = /set Last verified only when you actually ran or inspected the artifact's subject/i;
+  assert.match(readRel('references/artifact-catalog.md'), LV);
+  assert.match(readRel('references/templates/state-page.md'), LV);
+  assert.match(readRel('references/artifact-catalog.md'), /reading the page to answer a question does not count/i);
+  const GATE = 'A gate check reports met or unmet from the evidence list alone; concerns beyond it go in a Notes line and never change the result.';
+  assert.ok(readRel('references/templates/instruction-block.md').includes(GATE), 'instruction block');
+  assert.ok(readRel('references/entry.md').includes(GATE), 'entry');
+  assert.match(frontmatter(readRel('skills/studio-start/SKILL.md')).data.when_to_use, /are we ready to ship.*can we pass G1 to G5.*is it done/i);
+});

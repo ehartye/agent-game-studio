@@ -29,7 +29,7 @@ A question about how to build, run, verify, structure or measure the project, or
 
 ## Check or pass a gate
 
-The result is `met` when every required evidence item is `observed`, `unmet` otherwise. Report the result, then ask the owner to accept (see How a gate is passed in the process). Concerns outside the gate's evidence list go in a Notes line and never change the result.
+The result is `met` when every required evidence item is `observed`, `unmet` otherwise. Report the result, then ask the owner to accept (see How a gate is passed in the process). A gate check reports met or unmet from the evidence list alone; concerns beyond it go in a Notes line and never change the result.
 
 ## Scope change after G3
 

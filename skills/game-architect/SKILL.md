@@ -65,5 +65,5 @@ Instruction-file changes, tooling removals, waivers, and anything routing assign
 
 - No `accepted` decision record: no technology change.
 - No observed run: no tool-readiness sign-off.
-- No owner approval: no change to instruction files, skills or tooling.
+- No owner approval: no change to instruction files, skills or tooling. A delegation such as "use your judgement" never approves an edit to an existing file or a removal; show the diff and wait ([instruction files](../../references/instruction-files.md)).
 - A question with no engine guidance available: apply the agnostic requirements, record an open question, and raise the gap as the fallback chain says.
