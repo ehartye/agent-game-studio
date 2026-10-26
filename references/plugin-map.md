@@ -36,8 +36,8 @@ This plugin says what must be decided and what evidence proves it. Another plugi
 
 1. Read the stack from the architecture page or the decision records.
 2. Find the purpose and stack in the map. A row whose stack is `any` adds to the stack's row (or to the fallback chain) and never replaces it.
-3. Confirm the named skill appears in the session's list of available skills. If it does, load it and follow it for how; when a row names several skills, load only those the question touches. In your answer, name the skill, state the conclusion for this project, and cite where the details live. Do not reproduce procedures, commands, thresholds or lists from it. In chat, give the conclusion for this project and the next action in a few sentences; the details stay in the guidance. A stack with no row for a purpose uses the fallback chain.
-4. Record the guidance used before you answer, even when the answer is a question to the owner: which guidance, for what question, and the date. Structure and architecture guidance goes under "Engine guidance used" on the architecture page. Verification guidance goes on the "Guidance used" line of the quality evidence note; if nothing has been run yet, write the note anyway with every claim marked `evidence: none` and `Evidence: none`. Asset or text craft guidance goes in the backlog item's Implications.
+3. The lookup is triggered by any question about how to build, structure, run, verify or measure the project, or which tool to use, whether or not it mentions architecture. Confirm the named skill appears in the session's list of available skills. If it does, load it and follow it for how; when a row names several skills, load only those the question touches. In your answer, name the skill, give the conclusion for this project and the next action in a few sentences, and cite where the details live. In chat, say which skill and reference hold the details and name the next action. At most ONE rule may be adopted, in a sentence that cites the guidance; if adopted, write it into the architecture page's review standard in the same operation, so it is a decision and not chatter. Do not copy its procedures, commands, thresholds or lists into a project document; the details stay in the guidance. A stack with no row for a purpose uses the fallback chain.
+4. Record the guidance used BEFORE you answer, even when the answer is a question to the owner: which guidance, for what question, and the date. Structure and architecture guidance goes under "Engine guidance used" on the architecture page. Verification guidance goes on the "Guidance used" line of the quality evidence note; if nothing has been run yet, write the note anyway with every claim marked `evidence: none` and `Evidence: none`. Asset or text craft guidance goes in the backlog item's Implications.
 
 ## Fallback chain
 
@@ -59,3 +59,7 @@ For a purpose that is not engine structure, quality or assets (asset craft, text
 ## Dependencies
 
 The wiki tooling (`wiki-master`, version 0.55.0 or later, for the validated `depends-on` field on backlog items) is a hard dependency: the state page, backlog, roadmap and decision records live in the project's wiki. Everything else in this map is optional; when it is missing, use the fallback chain.
+
+## Finding the wiki vault
+
+The wiki tooling's vault is the folder named by the `WIKI_MASTER_VAULT` environment variable, or the folder the tooling's own resolution reports (ask the tooling for its vault path). The project's pages are in `<vault>/wiki/authored/<slug>/`. [Entry](entry.md#find-the-wiki) gives the order in which to look.

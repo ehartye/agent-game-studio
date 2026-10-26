@@ -9,7 +9,7 @@ Target gate: G3
 
 ## Implications
 - art: reuse the existing enemy sprite
-- sound: none
+- sound: a footstep sound for the patrol
 - writing: a short lore blurb
 - architecture: none
 - quality: a recorded patrol-loop replay

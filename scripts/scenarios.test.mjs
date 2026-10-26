@@ -6,7 +6,7 @@ import { ROOT, readRel, tables } from './lib/md.mjs';
 
 const KINDS = ['routing', 'stop', 'gate', 'defer', 'adoption'];
 const scenarios = JSON.parse(readRel('tests/scenarios/scenarios.json'));
-const strip = (cell) => cell.replace(/`/g, '');
+const strip = (cell) => cell.replace(/`/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1');
 const routingRows = () => tables(readRel('references/decision-routing.md')).find((t) => t.header[0] === 'Request').rows;
 const ofKind = (kind) => scenarios.filter((s) => s.kind === kind);
 
@@ -89,4 +89,11 @@ test('every fixture is used by at least one scenario', () => {
 test('the results template lists exactly the scenario ids, in order', () => {
   const rows = readRel('tests/scenarios/results-template.md').split(/\r?\n/).filter((l) => /^\| [A-Z]+\d+ \|/.test(l)).map((l) => l.split('|')[1].trim());
   assert.deepEqual(rows, scenarios.map((s) => s.id));
+});
+
+test('the run protocol scores routing by the Routed line, defers by path and record, and expects the Routed line in the report', () => {
+  const text = readRel('tests/scenarios/README.md');
+  assert.match(text, /satisfied by the `Routed:` line or by the final text naming the role/);
+  assert.match(text, /records what it used or the gap where the scenario says/);
+  assert.match(text, /`Routed: <request type> -> <owner>`/);
 });

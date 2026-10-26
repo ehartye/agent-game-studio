@@ -6,7 +6,7 @@ import { ROOT, anchorLinks, existsExact, frontmatter, headingSlugs, links, posix
 
 const ROLES = ['game-master', 'game-architect', 'game-pm', 'game-quality', 'game-writer', 'game-artist', 'game-designer'];
 const EXPECTED_SKILLS = ['game-architect', 'game-master', 'studio-start']; // phase 1; extend in later phases
-const REFERENCES = ['adoption', 'artifact-catalog', 'decision-routing', 'tooling-audit', 'vocabulary', 'planning', 'plugin-map', 'process', 'instruction-files'];
+const REFERENCES = ['adoption', 'artifact-catalog', 'decision-routing', 'tooling-audit', 'vocabulary', 'planning', 'plugin-map', 'process', 'instruction-files', 'entry'];
 const SKILL_BUDGET_BYTES = 6500;
 const SETS = {
   'Artifact status': ['ready', 'draft', 'absent', 'reconstructed', 'conflicting'],
@@ -111,6 +111,9 @@ test('process.md defines the phases, the five gates and the eight-step work loop
     assert.ok(section(text, heading), `section ${heading}`);
   }
   assert.equal((section(text, 'Work loop').match(/^\d+\. \*\*/gm) ?? []).length, 8);
+  assert.match(section(text, 'Phases and gates'), /A gate is met when every required evidence item is observed; report met and ask the owner to accept\./);
+  assert.match(section(text, 'Phases and gates'), /Concerns outside the gate's evidence list go in a Notes line and never change the result\./);
+  assert.match(section(text, 'Work loop'), /in a single-agent session the agent performs each role's step/i);
 });
 
 test('decision-routing.md has a valid roles table and a valid routing table', () => {
@@ -170,6 +173,53 @@ test('the instruction block names the state page, the routing table, the gate ru
   assert.match(text, /routing/i);
   assert.match(text, /observed evidence/i);
   assert.match(text, /studio-start/);
+  assert.ok(text.includes('Routed: <request type> -> <owner>'), 'the Routed line');
+  assert.match(text, /not a waiver: do the step, say what is missing, and offer to record a waiver/);
+  assert.match(text, /Load the agent-game-studio studio-start skill if it is available/);
+  assert.match(text, /`Blocked by:` names any blocker/);
+});
+
+test('studio-start is the entry point for every request: it has a Route the request section with the Routed line', () => {
+  const text = readRel('skills/studio-start/SKILL.md');
+  const route = section(text, 'Route the request');
+  assert.ok(route, 'has a Route the request section');
+  assert.ok(route.includes('Routed: <request type> -> <owner>'), 'Routed line');
+  assert.match(route, /decision-routing\.md/);
+  assert.ok(!section(text, 'After studio-start'), 'the old After studio-start section is gone');
+  assert.ok(links(text).some((l) => l.target.includes('references/entry.md')), 'links to references/entry.md');
+  const fm = frontmatter(text).data;
+  assert.match(fm.when_to_use, /continue|resume|where we left off/i, 'resume phrasing');
+  assert.match(fm.when_to_use, /looks like a game project/i, 'a folder that looks like a game project, even with no process set up');
+  assert.match(fm.when_to_use, /how to build, run, verify, structure or measure/i, 'technical how-to questions');
+  assert.match(fm.description, /^Entry point for any request about a game project/);
+  assert.match(fm.description, /Not for /, 'description keeps a Not for clause');
+});
+
+test('game-architect when_to_use selects it for how-to technical questions', () => {
+  assert.match(frontmatter(readRel('skills/game-architect/SKILL.md')).data.when_to_use, /how to build, run, verify, structure or measure/i);
+});
+
+test('entry.md holds the wiki location order, the record-first lookup rule and the scope-change handling', () => {
+  const text = readRel('references/entry.md');
+  for (const h of ['Find the wiki', 'Look up guidance', 'Scope change after G3']) assert.ok(section(text, h), `section ${h}`);
+  const wiki = section(text, 'Find the wiki');
+  assert.match(wiki, /wiki\/authored\/<slug>\//);
+  assert.match(wiki, /project folder name/);
+  assert.match(wiki, /ask the owner where to store the pages/);
+  assert.match(wiki, /Never hand-create wiki pages outside/);
+  assert.match(section(text, 'Look up guidance'), /BEFORE composing the answer/);
+  assert.match(section(text, 'Scope change after G3'), /ask the owner to name the cut and to approve/i);
+  assert.match(readRel('references/plugin-map.md'), /WIKI_MASTER_VAULT/);
+});
+
+test('the process makes the scope-change request a decision record and says to record output without the wiki scripts', () => {
+  const text = readRel('references/process.md');
+  assert.match(section(text, 'Change control'), /decision record that names the cut \(or `none` with the owner's reason\)/);
+  assert.match(section(text, 'Work loop'), /exact-path file edits/);
+  assert.match(section(text, 'Work loop'), /validation was not run/);
+  assert.match(section(text, 'Work loop'), /never decline to record/i);
+  assert.match(text, /`Blocked by:` names any blocker/);
+  assert.match(readRel('references/decision-routing.md'), /\| Scope change after G3 \|[^\n]*decision record[^\n]*names? the cut/);
 });
 
 test('plugin-map.md has a purpose/stack/defer table covering every purpose and stack, and the fallback chain', () => {
@@ -368,4 +418,65 @@ test('a backticked value after a status-like word belongs to a closed set', () =
     });
   }
   assert.deepEqual(bad, []);
+});
+
+test('the reply starts with the report and the Routed line, in the skills and the instruction block', () => {
+  const FIRST = /If this reply has not yet started with the three-line report and the `Routed: <request type> -> <owner>` line \(see studio-start, Route the request\), start it that way\./;
+  for (const name of ['game-master', 'game-architect']) {
+    const body = readRel(`skills/${name}/SKILL.md`).split(/\r?\n/);
+    const first = body[body.findIndex((l) => l.startsWith('# ')) + 2];
+    assert.match(first, FIRST, `${name}: first line after the title`);
+  }
+  const route = section(readRel('skills/studio-start/SKILL.md'), 'Route the request');
+  assert.match(route, /BEGINS with the three-line report and the Routed line, before any narration/);
+  assert.match(route, /even when work was done/);
+  assert.match(route, /exact Request text/);
+  assert.match(readRel('references/templates/instruction-block.md'), /begins with the three-line report and the Routed line, before any narration/);
+  const entry = readRel('references/entry.md');
+  assert.match(section(entry, 'The Routed line'), /Anything else -> none/);
+  assert.match(section(entry, 'The Routed line'), /Joining an existing project -> studio-start/);
+  assert.match(section(entry, 'The Routed line'), /never invent a row name/i);
+});
+
+test('lookup answers point to the guidance, and an adopted rule becomes a recorded decision', () => {
+  for (const text of [section(readRel('references/entry.md'), 'Look up guidance'), readRel('references/plugin-map.md')]) {
+    assert.match(text, /skill and reference (?:that )?hold the details/i);
+    assert.match(text, /at most ONE rule/i);
+    assert.match(text, /review standard in the same operation/);
+  }
+});
+
+test('adoption shows the diff itself and never records an owner review the owner did not give', () => {
+  const adoption = readRel('references/adoption.md');
+  const rule = 'show the diff itself in the reply; a summary of what would be added does not count';
+  assert.ok(adoption.includes(rule), 'adoption step 7');
+  assert.ok(readRel('references/instruction-files.md').includes(rule), 'instruction files');
+  for (const [name, text] of [['adoption', adoption], ['state page template', readRel('references/templates/state-page.md')], ['process', readRel('references/process.md')]]) {
+    assert.match(text, /proposed, owner review pending/, name);
+  }
+  assert.match(adoption, /never record an owner review, confirmation or acceptance the owner did not give/i);
+  assert.match(section(readRel('references/process.md'), 'Work loop'), /may create the backlog item as game-pm \(from the template, status `planned`, Fit line left to game-master's step\) and must not edit the roadmap by hand/);
+});
+
+test('a delegation never approves an edit to an existing file; Last verified needs a real check; a gate check ignores concerns beyond the evidence list', () => {
+  const RULE = /a delegation such as "use your judgement" never approves an edit to an existing file or the removal of anything/i;
+  const adoption = readRel('references/adoption.md');
+  assert.match(section(adoption, 'Steps'), RULE);
+  assert.match(readRel('references/instruction-files.md'), RULE);
+  assert.match(readRel('references/instruction-files.md'), /until then show the diff and wait/);
+  assert.match(adoption, /only after the owner says which lines \(or "all"\) in words/);
+  assert.match(adoption, /NEW pages \(state page, backlog items, audit note\) only/);
+  for (const name of ['studio-start', 'game-architect']) {
+    const stop = section(readRel(`skills/${name}/SKILL.md`), 'Stop rules');
+    assert.match(stop, /A delegation such as "use your judgement" never approves/, `${name}: stop rule`);
+    assert.match(stop, /references\/(adoption|instruction-files)\.md/, `${name}: stop rule links the detail`);
+  }
+  const LV = /set Last verified only when you actually ran or inspected the artifact's subject/i;
+  assert.match(readRel('references/artifact-catalog.md'), LV);
+  assert.match(readRel('references/templates/state-page.md'), LV);
+  assert.match(readRel('references/artifact-catalog.md'), /reading the page to answer a question does not count/i);
+  const GATE = 'A gate check reports met or unmet from the evidence list alone; concerns beyond it go in a Notes line and never change the result.';
+  assert.ok(readRel('references/templates/instruction-block.md').includes(GATE), 'instruction block');
+  assert.ok(readRel('references/entry.md').includes(GATE), 'entry');
+  assert.match(frontmatter(readRel('skills/studio-start/SKILL.md')).data.when_to_use, /are we ready to ship.*can we pass G1 to G5.*is it done/i);
 });

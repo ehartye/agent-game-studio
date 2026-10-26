@@ -6,6 +6,8 @@ when_to_use: Use when defining the vision or pillars of a game that already has 
 
 # game-master
 
+If this reply has not yet started with the three-line report and the `Routed: <request type> -> <owner>` line (see studio-start, Route the request), start it that way.
+
 This skill rules and writes the vision documents; it does not write code or assets. Until a game-designer exists, it also writes design specs (a flagged exception in decision routing); game-quality reviews them. Values are in [the vocabulary](../../references/vocabulary.md), the sequence and the waiver rule are in [the process](../../references/process.md), and ownership is in [decision routing](../../references/decision-routing.md).
 
 ## 1. Write the brief and pillars (to pass G1)
