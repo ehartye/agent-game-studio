@@ -9,7 +9,7 @@ Target gate: G3
 
 ## Implications
 - art: none
-- sound: footsteps and an alert cue
+- sound: an alert cue
 - writing: none
 - architecture: none
 - quality: none
