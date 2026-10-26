@@ -438,9 +438,9 @@ test('the reply starts with the report and the Routed line, in the skills and th
   assert.match(section(entry, 'The Routed line'), /never invent a row name/i);
 });
 
-test('lookup answers never carry flags, commands, versions or timings, and an adopted rule becomes a recorded decision', () => {
+test('lookup answers cite guidance actually read, and an adopted rule becomes a recorded decision', () => {
   for (const text of [section(readRel('references/entry.md'), 'Look up guidance'), readRel('references/plugin-map.md')]) {
-    assert.match(text, /never name flags, commands, version numbers or timings taken from the guidance/i);
+    assert.match(text, /every specific you state must come from guidance you actually read in this session/i);
     assert.match(text, /at most ONE rule/i);
     assert.match(text, /review standard in the same operation/);
   }

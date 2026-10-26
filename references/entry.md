@@ -25,7 +25,7 @@ A question about how to build, run, verify, structure or measure the project, or
 
 1. Do the lookup. If it names no usable guidance, use the fallback chain there.
 2. Write the record BEFORE composing the answer, even when nothing has been run: the "Engine guidance used" entry on the architecture page for structure and build questions; the quality evidence note for verification, run and measurement questions, with every claim `evidence: none` and its Guidance used line filled.
-3. Answer in a few sentences: the conclusion for this project and the next action. In chat, never name flags, commands, version numbers or timings taken from the guidance; say which skill and reference holds them. At most ONE rule may be adopted, in a sentence that cites the guidance; if adopted, write it into the architecture page's review standard in the same operation, so it is a decision and not chatter.
+3. Answer in a few sentences: the conclusion for this project and the next action. In chat, summarise the conclusion and cite the skill and reference that hold the details; every specific you state must come from guidance you actually read in this session, never from memory. At most ONE rule may be adopted, in a sentence that cites the guidance; if adopted, write it into the architecture page's review standard in the same operation, so it is a decision and not chatter.
 
 ## Check or pass a gate
 
