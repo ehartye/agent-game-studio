@@ -6,7 +6,7 @@ import { ROOT, anchorLinks, existsExact, frontmatter, headingSlugs, links, posix
 
 const ROLES = ['game-master', 'game-architect', 'game-pm', 'game-quality', 'game-writer', 'game-artist', 'game-designer'];
 const EXPECTED_SKILLS = ['game-architect', 'game-master', 'studio-start']; // phase 1; extend in later phases
-const REFERENCES = ['adoption', 'artifact-catalog', 'decision-routing', 'tooling-audit', 'vocabulary', 'planning', 'plugin-map', 'process', 'instruction-files'];
+const REFERENCES = ['adoption', 'artifact-catalog', 'decision-routing', 'tooling-audit', 'vocabulary', 'planning', 'plugin-map', 'process', 'instruction-files', 'entry'];
 const SKILL_BUDGET_BYTES = 6500;
 const SETS = {
   'Artifact status': ['ready', 'draft', 'absent', 'reconstructed', 'conflicting'],
@@ -176,6 +176,7 @@ test('the instruction block names the state page, the routing table, the gate ru
   assert.ok(text.includes('Routed: <request type> -> <owner>'), 'the Routed line');
   assert.match(text, /not a waiver: do the step, say what is missing, and offer to record a waiver/);
   assert.match(text, /Load the agent-game-studio studio-start skill if it is available/);
+  assert.match(text, /`Blocked by:` names any blocker/);
 });
 
 test('studio-start is the entry point for every request: it has a Route the request section with the Routed line', () => {
@@ -185,7 +186,40 @@ test('studio-start is the entry point for every request: it has a Route the requ
   assert.ok(route.includes('Routed: <request type> -> <owner>'), 'Routed line');
   assert.match(route, /decision-routing\.md/);
   assert.ok(!section(text, 'After studio-start'), 'the old After studio-start section is gone');
-  assert.match(frontmatter(text).data.description, /^Entry point for any request about a game project/);
+  assert.ok(links(text).some((l) => l.target.includes('references/entry.md')), 'links to references/entry.md');
+  const fm = frontmatter(text).data;
+  assert.match(fm.when_to_use, /continue|resume|where we left off/i, 'resume phrasing');
+  assert.match(fm.when_to_use, /looks like a game project/i, 'a folder that looks like a game project, even with no process set up');
+  assert.match(fm.when_to_use, /how to build, run, verify, structure or measure/i, 'technical how-to questions');
+  assert.match(fm.description, /^Entry point for any request about a game project/);
+  assert.match(fm.description, /Not for /, 'description keeps a Not for clause');
+});
+
+test('game-architect when_to_use selects it for how-to technical questions', () => {
+  assert.match(frontmatter(readRel('skills/game-architect/SKILL.md')).data.when_to_use, /how to build, run, verify, structure or measure/i);
+});
+
+test('entry.md holds the wiki location order, the record-first lookup rule and the scope-change handling', () => {
+  const text = readRel('references/entry.md');
+  for (const h of ['Find the wiki', 'Look up guidance', 'Scope change after G3']) assert.ok(section(text, h), `section ${h}`);
+  const wiki = section(text, 'Find the wiki');
+  assert.match(wiki, /wiki\/authored\/<slug>\//);
+  assert.match(wiki, /project folder name/);
+  assert.match(wiki, /ask the owner where to store the pages/);
+  assert.match(wiki, /Never hand-create wiki pages outside/);
+  assert.match(section(text, 'Look up guidance'), /BEFORE composing the answer/);
+  assert.match(section(text, 'Scope change after G3'), /ask the owner to name the cut and to approve/i);
+  assert.match(readRel('references/plugin-map.md'), /WIKI_MASTER_VAULT/);
+});
+
+test('the process makes the scope-change request a decision record and says to record output without the wiki scripts', () => {
+  const text = readRel('references/process.md');
+  assert.match(section(text, 'Change control'), /decision record that names the cut \(or `none` with the owner's reason\)/);
+  assert.match(section(text, 'Work loop'), /exact-path file edits/);
+  assert.match(section(text, 'Work loop'), /validation was not run/);
+  assert.match(section(text, 'Work loop'), /never decline to record/i);
+  assert.match(text, /`Blocked by:` names any blocker/);
+  assert.match(readRel('references/decision-routing.md'), /\| Scope change after G3 \|[^\n]*decision record[^\n]*names? the cut/);
 });
 
 test('plugin-map.md has a purpose/stack/defer table covering every purpose and stack, and the fallback chain', () => {

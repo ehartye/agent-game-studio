@@ -37,11 +37,11 @@ A routing row's Required output is the output of the first step its owner perfor
 5. **Build.** Do the work.
 6. **Verify.** game-quality records `observed` evidence against the item and the gate it supports. `reported` evidence does not pass.
 7. **Accept.** game-master accepts against the pillars. At a gate, the owner accepts (see Phases and gates).
-8. **Update.** game-pm updates the state page and the backlog. The role that produced or verified an artifact supplies that artifact's registry row (status and Last verified). All of it happens in the same wiki operation as the work.
+8. **Update.** game-pm updates the state page and the backlog. The role that produced or verified an artifact supplies that artifact's registry row (status and Last verified). All of it happens in the same wiki operation as the work. Record the output (text, glossary entry, canon entry, evidence) in the project's wiki even when the wiki scripts cannot be run, by exact-path file edits, and say that validation was not run; never decline to record.
 
 ## Session rules
 
-- **Start.** Read the state page. Check its Phase, Next step and Blocked by against the repository and the wiki. If the page is missing, a required field is empty, or the page is stale (see [the vocabulary](vocabulary.md)), say so and run studio-start; do nothing else until it finishes, then take the original request to Intake, unless running studio-start was itself the request. For a stale page studio-start records the contradiction as an open question and confirms the Next step with the owner. Then report in exactly three lines: `Phase: <phase>, tier: <tier>`; `Next step: <text>`; `Blocked by: <text or nothing>`.
+- **Start.** Read the state page. Check its Phase, Next step and Blocked by against the repository and the wiki. If the page is missing, a required field is empty, or the page is stale (see [the vocabulary](vocabulary.md)), say so and run studio-start; do nothing else until it finishes, then take the original request to Intake, unless running studio-start was itself the request. For a stale page studio-start records the contradiction as an open question and confirms the Next step with the owner. Then report in exactly three lines: `Phase: <phase>, tier: <tier>`; `Next step: <text>`; `Blocked by: <text or nothing>`. `Blocked by:` names any blocker the answer then states; never print `nothing` above a stated blocker.
 - **End.** Run step 8 of the work loop before the session closes.
 
 ## Evidence rules
@@ -57,7 +57,7 @@ Only the owner can waive a gate requirement or a work-loop step. A waiver is a d
 
 ## Change control
 
-After G3 a change request names the cut that pays for it. game-pm writes it, game-master rules on fit, and the owner approves. The request is written first and carries game-master's fit ruling. If the ruling is `does-not-fit` or `needs-pillar-change`, the request goes to the owner with that ruling, and nothing is built unless the owner approves. After G4 the same applies to content. Changes to locked text, a locked asset or a signed-off contract make dependent sign-offs stale: set their registry status to `draft` and re-check them.
+After G3 a change request names the cut that pays for it. game-pm writes it as a decision record that names the cut (or `none` with the owner's reason), game-master adds the fit ruling, and the agent asks the owner to name the cut and to approve. The request is written first and carries game-master's fit ruling. If the ruling is `does-not-fit` or `needs-pillar-change`, the request goes to the owner with that ruling, and nothing is built unless the owner approves. After G4 the same applies to content. Changes to locked text, a locked asset or a signed-off contract make dependent sign-offs stale: set their registry status to `draft` and re-check them.
 
 ## Before a role skill exists
 

@@ -1,7 +1,7 @@
 ---
 name: game-architect
 description: Decide a game's technology and keep its architecture page, tool readiness and agent tooling true. Not for whether the game works or performs, or what to build next.
-when_to_use: Use when asked which engine, library or tool to use, to review code or the project's structure, to sign off a tool before work can proceed, for the technology part of a gate check (G2), to change agent instruction files, skills or tooling, or to clean up leftover or unused agent configuration.
+when_to_use: Use when asked which engine, library or tool to use, how to build, run, verify, structure or measure a game project, to review code or the project's structure, to sign off a tool before work can proceed, for the technology part of a gate check (G2), to change agent instruction files, skills or tooling, or to clean up leftover or unused agent configuration.
 ---
 
 # game-architect

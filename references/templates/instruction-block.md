@@ -4,7 +4,7 @@ At the start of each session, before acting on the first request about this proj
 
 1. Read the project's state page: `wiki/authored/<project>/reference/studio-state.md` (the path is relative to the folder that contains `wiki/`). If you cannot find the wiki, ask the wiki tooling for its vault path, or ask the owner; do not create pages elsewhere.
 2. Check its Phase, Next step and Blocked by against the repository and the wiki. If the page is missing, a required field is empty, or the page is stale, say so and run studio-start; do nothing else until it finishes, then continue with the original request. A page is stale when its phase, next step or blockers disagree with the repository or with what the owner says.
-3. Report in exactly three lines: `Phase: <phase>, tier: <tier>`; `Next step: <text>`; `Blocked by: <text or nothing>`. Then add a separate line: `Routed: <request type> -> <owner>`, naming the row you matched in step 4.
+3. Report in exactly three lines: `Phase: <phase>, tier: <tier>`; `Next step: <text>`; `Blocked by: <text or nothing>`. Then add a separate line: `Routed: <request type> -> <owner>`, naming the row you matched in step 4. `Blocked by:` names any blocker the answer then states; never print `nothing` above a stated blocker.
 
 For every request:
 

@@ -59,3 +59,7 @@ For a purpose that is not engine structure, quality or assets (asset craft, text
 ## Dependencies
 
 The wiki tooling (`wiki-master`, version 0.55.0 or later, for the validated `depends-on` field on backlog items) is a hard dependency: the state page, backlog, roadmap and decision records live in the project's wiki. Everything else in this map is optional; when it is missing, use the fallback chain.
+
+## Finding the wiki vault
+
+The wiki tooling's vault is the folder named by the `WIKI_MASTER_VAULT` environment variable, or the folder the tooling's own resolution reports (ask the tooling for its vault path). The project's pages are in `<vault>/wiki/authored/<slug>/`. [Entry](entry.md#find-the-wiki) gives the order in which to look.

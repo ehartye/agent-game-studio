@@ -32,7 +32,7 @@ In this table `Owner` is the responsible role. The human who owns the project is
 | Tooling cleanup | game-architect | owner | Artifact registry, instruction files | Audit proposal |
 | What to do next, or sprint contents | game-pm | - | Backlog, artifact registry | Sprint list with design artifacts confirmed ready |
 | Plan creation or revision | game-pm | - | Brief, pillars, backlog | Plan from the planning pass |
-| Scope change after G3 | game-pm | game-master | Backlog, pillars | Change request naming the cut |
+| Scope change after G3 | game-pm | game-master | Backlog, pillars | Change request as a decision record naming the cut, or `none` with the owner's reason, with game-master's fit ruling; the owner is asked to name the cut and approve |
 | Dialogue, item text, lore | game-writer | - | Narrative bible | Text plus glossary and canon updates |
 | Characters, levels, effects, marketing art | game-artist | game-master | Art bible | Asset plus provenance entry; game-master signs off fit on key assets |
 | Sound or music selection | game-artist | owner | Art bible | The owner's recorded pick |

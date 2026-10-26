@@ -18,7 +18,7 @@
     "expect": { "request": "Plan creation or revision", "owner": "game-pm", "then": "-", "readFirst": "brief, pillars, backlog", "output": "plan from the planning pass" } },
   { "id": "R09", "kind": "routing", "fixture": "release-ready", "prompt": "The designer wants to add a crafting system now.",
     "note": "Passes if the agent treats this as a scope change after G3 owned by game-pm, with game-master ruling on fit (crafting is a stated non-goal), and asks for a change request naming a cut.",
-    "expect": { "request": "Scope change after G3", "owner": "game-pm", "then": "game-master", "readFirst": "backlog, pillars", "output": "change request naming the cut" } },
+    "expect": { "request": "Scope change after G3", "owner": "game-pm", "then": "game-master", "readFirst": "backlog, pillars", "output": "change request as a decision record naming the cut, or none with the owner's reason, with game-master's fit ruling; the owner is asked to name the cut and approve" } },
   { "id": "R10", "kind": "routing", "fixture": "active-project", "prompt": "Write the lore blurb for the enemy patrols.",
     "note": "Reading the narrative bible is expected; its absence being noted is acceptable. The boss-fight version of this request stops correctly at design readiness (see R11); this prompt targets an item that is in the current sprint.",
     "expect": { "request": "Dialogue, item text, lore", "owner": "game-writer", "then": "-", "readFirst": "narrative bible", "output": "text plus glossary and canon updates" } },
