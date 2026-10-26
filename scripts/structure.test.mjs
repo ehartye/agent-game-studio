@@ -419,3 +419,41 @@ test('a backticked value after a status-like word belongs to a closed set', () =
   }
   assert.deepEqual(bad, []);
 });
+
+test('the reply starts with the report and the Routed line, in the skills and the instruction block', () => {
+  const FIRST = /If this reply has not yet started with the three-line report and the `Routed: <request type> -> <owner>` line \(see studio-start, Route the request\), start it that way\./;
+  for (const name of ['game-master', 'game-architect']) {
+    const body = readRel(`skills/${name}/SKILL.md`).split(/\r?\n/);
+    const first = body[body.findIndex((l) => l.startsWith('# ')) + 2];
+    assert.match(first, FIRST, `${name}: first line after the title`);
+  }
+  const route = section(readRel('skills/studio-start/SKILL.md'), 'Route the request');
+  assert.match(route, /BEGINS with the three-line report and the Routed line, before any narration/);
+  assert.match(route, /even when work was done/);
+  assert.match(route, /exact Request text/);
+  assert.match(readRel('references/templates/instruction-block.md'), /begins with the three-line report and the Routed line, before any narration/);
+  const entry = readRel('references/entry.md');
+  assert.match(section(entry, 'The Routed line'), /Anything else -> none/);
+  assert.match(section(entry, 'The Routed line'), /Joining an existing project -> studio-start/);
+  assert.match(section(entry, 'The Routed line'), /never invent a row name/i);
+});
+
+test('lookup answers never carry flags, commands, versions or timings, and an adopted rule becomes a recorded decision', () => {
+  for (const text of [section(readRel('references/entry.md'), 'Look up guidance'), readRel('references/plugin-map.md')]) {
+    assert.match(text, /never name flags, commands, version numbers or timings taken from the guidance/i);
+    assert.match(text, /at most ONE rule/i);
+    assert.match(text, /review standard in the same operation/);
+  }
+});
+
+test('adoption shows the diff itself and never records an owner review the owner did not give', () => {
+  const adoption = readRel('references/adoption.md');
+  const rule = 'show the diff itself in the reply; a summary of what would be added does not count';
+  assert.ok(adoption.includes(rule), 'adoption step 7');
+  assert.ok(readRel('references/instruction-files.md').includes(rule), 'instruction files');
+  for (const [name, text] of [['adoption', adoption], ['state page template', readRel('references/templates/state-page.md')], ['process', readRel('references/process.md')]]) {
+    assert.match(text, /proposed, owner review pending/, name);
+  }
+  assert.match(adoption, /never record an owner review, confirmation or acceptance the owner did not give/i);
+  assert.match(section(readRel('references/process.md'), 'Work loop'), /may create the backlog item as game-pm \(from the template, status `planned`, Fit line left to game-master's step\) and must not edit the roadmap by hand/);
+});

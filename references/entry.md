@@ -12,13 +12,20 @@ Find the project's slug in the agent instruction file. If none names it, use the
 
 Never hand-create wiki pages outside the wiki found by 1 or 2.
 
+## The Routed line
+
+The request type is the routing row's exact Request text and the owner is that row's Owner; never invent a row name. If no row fits, print `Routed: Anything else -> none`. Two cases of starting a project, fixed here:
+
+- Adopting a repo that already has code, documents or agent setup: `Routed: Joining an existing project -> studio-start`.
+- Bootstrapping an empty folder: `Routed: Anything else -> none`, then run Case B (bootstrap) in place of the row's open question.
+
 ## Look up guidance
 
 A question about how to build, run, verify, structure or measure the project, or which tool to use, needs the lookup in [the plugin map](plugin-map.md) even if it does not mention architecture. The record comes first:
 
 1. Do the lookup. If it names no usable guidance, use the fallback chain there.
 2. Write the record BEFORE composing the answer, even when nothing has been run: the "Engine guidance used" entry on the architecture page for structure and build questions; the quality evidence note for verification, run and measurement questions, with every claim `evidence: none` and its Guidance used line filled.
-3. Answer in a few sentences: the conclusion for this project and the next action. Do not list the guidance's commands, thresholds or procedures. You may adopt a rule from it as the project's own standard in one line that cites the guidance.
+3. Answer in a few sentences: the conclusion for this project and the next action. In chat, never name flags, commands, version numbers or timings taken from the guidance; say which skill and reference holds them. At most ONE rule may be adopted, in a sentence that cites the guidance; if adopted, write it into the architecture page's review standard in the same operation, so it is a decision and not chatter.
 
 ## Check or pass a gate
 

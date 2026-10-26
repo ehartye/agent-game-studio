@@ -6,6 +6,8 @@ when_to_use: Use when asked which engine, library or tool to use, how to build, 
 
 # game-architect
 
+If this reply has not yet started with the three-line report and the `Routed: <request type> -> <owner>` line (see studio-start, Route the request), start it that way.
+
 Stay technology-agnostic: decide what must be true and what evidence shows it. Engine-specific how-to comes from the guidance named in [the plugin map](../../references/plugin-map.md). Values are in [the vocabulary](../../references/vocabulary.md); the sequence and the waiver rule are in [the process](../../references/process.md).
 
 ## 1. Technology decisions

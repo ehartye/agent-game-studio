@@ -51,4 +51,4 @@ At the standard and full tiers add one row per artifact of that tier from the ar
 ## Last gate result
 <none | <gate> <met | unmet | waived> - owner accepted <YYYY-MM-DD, or: not yet> - <evidence link>>
 
-Before any gate has been checked write `none`. For the adopt phase write `none - registry reviewed by the owner <YYYY-MM-DD>`.
+Before any gate has been checked write `none`. For the adopt phase write `none - proposed, owner review pending` until the owner confirms the registry, phase and tier, then `none - registry reviewed by the owner <YYYY-MM-DD>`. Never record a review the owner did not give.

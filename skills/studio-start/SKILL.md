@@ -46,10 +46,10 @@ Follow [adoption](../../references/adoption.md) step by step. Never rename, over
 
 ## Route the request
 
-Applies after the Case A report, and after bootstrap or adoption if the original request was something else.
+Applies after the Case A report, and after bootstrap or adoption if the original request was something else. The reply to every game-project request BEGINS with the three-line report and the Routed line, before any narration, even when work was done; the report is the first thing in the final message.
 
 1. Read [decision routing](../../references/decision-routing.md) and pick the most specific row (its rule 1).
-2. After the three-line report, add a fourth, separate line: `Routed: <request type> -> <owner>`, using the row's exact Request and Owner text (for a status question: `Routed: Status -> game-pm`). If you stopped for a missing precondition, still print the line.
+2. After the three-line report, add a fourth, separate line: `Routed: <request type> -> <owner>`, using the row's exact Request text and its Owner (for a status question: `Routed: Status -> game-pm`); see [the Routed line](../../references/entry.md#the-routed-line). If you stopped for a missing precondition, still print the line.
 3. If the owner has a skill (game-master, game-architect), load it and follow it. Otherwise follow the row and the work loop in [the process](../../references/process.md), acting as that role; in a single-agent session you perform each role's step (the fit-verdict line is game-master's; step 8 updates are game-pm's).
 4. A how to build, run, verify, structure or measure question, or a which-tool question: do the lookup and write the record BEFORE composing the answer, then answer in a few sentences ([look up guidance](../../references/entry.md#look-up-guidance)).
 5. A request to check or pass a gate: [check or pass a gate](../../references/entry.md#check-or-pass-a-gate).
