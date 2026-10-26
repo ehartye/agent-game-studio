@@ -130,7 +130,7 @@ test('buildRun builds the argv array and the vault-isolating environment', () =>
   assert.deepEqual(a.slice(at + 1, at + 9), ['Read', 'Glob', 'Grep', 'Write(//out/S01-t1/project/**)', 'Edit(//out/S01-t1/project/**)', 'Skill', 'Bash(git *)', 'Bash(node *wiki-master*)']);
   assert.ok(!a.includes('Write') && !a.includes('Edit'), 'no unscoped write rules');
   const dt = a.indexOf('--disallowedTools');
-  assert.ok(dt > 0 && a.includes('Write(//real/vault/**)') && a.includes('Edit(//real/vault/**)') && a.includes('NotebookEdit(//real/vault/**)'));
+  assert.ok(dt > 0 && a.includes('Write(//real/vault/**)') && a.includes('Edit(//real/vault/**)') && a.includes('NotebookEdit(//real/vault/**)') && a.includes('Read(//real/vault/**)') && a.includes('Glob(//real/vault)') && a.includes('Grep(//real/vault)'));
   assert.deepEqual(a.filter((x, i) => a[i - 1] === '--add-dir'), ['/plug', '/cache']);
   assert.equal(a[a.indexOf('--max-budget-usd') + 1], '6');
   assert.ok(!a.includes('--model'));
@@ -215,13 +215,12 @@ test('confineWrites scopes Write and Edit to the project folder only', () => {
   ]);
 });
 
-test('vaultGuards deny file edits and shell access to the real vault folder', () => {
-  assert.deepEqual(vaultGuards(win('C:/data/.wiki-master-vault')), [
-    'Write(//c/data/.wiki-master-vault/**)',
-    'Edit(//c/data/.wiki-master-vault/**)',
-    'NotebookEdit(//c/data/.wiki-master-vault/**)',
-    'Bash(*.wiki-master-vault*)',
-  ]);
+test('vaultGuards deny edits, reads, searches and shell access to the real vault folder', () => {
+  const root = '//c/data/.wiki-master-vault';
+  const expected = [];
+  for (const tool of ['Write', 'Edit', 'NotebookEdit', 'Read', 'Glob', 'Grep']) expected.push(`${tool}(${root}/**)`, `${tool}(${root})`);
+  expected.push('Bash(*.wiki-master-vault*)');
+  assert.deepEqual(vaultGuards(win('C:/data/.wiki-master-vault')), expected);
   assert.deepEqual(vaultGuards(null), []);
 });
 
@@ -330,4 +329,16 @@ test('vaultSnapshot against a decoy repo sees new files individually, and a miss
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test('a denied read, search or listing of the vault is an attempt, not a touch', () => {
+  const raw = lines([
+    toolUse('g', 'Glob', { pattern: '**/*.md', path: VAULT }), denied('g'),
+    toolUse('r', 'Read', { file_path: VAULT + '/index.md' }), denied('r'),
+    toolUse('s', 'Grep', { pattern: 'x', path: VAULT }), denied('s'),
+  ]);
+  const none = { head: 'h', status: '' };
+  const v = evaluateVault({ texts: [raw], vault: VAULT, before: none, after: none, slugs: ['demo-game'] });
+  assert.equal(v.verdict, 'attempted');
+  assert.deepEqual(v.attempts.map((a) => [a.tool, a.denied]), [['Glob', true], ['Read', true], ['Grep', true]]);
 });

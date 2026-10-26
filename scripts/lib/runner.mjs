@@ -85,7 +85,9 @@ export function vaultGuards(vault) {
   if (!vault) return [];
   const scope = `${toRulePath(vault)}/**`;
   const name = vault.replaceAll('\\', '/').replace(/\/+$/, '').split('/').pop();
-  return [`Write(${scope})`, `Edit(${scope})`, `NotebookEdit(${scope})`, `Bash(*${name}*)`];
+  // The bare folder is needed too: Glob and Grep take a directory as their path, which the /** form does not match.
+  const file = ['Write', 'Edit', 'NotebookEdit', 'Read', 'Glob', 'Grep'].flatMap((tool) => [`${tool}(${scope})`, `${tool}(${toRulePath(vault)})`]);
+  return [...file, `Bash(*${name}*)`];
 }
 
 // Null when the vault is as it was; otherwise a sentence saying what changed.
