@@ -42,10 +42,7 @@ areas:
     why: runs the hygiene rules over the whole repository
   - path: scripts/lib/runner.mjs
     tier: critical
-    why: holds the guard that keeps test sessions away from the real wiki vault
-  - path: scripts/run-scenarios.mjs
-    tier: critical
-    why: starts real-host sessions; the vault guard depends on its arguments
+    why: holds the guard that keeps scenario test sessions away from the real wiki vault (test-only, not shipped use)
   - path: skills/**/*
     tier: standard
     why: the product; size limit and structure are checked
