@@ -20,3 +20,22 @@ When adding content to agent-game-studio's skills, do not re-create the content 
 - Run `node scripts/check.mjs` before committing; it must pass.
 - Skill files stay under 6500 bytes. Move detail into `references/`.
 - Never commit to `main`; use a branch or worktree and squash-merge.
+
+## Testing rules (agent-tests)
+
+- `.testing/risk.yml` says which areas are critical, standard or low. Read it before adding or changing tests.
+- One owner per invariant. Before adding a test, search for an existing test of the same behavior and extend it.
+- Test behavior at seams (public functions, inputs, persistence, transfers), not implementation details. Do not
+  assert on mocks alone, snapshot everything, or assert a value against itself.
+- Add old-format compatibility tests only for declared obligations. Current missing/invalid-input handling is
+  ordinary behavior and can need coverage even with no legacy consumers. The risk map decides.
+- Tests must not depend on the checkout: no fixed ports (use port 0), no fixed temp paths (use mkdtemp), no
+  absolute paths, no reading `.git` directly, no writes under the home directory.
+- Declare the lane in the file's first comment, before any import: `/** @lane merge */` (edit, merge, scheduled or
+  release). Tags are read only from that leading comment. If the test reaches code only through a subprocess or the
+  network, add `@subject <path>` for that code, as a path from the project root (`src/cli.ts`, not an import-style
+  `../src/cli.ts`, which is dropped). A test with no code subject gets `@risk <critical|standard|low>`.
+- For a bug fix, write the failing test first and watch it fail for the reported reason. For any new test, check that
+  it fails when the behavior it covers is broken.
+- While editing, run only the tests for the files you changed. Run the project's merge script before pushing. Do
+  not run the full suite after every change.

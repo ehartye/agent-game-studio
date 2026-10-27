@@ -1,0 +1,72 @@
+# agent-tests risk map. Confirm or edit, then commit it.
+# First matching area wins, so list specific areas before broad ones.
+# consumers: who depends on this code, and which compatibility obligations exist?
+# Current missing/invalid-input handling can need coverage without legacy consumers.
+phase: dev
+consumers: []
+weights:
+  wait: 1
+  agent: 1
+  ci: 1
+  churn: 1
+lanes:
+  edit:
+    runs: affected-files
+    trigger: agent-edit
+  merge:
+    runs: critical+standard
+    trigger: local-pre-push
+  scheduled:
+    runs: all
+    trigger: cron
+    os:
+      - ubuntu
+      - windows
+      - macos
+  release:
+    runs: all+clean-install
+    trigger: tag
+    os:
+      - ubuntu
+      - windows
+      - macos
+areas:
+  - path: scripts/lib/hygiene.mjs
+    tier: critical
+    why: keeps private terms out of the public repository
+  - path: scripts/lib/hygiene.test.mjs
+    tier: critical
+    why: tests the hygiene deny-lists
+  - path: scripts/hygiene.test.mjs
+    tier: critical
+    why: runs the hygiene rules over the whole repository
+  - path: scripts/lib/runner.mjs
+    tier: critical
+    why: holds the guard that keeps scenario test sessions away from the real wiki vault (test-only, not shipped use)
+  - path: skills/**/*
+    tier: standard
+    why: the product; size limit and structure are checked
+  - path: references/**/*
+    tier: standard
+    why: the product; structure and hygiene are checked
+  - path: .claude-plugin/**
+    tier: standard
+    why: manifest; version must match package.json and the README
+  - path: scripts/**
+    tier: standard
+    why: repository checks and scenario tests
+  - path: tests/scenarios/*.json
+    tier: standard
+    why: scenario definitions
+  - path: tests/scenarios/README.md
+    tier: standard
+    why: scoring rules the scenarios depend on
+  - path: tests/fixtures/**
+    tier: low
+    why: neutral demo project data
+  - path: tests/scenarios/results/**
+    tier: low
+    why: recorded results
+  - path: docs/**
+    tier: low
+    why: design history
