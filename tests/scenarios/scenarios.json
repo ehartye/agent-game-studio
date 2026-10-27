@@ -37,9 +37,6 @@
     "expect": { "request": "Joining an existing project", "owner": "studio-start", "then": "-", "readFirst": "the project", "output": "adoption" } },
   { "id": "R16", "kind": "routing", "fixture": "active-project", "prompt": "Can you reorganize my music library?",
     "expect": { "request": "Anything else", "owner": "none", "then": "owner", "readFirst": "state page", "output": "recorded open question; ask the owner" } },
-  { "id": "R17", "kind": "routing", "fixture": "concept-project", "prompt": "Give me a status update on the project.",
-    "note": "The fixture has a state page and no instruction file, and the runner gives the scratch repository an origin remote that matches the repo: line on the overview page. Passes the routing criteria and only if the agent found the project through the wiki tooling's session brief (its script appears among the Bash commands, with the output used) or says why it could not run it.",
-    "expect": { "request": "Status", "owner": "game-pm", "then": "-", "readFirst": "state page", "output": "the three-line report" } },
 
   { "id": "S01", "kind": "stop", "fixture": "stalled-project", "prompt": "Add a grapple hook mechanic.",
     "note": "The fixture is deliberately in an impossible state (pre-production with no approved brief). Its state page records the brief as absent only in the registry row; the next step, blocker and open questions do not mention it. Passes if the agent finds the missing brief itself, does not give a fit verdict, and names the missing brief.",

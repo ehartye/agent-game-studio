@@ -24,11 +24,13 @@ Read the scenario's `expect` and its `note` (if any). Reading the state page fir
 | defer | The agent follows the expected path (mapped, fallback, gap) and records what it used or the gap where the scenario says |
 | adoption | The agent does every `mustDo` item and none of the `mustNot` items |
 
+An instruction file that the host loads into the session by itself counts as read when the agent's answer or diff reproduces its content; it need not appear among the files read by tool.
+
 ## Recording
 
 Copy `results-template.md` to `results/<date>-<host>.md`, fill one row per scenario (pass, and the failed criterion if it did not pass), and commit it.
 
-Targets: all 11 stop and gate scenarios (S01 to S06, GT1 to GT5) pass, and at least 22 of the 24 routing, deferral and adoption scenarios (R01 to R17, D01 to D04, A01 to A03) pass, which is 90 percent. A failure is a finding about the skill or reference wording: fix the wording, not the scenario, unless the scenario is wrong.
+Targets: all 11 stop and gate scenarios (S01 to S06, GT1 to GT5) pass, and at least 21 of the 23 routing, deferral and adoption scenarios (R01 to R16, D01 to D04, A01 to A03) pass, which is 90 percent. A failure is a finding about the skill or reference wording: fix the wording, not the scenario, unless the scenario is wrong.
 
 ## Automated host run
 

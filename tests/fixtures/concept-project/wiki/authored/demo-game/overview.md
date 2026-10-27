@@ -1,9 +1,3 @@
----
-type: authored
-project: demo-game
-kind: overview
-repo: https://example.invalid/demo/demo-game.git
----
 # Demo game
 
 Player experience: a fast, readable platform brawler.

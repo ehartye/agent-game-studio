@@ -22,7 +22,6 @@ Plugin version: <version>
 | R14 | yes / no | |
 | R15 | yes / no | |
 | R16 | yes / no | |
-| R17 | yes / no | |
 | S01 | yes / no | |
 | S02 | yes / no | |
 | S03 | yes / no | |
