@@ -523,3 +523,16 @@ test('the README tells a reader how to install the plugin from its marketplace, 
   assert.equal(pkg.version, manifest.version, 'package.json and plugin.json versions agree');
   assert.ok(readme.includes(`Early (${manifest.version})`), 'README states the current version');
 });
+
+test('evidence rules: versions are named from a reading, warm-up runs are declared in advance, and the minimal tier says who classes a defect', () => {
+  const template = readRel('references/templates/quality-evidence.md');
+  assert.match(template, /name each version from a reading/);
+  assert.match(template, /a version taken from a label or an unchecked file is reported/);
+  const process = section(readRel('references/process.md'), 'Evidence rules');
+  assert.match(process, /warm-up run may precede the evidence run only when it is declared before it starts/);
+  assert.match(process, /a failure in it stays a failure/);
+  assert.match(process, /no further run happens without the owner's decision/);
+  const vocabulary = readRel('references/vocabulary.md');
+  assert.match(vocabulary, /At the minimal tier game-quality proposes the class and the owner can change it/);
+  assert.match(vocabulary, /a failing step of the project's declared delivery gate is `critical` until the owner says otherwise/);
+});

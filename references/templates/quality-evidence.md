@@ -17,7 +17,7 @@ Check owner: <role; at G2 list both check owners and write one Claims section pe
 Guidance used: <the verification guidance consulted, for what question, and the date; name it, do not copy from it; or: none>
 
 ## Claims
-- <claim> - evidence: <observed | reported | none> - <what was run, how, on what build, and the result> - <link or path>
+- <claim> - evidence: <observed | reported | none> - <what was run, how, on what build, and the result; name each version from a reading (a log line, the program's own report or a command's output), because a version taken from a label or an unchecked file is reported> - <link or path>
 
 ## Minimal-tier substitutes
 - <art bible | test strategy | performance budgets | locked text | asset provenance audit> - evidence: <observed | reported | none> - <what was checked, how, and the observed result>

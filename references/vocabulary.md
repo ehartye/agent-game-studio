@@ -75,7 +75,7 @@ Closed value sets. Use these values exactly, in this spelling. A value that is n
 
 - **Sprint:** the backlog items game-pm lists under Current sprint on the state page. game-pm chooses its size and closes it when each item is `shipped`, `blocked` or back to `planned`.
 - **Feature complete:** every backlog item is `shipped` or `dropped`.
-- **Critical defect:** a defect classed critical in the quality evidence note. At standard tier and above, classes come from the severity scale in the test strategy.
+- **Critical defect:** a defect classed critical in the quality evidence note. At standard tier and above, classes come from the severity scale in the test strategy. At the minimal tier game-quality proposes the class and the owner can change it: a failing step of the project's declared delivery gate is `critical` until the owner says otherwise, and the note says the class is a proposal.
 - **Production plan:** the roadmap and the backlog items for the next gate, produced by the planning pass.
 - **Cut:** a named backlog item, or a named part of one, that is set `dropped` if the change is approved.
 - **Stale sign-off:** a sign-off made against a contract or version that has since changed. Set the registry status to `draft` and re-check it.

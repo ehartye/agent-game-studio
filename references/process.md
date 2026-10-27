@@ -49,6 +49,7 @@ A routing row's Required output is the output of the first step its owner perfor
 - A gate passes only on `observed` evidence for every behavioral claim.
 - Evidence names what was run, how, and the result, and links to the artifact (output, screenshot, receipt).
 - An agent's own assessment is `reported`, never `observed`.
+- A warm-up run may precede the evidence run only when it is declared before it starts. Record it with its own result and label it not evidence. The evidence run is one run at one named revision; a failure in it stays a failure, and no further run happens without the owner's decision.
 - For a high-stakes gate (G2, G5), offer to run the second-opinion skill the plugin map names, if it names one, with the owner's agreement, because it sends project content to another provider. Record its output as `reported` evidence: it never replaces `observed` evidence.
 
 ## Waivers
