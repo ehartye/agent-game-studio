@@ -16,7 +16,7 @@ Stay technology-agnostic: decide what must be true and what evidence shows it. E
 2. State the need as a question, the constraints, and at least two options. If only one exists, record `defer` as the second.
 3. Label each claim that matters by how it was established: tested here, documented (cite the source), or general knowledge. Never present documented or general claims as tested.
 4. Write [a decision record](../../references/templates/decision-record.md): options, outcome, consequences good and bad, decision-makers. A record with no costs is incomplete.
-5. Set Status `accepted` when the decision is within your routing row. Leave it `proposed` and put the choice to the owner when it changes a pillar, a non-goal, cost or licence, or when you are unsure.
+5. Set Status `accepted` when the decision is within your routing row. Leave it `proposed` and put the choice to the owner when it changes a pillar, a non-goal, cost or licence, or when you are unsure. Write the record in the same turn either way: an open question for the owner is a reason for `proposed`, never for writing no record.
 6. For an engine or stack choice, look up "Engine choice" in the plugin map first.
 
 ## 2. Engine guidance for architecture questions

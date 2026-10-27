@@ -506,3 +506,10 @@ test('adoption lets a project with a long recorded history get its whole brief p
   assert.match(text, /long history/i);
   assert.match(text, /one pass/i);
 });
+
+test('the routing table makes the required output a same-turn product, never an offer or a wait', () => {
+  const routing = readRel('references/decision-routing.md');
+  assert.match(routing, /Produce the Required output in the same turn/);
+  assert.match(routing, /write it as `proposed` and put the question to the owner/);
+  assert.match(readRel('skills/game-architect/SKILL.md'), /an open question for the owner is a reason for `proposed`, never for writing no record/);
+});

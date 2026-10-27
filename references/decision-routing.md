@@ -1,6 +1,6 @@
 # Decision routing
 
-Every request has exactly one owner. Match the request to a row, read the documents named in Read first and any document the row links, and produce the named output. Process and sequence are in [the process](process.md).
+Every request has exactly one owner. Match the request to a row, read the documents named in Read first and any document the row links, and produce the named output. Produce the Required output in the same turn: offering to write it, or holding it for the owner's answer, is not producing it. When an answer is still needed, write it as `proposed` and put the question to the owner. Process and sequence are in [the process](process.md).
 
 ## Roles
 
