@@ -513,3 +513,13 @@ test('the routing table makes the required output a same-turn product, never an 
   assert.match(routing, /write it as `proposed` and put the question to the owner/);
   assert.match(readRel('skills/game-architect/SKILL.md'), /an open question for the owner is a reason for `proposed`, never for writing no record/);
 });
+
+test('the README tells a reader how to install the plugin from its marketplace, and the version is the same everywhere', () => {
+  const readme = readRel('README.md');
+  assert.match(readme, /\/plugin marketplace add ehartye\/hartye-claude-plugins/);
+  assert.match(readme, /\/plugin install agent-game-studio@hartye-plugins/);
+  const manifest = JSON.parse(readRel('.claude-plugin/plugin.json'));
+  const pkg = JSON.parse(readRel('package.json'));
+  assert.equal(pkg.version, manifest.version, 'package.json and plugin.json versions agree');
+  assert.ok(readme.includes(`Early (${manifest.version})`), 'README states the current version');
+});

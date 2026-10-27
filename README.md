@@ -2,7 +2,7 @@
 
 Process skills and references that tell an AI agent which phase a game project is in, what comes next, who decides each question, and what evidence passes each gate. It is technology-agnostic and works for new projects and for adopting one that already exists. The shipped plugin is Markdown and JSON with no runtime; `scripts/` holds the repository's own tests and is not used at runtime.
 
-Early (0.1.0). Three skills.
+Early (0.1.1). Three skills.
 
 ## What it gives the agent
 
@@ -31,6 +31,8 @@ The other roles (project manager, quality, writer, artist, designer) are followe
 ## Install
 
 Install the plugin with your agent host's plugin mechanism; the [host adapters](references/hosts/README.md) say how for each host ([Claude Code](references/hosts/claude-code.md), or [generic](references/hosts/generic.md) for any other).
+
+On [Claude Code](references/hosts/claude-code.md): `/plugin marketplace add ehartye/hartye-claude-plugins`, then `/plugin install agent-game-studio@hartye-plugins`.
 
 ## Requires
 
