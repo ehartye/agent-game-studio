@@ -481,10 +481,14 @@ test('a delegation never approves an edit to an existing file; Last verified nee
   assert.match(frontmatter(readRel('skills/studio-start/SKILL.md')).data.when_to_use, /are we ready to ship.*can we pass G1 to G5.*is it done/i);
 });
 
-test('the session brief is mapped, tried first when finding the wiki, named in the instruction block and bound at adoption', () => {
+test('the session brief is mapped, used to find the wiki when no instruction file names the project, named in the instruction block and bound at adoption', () => {
   assert.match(readRel('references/plugin-map.md'), /\| Project state brief \| any \|[^\n]*session-brief[^\n]*0\.73\.0/);
   assert.match(section(readRel('references/entry.md'), 'Find the wiki'), /session brief/i);
   assert.match(readRel('references/templates/instruction-block.md'), /session brief/i);
+  // The brief is for finding the project when its page path is not known; it must not be mandated when the block already names the page.
+  assert.match(readRel('references/templates/instruction-block.md'), /not at that path|do not know which wiki project/i);
+  assert.doesNotMatch(readRel('references/templates/instruction-block.md'), /session brief command, run it from this repository first/);
+  assert.match(section(readRel('references/entry.md'), 'Find the wiki'), /no instruction file (names|gives)/i);
   assert.match(readRel('references/adoption.md'), /`repo:`/);
   assert.match(readRel('references/plugin-map.md'), /does not make the state page stale/);
 });

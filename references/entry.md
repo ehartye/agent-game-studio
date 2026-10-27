@@ -4,7 +4,7 @@ Detail for the studio-start skill: where the wiki is, how to answer a how-to que
 
 ## Find the wiki
 
-First run the wiki tooling's session brief from the project's repository, as [the plugin map](plugin-map.md#finding-the-wiki-vault) says. When it names the project, use that slug and folder, and its three lines are the report. When it says no project is bound, or the tooling has no session brief, find the slug in the agent instruction file; if none names it, use the project folder name. When the owner says to use your judgement, state the assumption (slug = the project folder name) and continue; do not ask again. Then look in this order:
+Find the project's slug and its state page path in the agent instruction file. When no instruction file names the project, run the wiki tooling's session brief from the project's repository, as [the plugin map](plugin-map.md#finding-the-wiki-vault) says: when it names the project, use that slug and folder, and its three lines are the report. When it says no project is bound, or the tooling has no session brief, use the project folder name. When the owner says to use your judgement, state the assumption (slug = the project folder name) and continue; do not ask again. Then look in this order:
 
 1. `wiki/authored/<slug>/` in the project root.
 2. The vault of the wiki tooling named in [the plugin map](plugin-map.md), found as the plugin map says. If the vault has no folder for the project, bootstrap or adoption creates it there.
