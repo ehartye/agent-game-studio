@@ -29,7 +29,7 @@ Keep [the architecture page](../../references/templates/architecture.md) true to
 
 1. If a stack decision is accepted and the page is absent, create it from the template.
 2. Describe only what exists; planned work goes in the backlog.
-3. When page and code disagree, correct the page to match the code, say so, and update Verified in the same operation.
+3. When page and code disagree, correct the page to match the code (the architecture page and the decision records you draft are your own documents; this needs no separate approval), say so, name every replaced line, and update Verified in the same operation.
 4. If a decision record or the brief contradicts the code, open a question; a decision record follows only if the owner changes the decision.
 
 ## 4. Tool readiness sign-off
@@ -65,5 +65,5 @@ Instruction-file changes, tooling removals, waivers, and anything routing assign
 
 - No `accepted` decision record: no technology change.
 - No observed run: no tool-readiness sign-off.
-- No owner approval: no change to instruction files, skills or tooling. A delegation such as "use your judgement" never approves an edit to an existing file or a removal; show the diff and wait ([instruction files](../../references/instruction-files.md)).
+- No owner approval: no change to instruction files, skills or tooling. A delegation such as "use your judgement" never approves an edit to an existing file or a removal; show the diff and wait ([instruction files](../../references/instruction-files.md)). This guards files other roles or the owner own; your own documents follow section 3.
 - A question with no engine guidance available: apply the agnostic requirements, record an open question, and raise the gap as the fallback chain says.

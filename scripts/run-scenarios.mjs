@@ -37,6 +37,8 @@ function prepareProject(dir, fixture) {
   git(dir, 'config', 'user.email', 'scenario-runner@example.invalid');
   git(dir, 'config', 'core.autocrlf', 'false');
   git(dir, 'config', 'commit.gpgsign', 'false');
+  // The fixtures' overview pages carry a repo: line with this URL, so the wiki tooling's session brief can bind the project.
+  git(dir, 'remote', 'add', 'origin', 'https://example.invalid/demo/demo-game.git');
   git(dir, 'add', '-A');
   git(dir, 'commit', '-q', '-m', 'baseline');
 }

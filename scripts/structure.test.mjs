@@ -480,3 +480,25 @@ test('a delegation never approves an edit to an existing file; Last verified nee
   assert.ok(readRel('references/entry.md').includes(GATE), 'entry');
   assert.match(frontmatter(readRel('skills/studio-start/SKILL.md')).data.when_to_use, /are we ready to ship.*can we pass G1 to G5.*is it done/i);
 });
+
+test('the session brief is mapped, tried first when finding the wiki, named in the instruction block and bound at adoption', () => {
+  assert.match(readRel('references/plugin-map.md'), /\| Project state brief \| any \|[^\n]*session-brief[^\n]*0\.73\.0/);
+  assert.match(section(readRel('references/entry.md'), 'Find the wiki'), /session brief/i);
+  assert.match(readRel('references/templates/instruction-block.md'), /session brief/i);
+  assert.match(readRel('references/adoption.md'), /`repo:`/);
+  assert.match(readRel('references/plugin-map.md'), /does not make the state page stale/);
+});
+
+test('the architect corrects its own documents and names every replaced line, while approval still guards instruction files', () => {
+  const text = readRel('skills/game-architect/SKILL.md');
+  assert.match(text, /architecture page and the decision records you draft/);
+  assert.match(text, /name every replaced line/i);
+  assert.match(text, /No owner approval: no change to instruction files, skills or tooling/);
+  assert.match(text, /A delegation such as "use your judgement" never approves an edit to an existing file/);
+});
+
+test('adoption lets a project with a long recorded history get its whole brief proposed in one pass', () => {
+  const text = readRel('references/adoption.md');
+  assert.match(text, /long history/i);
+  assert.match(text, /one pass/i);
+});

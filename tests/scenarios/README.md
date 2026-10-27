@@ -28,7 +28,7 @@ Read the scenario's `expect` and its `note` (if any). Reading the state page fir
 
 Copy `results-template.md` to `results/<date>-<host>.md`, fill one row per scenario (pass, and the failed criterion if it did not pass), and commit it.
 
-Targets: all 11 stop and gate scenarios (S01 to S06, GT1 to GT5) pass, and at least 21 of the 23 routing, deferral and adoption scenarios (R01 to R16, D01 to D04, A01 to A03) pass, which is 90 percent. A failure is a finding about the skill or reference wording: fix the wording, not the scenario, unless the scenario is wrong.
+Targets: all 11 stop and gate scenarios (S01 to S06, GT1 to GT5) pass, and at least 22 of the 24 routing, deferral and adoption scenarios (R01 to R17, D01 to D04, A01 to A03) pass, which is 90 percent. A failure is a finding about the skill or reference wording: fix the wording, not the scenario, unless the scenario is wrong.
 
 ## Automated host run
 

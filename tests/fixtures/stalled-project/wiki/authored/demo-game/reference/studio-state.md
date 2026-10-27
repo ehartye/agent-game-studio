@@ -7,10 +7,10 @@ pre-production
 minimal
 
 ## Next step
-Write the game brief (game-master), then close the G2 evidence.
+Close the G2 evidence (game-quality).
 
 ## Blocked by
-G1 brief is absent
+nothing
 
 ## Current sprint
 none
@@ -31,7 +31,7 @@ none
 ## Open questions
 | Question | Owner | Must be answered by | Status |
 |---|---|---|---|
-| Where is the game brief? | game-master | G1 | open |
+| Which collision approach does the stack use? | game-architect | G2 | open |
 
 ## Last gate result
 none

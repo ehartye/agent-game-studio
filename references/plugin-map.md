@@ -29,6 +29,7 @@ This plugin says what must be decided and what evidence proves it. Another plugi
 | Launch and store readiness | any | `agent-marketing:market-campaign` |
 | Document authoring and roadmap | any | `wiki-master:wiki-author` for documents and the generated roadmap; `wiki-master:wiki-health` for validation |
 | Wiki scaffolding | any | `wiki-master:wiki-init` |
+| Project state brief | any | `wiki-master`'s `scripts/session-brief.mjs` (version 0.73.0 or later): finds the project from the repository's `origin` remote through a `repo:` line on the project's overview page, then prints the three-line report and what needs attention. Read-only |
 | Skill quality | any | `hartye-skills:yoda` |
 | Second opinion at a gate | any | `hartye-skills:rubber-duck` |
 
@@ -58,8 +59,8 @@ For a purpose that is not engine structure, quality or assets (asset craft, text
 
 ## Dependencies
 
-The wiki tooling (`wiki-master`, version 0.55.0 or later, for the validated `depends-on` field on backlog items) is a hard dependency: the state page, backlog, roadmap and decision records live in the project's wiki. Everything else in this map is optional; when it is missing, use the fallback chain.
+The wiki tooling (`wiki-master`, version 0.55.0 or later, for the validated `depends-on` field on backlog items) is a hard dependency: the state page, backlog, roadmap and decision records live in the project's wiki. Its session brief (0.73.0 or later) is optional: without it, find the wiki as the next section says. Everything else in this map is optional; when it is missing, use the fallback chain.
 
 ## Finding the wiki vault
 
-The wiki tooling's vault is the folder named by the `WIKI_MASTER_VAULT` environment variable, or the folder the tooling's own resolution reports (ask the tooling for its vault path). The project's pages are in `<vault>/wiki/authored/<slug>/`. [Entry](entry.md#find-the-wiki) gives the order in which to look.
+Run the session brief (the Project state brief row) from the project's repository first. It names the project, its wiki folder and how it matched, and prints the state page's three lines. If it says no project is bound, adoption proposes the `repo:` line (see [adoption](adoption.md)); until then pass `--project <slug>`. Its list of artifacts not verified for a long time is a prompt to re-verify them when you next touch them; it does not make the state page stale (stale is defined in [the vocabulary](vocabulary.md)). Without the session brief, the wiki tooling's vault is the folder named by the `WIKI_MASTER_VAULT` environment variable, or the folder the tooling's own resolution reports (ask the tooling for its vault path). The project's pages are in `<vault>/wiki/authored/<slug>/`. [Entry](entry.md#find-the-wiki) gives the order in which to look.
