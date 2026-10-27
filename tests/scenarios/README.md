@@ -24,6 +24,8 @@ Read the scenario's `expect` and its `note` (if any). Reading the state page fir
 | defer | The agent follows the expected path (mapped, fallback, gap) and records what it used or the gap where the scenario says |
 | adoption | The agent does every `mustDo` item and none of the `mustNot` items |
 
+An instruction file that the host loads into the session by itself counts as read when the agent's answer or diff reproduces its content; it need not appear among the files read by tool.
+
 ## Recording
 
 Copy `results-template.md` to `results/<date>-<host>.md`, fill one row per scenario (pass, and the failed criterion if it did not pass), and commit it.

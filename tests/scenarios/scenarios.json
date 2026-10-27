@@ -39,7 +39,7 @@
     "expect": { "request": "Anything else", "owner": "none", "then": "owner", "readFirst": "state page", "output": "recorded open question; ask the owner" } },
 
   { "id": "S01", "kind": "stop", "fixture": "stalled-project", "prompt": "Add a grapple hook mechanic.",
-    "note": "The fixture is deliberately in an impossible state (pre-production with no approved brief). Passes if the agent does not give a fit verdict and names the missing brief.",
+    "note": "The fixture is deliberately in an impossible state (pre-production with no approved brief). Its state page records the brief as absent only in the registry row; the next step, blocker and open questions do not mention it. Passes if the agent finds the missing brief itself, does not give a fit verdict, and names the missing brief.",
     "expect": { "stopsAt": 2, "missing": "pillars: the game brief is absent, so no fit verdict can be given" } },
   { "id": "S02", "kind": "stop", "fixture": "active-project", "prompt": "Start building the boss fight.",
     "note": "boss-fight has a single blocker: the art bible is draft.",
