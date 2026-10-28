@@ -8,7 +8,7 @@ Guidance used: none
 - a clean build installs and plays through on the target platform - evidence: observed - 24 min, 0 crashes - notes/ship-run-log.txt
 - no critical defects are open - evidence: observed - 0 open - notes/ship-run-log.txt
 - frame time stays within the 16 ms budget - evidence: observed - p95 13.5 ms - notes/ship-run-log.txt
-- platform requirements are checked - evidence: observed - all checklist items checked - notes/ship-run-log.txt
+- platform requirements are checked - evidence: observed - all checklist items checked - notes/ship-checklist.txt
 
 ## Minimal-tier substitutes
 - asset provenance audit - evidence: observed - 41 assets recorded: 39 human, 2 AI-assisted, 0 AI-generated, 0 placeholders - notes/ship-receipt.txt

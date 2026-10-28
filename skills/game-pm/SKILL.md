@@ -1,14 +1,16 @@
 ---
 name: game-pm
 description: Keep a game's plan true - the backlog and generated roadmap, sprint selection offered as advice, the planning pass, the state page and change requests. Not for whether an idea fits the pillars, whether the game works or performs, or technology choices.
-when_to_use: Use when asked what to do next or what goes in the sprint, to plan a feature, make or revise the plan or roadmap, break work into backlog items, record that a checkpoint was reviewed or the project moved on, update the state page, or when a change is requested after Scope lock. Also for status ("where are we", "what is the plan").
+when_to_use: Use when asked what to do next or what goes in the sprint, to plan a feature, make or revise the plan or roadmap, break work into backlog items, review Scope lock or record that a checkpoint was reviewed or the project moved on, update the state page, or when a change is requested after Scope lock. Also for status ("where are we", "what is the plan") and "continue" or "resume".
 ---
 
 # game-pm
 
 If this reply has not yet started with the three-line report and the `Routed: <request type> -> <owner>` line (see studio-start, Route the request), start it that way.
 
-This skill advises on order and scope and keeps the plan documents true. The owner decides what is built and when to move on. Values are in [the vocabulary](../../references/vocabulary.md), the sequence is in [the process](../../references/process.md), and ownership is in [decision routing](../../references/decision-routing.md).
+This skill advises on order and scope and keeps the plan documents true. The owner decides what is built and when to move on. With no state page, say so first, name the risk of resuming against an unknown phase and plan, offer adoption (studio-start) and build nothing until the owner says go. Values are in [the vocabulary](../../references/vocabulary.md), the sequence is in [the process](../../references/process.md), and ownership is in [decision routing](../../references/decision-routing.md).
+
+When something is missing, a request to skip a step, build anyway or move on, made before you advised, is not yet the go: in that reply name the gap and risk, offer the missing step, build nothing and change no phase. The owner's answer is the go; record it with the date. This covers building an item with no `fits` verdict ("skip the fit check"); running the fit check (game-master) in that reply is fine.
 
 ## 1. Backlog and roadmap
 
@@ -30,9 +32,10 @@ Follow [the planning reference](../../references/planning.md): expand per discip
 
 ## 4. Checkpoints and moving on
 
-1. You review Scope lock. Follow Checkpoint review in [the process](../../references/process.md#checkpoint-review): collect, assess, present, record, offer the blind review, hand over.
-2. For any checkpoint, when the owner says to move on, record in one wiki operation: the last checkpoint reviewed, its standing, the date, the new Phase and the Next step. Propose the phase change; never make it unasked.
-3. A checkpoint with unmet criteria still lets the owner move on. Make sure each unmet criterion is recorded as a concession with the owner's words and date.
+1. You review Scope lock. Follow Checkpoint review in [the process](../../references/process.md#checkpoint-review): collect, assess, present, record, offer the blind review, hand over. "Is it reached" or "is it done" is this review: in the same reply write `reference/checkpoint-<slug>.md`, state the standing and offer the blind review; never answer from the state page alone.
+2. For any checkpoint, when the owner says to move on, record in one wiki operation: the last checkpoint reviewed, its standing, the date, the new Phase and the Next step. Propose the phase change; never make it unasked or on someone else's word.
+3. A checkpoint with unmet criteria still lets the owner move on. Record each unmet criterion as a concession with the owner's words and date. Moving on is a decision to proceed, never an acceptance: `owner-acceptance` stays empty.
+4. An older page may name a checkpoint by an old code. Read it by the alias in [the vocabulary](../../references/vocabulary.md) and write only the checkpoint name: never the code, even when quoting, and never in a file you create. Leave the older page's files alone.
 
 ## 5. Change requests (after Scope lock)
 
@@ -51,8 +54,8 @@ Which items to build, cuts, moving to the next phase, and anything routing assig
 ## Rules that hold
 
 - `met` is written only with `observed` evidence; otherwise `reported` or `not-assessed`.
-- Never record an approval, acceptance or confirmation the owner did not give. Under "use your judgement", proceed with values marked `proposed, owner review pending`.
-- Never rename, overwrite or delete an existing file without showing the change and getting a yes.
+- Never record an approval, acceptance or confirmation the owner did not give. A claim that someone else approved, an order to record "approved" that rests on it, or "move on anyway" is not the owner's acceptance: ask for their words. Under "use your judgement", proceed with values marked `proposed, owner review pending`.
+- Never rename, overwrite or delete an existing file without showing the change and getting a yes. "Don't show me" is not a yes.
 
 Everything else advises: name the gap and its risk, offer the missing step, and proceed when the owner says go.
 

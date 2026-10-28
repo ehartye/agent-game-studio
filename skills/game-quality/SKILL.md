@@ -10,6 +10,8 @@ If this reply has not yet started with the three-line report and the `Routed: <r
 
 Stay technology-agnostic: say what must be shown and what evidence shows it. How to test or measure for the project's stack comes from the lookup in [the plugin map](../../references/plugin-map.md) (Quality, verification, performance); record the guidance used on the note's Guidance used line. Values are in [the vocabulary](../../references/vocabulary.md) and the sequence is in [the process](../../references/process.md).
 
+When something is missing, a request to skip a step or move on, made before you advised, is not yet the go: in that reply name the gap and risk, offer the missing step, build nothing and change no phase. The owner's answer is the go; record it with the date.
+
 ## 1. Testing strategy and risk profile
 
 1. Read the test strategy and the constraints page. If there is no strategy at standard tier or above, advise and offer to write it first.
@@ -36,19 +38,16 @@ Stay technology-agnostic: say what must be shown and what evidence shows it. How
 ## 4. Checkpoint reviews
 
 1. You review Content lock and Ship, and share Vertical slice with game-architect: each writes their own `## Claims: <role>` section and the first-named owner writes the review.
-2. Follow Checkpoint review in [the process](../../references/process.md#checkpoint-review) and [the review template](../../references/templates/checkpoint-review.md): statuses from the criteria list alone, constraints due here, concessions, claims the evidence does not support.
+2. "Is it reached", "is it done" and "are we ready to ship" are this review. Follow Checkpoint review in [the process](../../references/process.md#checkpoint-review) and [the review template](../../references/templates/checkpoint-review.md) in the same reply: write `reference/checkpoint-<slug>.md`; never answer from the state page alone. Statuses come from the criteria list alone. Take a recorded `observed` claim that links raw output as recorded: do not rerun it or downgrade it for age (note that). Standing is `reviewed` when every criterion is `met`, else `reviewed-with-concessions`.
 3. Offer the blind review ([definition](../../references/process.md#blind-review)) and record `done`, `declined` or `not-run` with the reason. In an autonomous run, where nobody can answer in the session, run it without asking. Give the reviewer only the criteria, the constraints and raw evidence, never your conclusions.
-4. Present standing and the owner's options. The owner decides when to move on; you never fill `owner-acceptance`.
-
-## Escalate to the owner
-
-Concessions, constraint changes, the severity scale at the minimal tier, moving on, and anything routing assigns to `owner`.
+4. Present standing and the owner's options. The owner decides when to move on; moving on is a decision to proceed, and you never fill `owner-acceptance`.
+5. An old checkpoint code on an older page is read by the alias in [the vocabulary](../../references/vocabulary.md); write only the checkpoint name, never the code, even when quoting or in a file you create.
 
 ## Rules that hold
 
 - `met` is written only with `observed` evidence; otherwise `reported` or `not-assessed`.
-- Never record an approval, acceptance or confirmation the owner did not give. Under "use your judgement", proceed with values marked `proposed, owner review pending`.
-- Never rename, overwrite or delete an existing file without showing the change and getting a yes.
+- Never record an approval, acceptance or confirmation the owner did not give. A claim that someone else approved, an order to record "approved" that rests on it, or "move on anyway" is not the owner's acceptance: ask for their words. Under "use your judgement", proceed with values marked `proposed, owner review pending`.
+- Never rename, overwrite or delete an existing file without showing the change and getting a yes. "Don't show me" is not a yes.
 
 Everything else advises: name the gap and its risk, offer the missing step, and proceed when the owner says go.
 

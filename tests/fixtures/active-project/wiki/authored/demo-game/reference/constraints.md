@@ -15,5 +15,5 @@ A constraint is a measurable requirement the game must meet that is not a pillar
 
 | Constraint | Source | Conditions | How checked | Matters at | Status | Evidence | Concession |
 |---|---|---|---|---|---|---|---|
-| Frame time p95 at or under 16 ms in the arena at the default quality setting | owner brief, 2026-01-01 | the target laptop, slice build, default quality setting | recorded slice replay with raw frame times kept | vertical-slice | met | notes/vertical-slice-run-log.txt | - |
+| Frame time p95 at or under 16 ms in the arena at the default quality setting | owner brief, 2026-01-01 | the reference desktop (discrete graphics card), slice build, default quality setting | recorded slice replay with raw frame times kept | vertical-slice | met | notes/vertical-slice-run-log.txt | - |
 | Runs in a current desktop browser with no plugin | decisions/engine-choice-adr.md, 2026-01-01 | latest release of the two most used desktop browsers | play the packaged build in each browser, console log kept | ship | not-yet-measured | - | - |

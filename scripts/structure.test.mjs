@@ -88,6 +88,12 @@ test('every skill has matching frontmatter, a routing description, links to a re
     assert.equal(fm.data.name, name, `${name}: name`);
     assert.ok((fm.data.description ?? '').length >= 60, `${name}: description`);
     assert.match(fm.data.when_to_use ?? '', /^Use /, `${name}: when_to_use starts with "Use "`);
+    // A plain YAML value holding a colon and a space is a parse error, and the host then drops the skill.
+    const lines = text.split(/\r?\n/);
+    for (const line of lines.slice(1, lines.indexOf('---', 1))) {
+      const value = line.replace(/^[A-Za-z_][\w-]*:\s*/, '');
+      if (!/^["']/.test(value)) assert.ok(!/: | #/.test(value), `${name}: an unquoted frontmatter value must not contain ": " or " #": ${line.slice(0, 40)}`);
+    }
     assert.ok(links(text).some((l) => l.target.includes('references/')), `${name}: links to a reference`);
     assert.ok(!section(text, 'Stop rules'), `${name}: the Stop rules section is gone`);
     const rules = section(text, 'Rules that hold');

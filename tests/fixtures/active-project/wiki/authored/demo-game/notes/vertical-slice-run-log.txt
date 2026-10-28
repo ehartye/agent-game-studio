@@ -1,3 +1,4 @@
+machine: reference desktop (discrete graphics card)
 slice playthrough: 312 s, 0 crashes
 frame time p95: 14.2 ms (budget 16 ms)
 art check: placeholder sprites share one silhouette rule (readable at 1x)

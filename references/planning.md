@@ -64,7 +64,7 @@ Stages, in order, written exactly as these values:
 7. `in-context-signoff`
 8. `locked`
 
-An item with no art is `not-applicable`. In the minimal tier, record the stage in the Art stage section of the backlog item, using the values in [the vocabulary](vocabulary.md). game-artist sets the stages up to `craft-review`, then `integrated` and `locked`; game-master sets `isolated-signoff` and `in-context-signoff` for key visuals; the owner's pick sets them for sound and music. Each sign-off adds a Signed line naming the version signed. A sign-off made against a contract or version that has since changed is stale: return the Art stage to `craft-review` and re-check it. Craft checklists belong to the asset plugins named in [the plugin map](plugin-map.md); do not restate them here.
+An item with no art is `not-applicable`. In the minimal tier, record the stage in the Art stage section of the backlog item, using the values in [the vocabulary](vocabulary.md). game-artist sets the stages up to `craft-review`, then `integrated` and `locked`; game-master sets `isolated-signoff` and `in-context-signoff` for key visuals; the owner's pick sets them for sound and music. Each sign-off adds a line `Signed: <stage> - <version or build signed> - <YYYY-MM-DD>`; with no `ready` art bible, game-master signs off on pillar fit only and says so in that line. A sign-off made against a contract or version that has since changed is stale: return the Art stage to `craft-review` and re-check it. Craft checklists belong to the asset plugins named in [the plugin map](plugin-map.md); do not restate them here.
 
 | Asset class | Craft sign-off | Fit sign-off |
 |---|---|---|

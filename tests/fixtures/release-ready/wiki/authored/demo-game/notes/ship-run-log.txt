@@ -1,4 +1,8 @@
+build id: demo-1.0.0
+platform: desktop, packaged build, clean install
+hardware: reference laptop, integrated graphics, 8 GB memory
+run date: 2026-02-01
 playthrough: 24 min, 0 crashes
 critical defects open: 0
 frame time p95: 13.5 ms (budget 16 ms)
-platform requirements checklist: all items checked
+platform requirements checklist: all items checked (notes/ship-checklist.txt)

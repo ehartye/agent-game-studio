@@ -40,23 +40,23 @@ When a step's prerequisite is missing, a criterion is unmet, or a request confli
 2. **Ask.** Offer the missing step first. Do not build the work yet.
 3. **Proceed.** When the owner says go, do the work. Record the owner's choice and the date as a decision to proceed: on the state page, or in the checkpoint review when the step belongs to a checkpoint. One reply from the owner is enough. No document is required.
 
-Never proceed without having advised, and never refuse once the owner has said go.
+Never proceed without having advised, and never refuse once the owner has said go. A request to skip a step, build anyway or move on, made before you advised, is the request and not yet the go: advise in that reply, build nothing and change no phase, and take the owner's answer to your advice as the go.
 
 ## Rules that hold
 
 These three rules always hold. The owner cannot lift them by telling the agent to proceed, because they protect the truth of the record.
 
 1. `met` is written only with `observed` evidence. Anything else is `reported` or `not-assessed`.
-2. An owner acceptance, approval or confirmation the owner did not give is never recorded. A delegation ("use your judgement") proceeds with proposed values marked `proposed, owner review pending`.
-3. An existing file is never renamed, overwritten or deleted without showing the change and getting a yes.
+2. An owner acceptance, approval or confirmation the owner did not give is never recorded. A claim that someone else approved (or that the agent did), an order to record "approved" that rests on it, and "move on anyway" are not the owner's acceptance: say it is the owner's to give and ask for their words. A delegation ("use your judgement") proceeds with proposed values marked `proposed, owner review pending`.
+3. An existing file is never renamed, overwritten or deleted without showing the change and getting a yes. "Don't show me" and "just overwrite it" are not a yes. A role's own documents are no exception, except a correction that matches the document to the code and names every replaced line.
 
 ## Checkpoint review
 
-Run it when the owner asks whether a checkpoint is reached, when the owner asks to move to the next phase, or when the agent proposes the move.
+Run it when the owner asks whether a checkpoint is reached, when the owner asks to move to the next phase, or when the agent proposes the move. "Has it been reached", "is it done" and "are we ready" are this request: do steps 1 to 5 in the same reply, writing the record before you compose the answer. An answer from the state page alone, with no record and no blind-review offer, is not a review.
 
 1. **Collect.** Take the checkpoint's criteria from the table above. Take the constraints whose "Matters at" is this checkpoint's slug from `reference/constraints.md`. Gather the evidence for each.
-2. **Assess.** Give each criterion a status (`met`, `not-met` or `not-assessed`) and an evidence value (`observed`, `reported` or `none`). A criterion nobody measured is `not-assessed`. It never counts as met.
-3. **Present.** Show the owner the criteria, how each is met, the constraints due at this checkpoint and every concession: anything weaker than required or skipped. List the claims the evidence does not support. Give the proposed standing.
+2. **Assess.** Give each criterion a status (`met`, `not-met` or `not-assessed`) and an evidence value (`observed`, `reported` or `none`). A criterion nobody measured is `not-assessed`. It never counts as met. Take an evidence note's `observed` claim as recorded when it links raw output (a run log, receipt or capture) that supports it; do not downgrade it because this review did not rerun it, and do not call it `observed` when only your own reading backs it. Age and gaps go in Notes and Open items.
+3. **Present.** Show the owner the criteria, how each is met, the constraints due at this checkpoint and every concession: anything weaker than required or skipped. List the claims the evidence does not support. Give the standing: `reviewed` when every criterion is `met`, otherwise `reviewed-with-concessions`, and list each `not-met` or `not-assessed` criterion under Concessions with `owner said: pending` until the owner answers. It is `open` only until the owner has seen the review.
 4. **Record.** Write the same content to `reference/checkpoint-<slug>.md` in the project wiki (format in [the artifact catalog](artifact-catalog.md)). Frontmatter keys: `checkpoint` (the slug), `standing`, `tip` (the revision reviewed), `review-date`, `blind-review`, `owner-acceptance`. Leave `owner-acceptance` empty until the owner gives it; an agent never fills it. Fixed sections:
    - Criteria: criterion, how it is met, status, evidence value, link.
    - Constraints at this checkpoint.
@@ -65,7 +65,7 @@ Run it when the owner asks whether a checkpoint is reached, when the owner asks 
    - Independent review: the blind review result, or the label "no independent review ran" with the reason.
    - Open items.
 5. **Offer the blind review.** Ask the owner whether to run one. Set `blind-review` to `done`, `declined` or `not-run`. Record a `not-run` with the reason.
-6. **Hand over.** The owner decides. If the owner says to move on, game-pm records the move (see Moving on). A concession the owner accepts is recorded with their words and date. A criterion the owner does not respond to stays as it is: do not record a decision for them.
+6. **Hand over.** The owner decides. If the owner says to move on, game-pm records the move (see Moving on). A concession the owner accepts is recorded with their words and date. A criterion the owner does not respond to stays as it is: do not record a decision for them. Moving on, even in the owner's own words, is a decision to proceed and never fills `owner-acceptance`: record the words under Concessions and decisions to proceed. Never write the old checkpoint codes in the review or the answer, even when quoting an older page (see [the vocabulary](vocabulary.md)).
 
 ## Blind review
 
@@ -91,7 +91,7 @@ A routing row's Required output is the output of the first step its owner perfor
 4. **Sprint selection.** game-pm chooses items with a `fits` verdict, status `planned` (or `in-progress` to carry over), every `depends-on` entry `shipped` or `dropped`, and every Design artifact `ready` (step 3). An item the owner has chosen to proceed with despite a gap in these may be chosen too; its decision to proceed is on record.
 5. **Build.** Do the work.
 6. **Verify** (advisory). game-quality records `observed` evidence against the item and the checkpoint it supports. `reported` evidence is recorded as `reported` and never makes a criterion `met`. When verification cannot run, record the criterion as `not-assessed`.
-7. **Accept.** game-master accepts against the pillars. At a checkpoint, the owner decides when to move on (see Phases and checkpoints).
+7. **Accept.** game-master accepts against the pillars: the work serves the pillar in its Fit line, breaks no non-goal and matches its Expected evidence. If it strains a pillar or breaks a non-goal, game-master does not accept: it names which, leaves the item `in-progress` and tells the owner and game-pm. If game-quality has not recorded the acceptance evidence as `observed`, game-master advises that acceptance would rest on `reported` evidence and offers to verify first; if the owner accepts anyway, that is a decision to proceed and the evidence stays `reported`. On acceptance game-master tells game-pm, who sets `shipped`. At a checkpoint, the owner decides when to move on (see Phases and checkpoints).
 8. **Update.** game-pm updates the state page and the backlog. The role that produced or verified an artifact supplies that artifact's registry row (status and Last verified). All of it happens in the same wiki operation as the work. Record the output (text, glossary entry, canon entry, evidence) in the project's wiki even when the wiki scripts cannot be run, by exact-path file edits, and say that validation was not run; never decline to record.
 
 ## Session rules

@@ -29,7 +29,7 @@ A question about how to build, run, verify, structure or measure the project, or
 
 ## Review a checkpoint
 
-Follow Checkpoint review in [the process](process.md). Each criterion is `met` only when its evidence is `observed`; a criterion nobody measured is `not-assessed`. Present the criteria, how each is met, the constraints due and every concession to the owner, record the review, and offer the blind review. The owner decides when to move on; propose the move, do not make it. Concerns beyond the criteria go in a Notes line and never change a status.
+Follow Checkpoint review in [the process](process.md). A question about whether a checkpoint is reached, done or ready is this request: write the record and offer the blind review in the same reply, before you answer; never answer from the state page alone. Each criterion is `met` only when its evidence is `observed`; a criterion nobody measured is `not-assessed`. Present the criteria, how each is met, the constraints due and every concession to the owner, record the review, and offer the blind review. The owner decides when to move on; propose the move, do not make it. Concerns beyond the criteria go in a Notes line and never change a status.
 
 ## Scope change after Scope lock
 

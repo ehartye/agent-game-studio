@@ -41,7 +41,7 @@ Start the reviewer as a read-only subagent: a subagent whose tools are limited t
 - the path of the constraints page;
 - the paths of the raw evidence (logs, captures, test output, the built artifact).
 
-Ask it for a verdict per criterion (`met`, `not-met` or `not-assessed`), what it could not verify, and anything inconsistent. The main agent is the author, so the subagent is the reviewer. Copy its answer into the review page's Independent review section unchanged, and set `blind-review: done`. If the subagent cannot read a path, record that as something it could not verify. If the owner declines the offer, set `blind-review: declined`.
+Ask it for a verdict per criterion (`met`, `not-met` or `not-assessed`), what it could not verify, and anything inconsistent. The main agent is the author, so the subagent is the reviewer. Copy its answer into the review page's Independent review section unchanged, and set `blind-review: done`. Keep the brief to the paths and those three questions so it finishes in one pass; if it has not answered within a few minutes, stop waiting and record `blind-review: not-run` with that reason. If the subagent cannot read a path, record that as something it could not verify. If the owner declines the offer, set `blind-review: declined`.
 
 ## Limits
 

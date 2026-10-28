@@ -17,7 +17,7 @@ owner-acceptance:
 ---
 # Checkpoint review: <checkpoint name>
 
-Path: `reference/checkpoint-<slug>.md`. Standing is `open` (review not finished), `reviewed` (every criterion `met`) or `reviewed-with-concessions` (at least one criterion is `not-met` or `not-assessed` and is listed under Concessions and decisions to proceed). `owner-acceptance` stays empty until the owner gives it, as a date and their words. An agent never fills it.
+Path: `reference/checkpoint-<slug>.md`. Standing is `open` (the owner has not seen the review yet), `reviewed` (every criterion `met`) or `reviewed-with-concessions` (at least one criterion is `not-met` or `not-assessed` and is listed under Concessions and decisions to proceed, with `owner said: pending` until the owner answers). `owner-acceptance` stays empty until the owner gives it, as a date and their words. An agent never fills it.
 
 Present the criteria, how each is met and every concession to the owner, then record the same content here.
 
@@ -36,7 +36,7 @@ Present the criteria, how each is met and every concession to the owner, then re
 If none matter here, write: none.
 
 ## Concessions and decisions to proceed
-- <what is weaker than required or skipped> - why: <reason> - owner said: "<the owner's words>" on <YYYY-MM-DD> - revisit: <when, or at which checkpoint>
+- <what is weaker than required or skipped> - why: <reason> - owner said: "<the owner's words>" on <YYYY-MM-DD>, or: pending - revisit: <when, or at which checkpoint>
 
 If there are none, write: none.
 

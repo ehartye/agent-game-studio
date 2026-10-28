@@ -2,7 +2,7 @@
 
 Closed value sets. Use these values exactly, in this spelling. A value that is not listed here is wrong: record an open question instead of inventing one.
 
-Checkpoints are named by their slugs. An older page may name them G1 to G5; read those as brief-approved, vertical-slice, scope-lock, content-lock and ship, in that order. Never write the codes.
+Checkpoints are named by their slugs. An older page may name them G1 to G5; read those as brief-approved, vertical-slice, scope-lock, content-lock and ship, in that order. Never write the codes. That holds in an answer and in any page or file you write, including when quoting the older page (say "the older page's last result"); cite an existing file's path as it is and do not rename it.
 
 ## Sets
 
