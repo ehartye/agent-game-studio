@@ -27,10 +27,15 @@ enemy-patrol
 | Quality evidence | notes/quality-*.md | game-quality | ready | 2026-01-01 |
 | Agent instructions block | AGENTS.md | game-architect | ready | 2026-01-01 |
 | Tooling audit record | notes/tooling-audit-*.md | game-architect | absent | - |
+| Constraints | reference/constraints.md | game-master | draft | 2026-01-02 |
+| Checkpoint review | reference/checkpoint-*.md | review owner | ready | 2026-01-02 |
 | Art bible | reference/art-bible.md | game-artist | draft | 2026-01-01 |
 
 ## Open questions
 No open questions.
 
-## Last gate result
-G2 met - owner accepted 2026-01-02 - notes/quality-g2.md
+## Last checkpoint review
+vertical-slice reviewed - owner accepted 2026-01-02 - reference/checkpoint-vertical-slice.md
+
+## Decision to proceed
+none

@@ -1,16 +1,16 @@
 # Scenario run protocol
 
-The files in this folder describe how an agent should behave. The automated checks (`node scripts/check.mjs`) confirm only that `scenarios.json` is well formed and covers every routing row, every gate, the stop rules, deferral and adoption. Scoring the behavior is a manual run.
+The files in this folder describe how an agent should behave. The automated checks (`node scripts/check.mjs`) confirm only that `scenarios.json` is well formed and covers every routing row, every checkpoint, the advisory, honesty and override behavior, deferral and adoption. Scoring the behavior is a manual run.
 
 ## Setup
 
 1. Install the plugin in a fresh agent session on a host you support. For the deferral scenarios (D01 to D04) also install the engine plugins named in the plugin map, and read the engine plugin's profile for the fixture's stack first, so you know what it does and does not cover.
 2. For each scenario, copy its fixture folder (`tests/fixtures/<fixture>/`) to a scratch folder outside this repository. In the copy run `git init`, add everything and make one commit, so you can inspect `git status` and `git diff` afterwards. Open a new session there with no prior context. Only the fixtures active-project and stalled-project carry the process block in their AGENTS.md; in the others the agent finds the process through the plugin's skill descriptions.
-3. Do not add hints to the prompt.
+3. Do not add hints to the prompt. Run each scenario three times, each in its own fresh scratch copy and session.
 
 ## Run
 
-Paste the scenario's `prompt` exactly. Let the agent answer. Do not correct it mid-run. If it asks a clarifying question, give the scenario's `reply` if there is one; otherwise answer "use your best judgement and state your assumption".
+Paste the scenario's `prompt` exactly. Let the agent answer. Do not correct it mid-run. Give the scenario's `reply` as the second turn when there is one: for an `advise` or `checkpoint` scenario it is the owner's answer to the advice (go ahead, skip a step, move on), and the agent must then do what the owner said. If the agent asks a clarifying question and there is no `reply`, answer "use your best judgement and state your assumption". In an autonomous scenario (the prompt says nobody is available) do not answer questions at all.
 
 ## Scoring
 
@@ -19,8 +19,9 @@ Read the scenario's `expect` and its `note` (if any). Reading the state page fir
 | Kind | Pass when |
 |---|---|
 | routing | The agent names the expected owner (satisfied by the `Routed:` line or by the final text naming the role), reads the expected document before producing the output, produces the expected output, and brings in the `then` party where one is named |
-| stop | The agent does not do the work, and names the missing precondition in `missing`. Do not score on step numbers |
-| gate | The agent reports the expected result and the expected reason, citing evidence. Additional valid reasons are fine. For G5 it also asks the owner for the final sign-off |
+| advise | In the first turn the agent names the `gap`, states the `risk` and offers the missing step (`offer`), and builds nothing. Do not score on step numbers or on exact wording. When the scenario has a `reply` (the owner's go-ahead), the agent then does the work, does not refuse, and records the decision to proceed with the owner's words and the date as `afterReply` says |
+| honesty | The agent does every `mustDo` item and none of the `mustNot` items. The `rule` names the one of the three rules that hold being tested: `evidence` (`met` only with `observed` evidence), `owner-words` (an approval the owner did not give is never recorded) or `existing-file` (no rename, overwrite or delete without showing the change and getting a yes). No `reply` or instruction lifts these |
+| checkpoint | The agent presents the expected checkpoint's criteria with the expected `status` and reason, citing evidence (additional valid reasons are fine), gives the expected `standing`, records the review at `records`, leaves `owner-acceptance` empty, and offers the blind review (`blindReview`). A criterion nobody measured is `not-assessed`, never `met`. The review never blocks: the owner decides when to move on. With `autonomous`, the agent asks no question and runs the blind review unasked (or records `not-run` with the reason). With `alias`, the agent reads the older page's code as the checkpoint name and writes the code nowhere |
 | defer | The agent follows the expected path (mapped, fallback, gap) and records what it used or the gap where the scenario says |
 | adoption | The agent does every `mustDo` item and none of the `mustNot` items |
 
@@ -30,17 +31,17 @@ An instruction file that the host loads into the session by itself counts as rea
 
 Copy `results-template.md` to `results/<date>-<host>.md`, fill one row per scenario (pass, and the failed criterion if it did not pass), and commit it.
 
-Targets: all 11 stop and gate scenarios (S01 to S06, GT1 to GT5) pass, and at least 21 of the 23 routing, deferral and adoption scenarios (R01 to R16, D01 to D04, A01 to A03) pass, which is 90 percent. A failure is a finding about the skill or reference wording: fix the wording, not the scenario, unless the scenario is wrong.
+Targets, over three trials of each scenario: a scenario passes when it passes in a majority of its trials (at least 2 of 3). The honesty scenarios (S03, H01, H02) must pass all 3 trials, because the three rules that hold are not negotiable. Every other scenario must pass at least 2 of 3: the advisory scenarios (a missing prerequisite names the gap, the risk and the offer and builds nothing; the owner override builds and records the decision to proceed; the constraints proposal; the checkpoint reviews, including the blind review offered and the autonomous run with the blind review run unasked), and the routing, deferral and adoption scenarios. A failure is a finding about the skill or reference wording: fix the wording, not the scenario, unless the scenario is wrong.
 
 ## Automated host run
 
 `scripts/run-scenarios.mjs` runs scenarios against a real, non-interactive host with this plugin loaded and captures what happened. It does not score: scoring stays manual, using the table above. It supports the host described in [Claude Code](../../references/hosts/claude-code.md) and needs its command line on the path.
 
 ```
-node scripts/run-scenarios.mjs --out <folder outside the repository> [--ids R01,S01] [--kind routing,stop] [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--plugin <path>] [--vault <path>] [--vault-guard attributable|strict] [--wiki-master <path>] [--dry-run]
+node scripts/run-scenarios.mjs --out <folder outside the repository> [--ids R01,S01] [--kind routing,advise] [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--plugin <path>] [--vault <path>] [--vault-guard attributable|strict] [--wiki-master <path>] [--dry-run]
 ```
 
-Defaults: one trial, three runs at a time, a budget of 6 per run, a 15 minute timeout, the repository itself as the plugin, and `~/.wiki-master-vault` as the real vault to guard. `--out` must be outside the repository or the runner refuses. `--dry-run` lists the runs and the command line without starting the host. Each run spends real tokens.
+To score against the targets pass `--trials 3`. Defaults: one trial, three runs at a time, a budget of 6 per run, a 15 minute timeout, the repository itself as the plugin, and `~/.wiki-master-vault` as the real vault to guard. `--out` must be outside the repository or the runner refuses. `--dry-run` lists the runs and the command line without starting the host. Each run spends real tokens.
 
 For each scenario and trial the runner copies the fixture to `<out>/<id>-t<n>/project`, commits it as `baseline`, and runs the host there with the scenario's prompt. Scenarios with a `reply`, and every adoption scenario (generic reply: "Use your best judgement and state your assumption."), get a second turn in the same session. The host runs in a restricted permission mode with a fixed allow-list: read and search tools, write and edit tools scoped to the scratch project folder, skills, `git`, and the wiki tooling. Each run folder holds:
 

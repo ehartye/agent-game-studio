@@ -2,6 +2,8 @@
 
 Status: draft for owner review. Date: 2026-10-26.
 
+Revision note (0.2.0): the five gates became advisory checkpoints (Brief approved, Vertical slice, Scope lock, Content lock, Ship). They no longer block work; the agent reports standing, records it, and the owner decides when to move on. Where this spec says "gate", read "checkpoint".
+
 ## 1. Purpose
 
 agent-game-studio is a technology-agnostic process plugin for building a game with an AI agent. When a person talks to an agent about a game project, the agent should know which phase the project is in, what the next step is, who decides each kind of question, what must be true before work moves on, and where each fact is recorded. The plugin supplies that as skills and references. It has no runtime.

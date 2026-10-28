@@ -54,4 +54,4 @@ Hosts differ in what they log. When you cannot show use or non-use, the outcome 
 
 ## When
 
-At adoption, when G2 is checked, before G5 is checked, whenever a tool or instruction file changes materially (a short audit of the changed items only), and when the owner asks. The audit is not gate evidence: if the owner declines it, no gate is blocked.
+At adoption, before the Vertical slice and Ship checkpoint reviews, whenever a tool or instruction file changes materially (a short audit of the changed items only), and when the owner asks. The audit is advice and not checkpoint evidence: if the owner declines it, record the decision to proceed and carry on.

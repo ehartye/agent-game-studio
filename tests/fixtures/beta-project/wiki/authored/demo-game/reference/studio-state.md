@@ -27,9 +27,14 @@ none
 | Quality evidence | notes/quality-*.md | game-quality | ready | 2026-02-01 |
 | Agent instructions block | - | game-architect | absent | - |
 | Tooling audit record | notes/tooling-audit-*.md | game-architect | absent | - |
+| Constraints | reference/constraints.md | game-master | absent | - |
+| Checkpoint review | reference/checkpoint-*.md | review owner | absent | - |
 
 ## Open questions
 No open questions.
 
-## Last gate result
-G3 met - owner accepted 2026-01-20 - notes/quality-g3.md
+## Last checkpoint review
+scope-lock reviewed - owner accepted 2026-01-20 - notes/quality-scope-lock.md
+
+## Decision to proceed
+none

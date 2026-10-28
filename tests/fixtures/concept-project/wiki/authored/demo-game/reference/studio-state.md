@@ -27,9 +27,14 @@ none
 | Quality evidence | notes/quality-*.md | game-quality | absent | - |
 | Agent instructions block | - | game-architect | absent | - |
 | Tooling audit record | notes/tooling-audit-*.md | game-architect | absent | - |
+| Constraints | reference/constraints.md | game-master | absent | - |
+| Checkpoint review | reference/checkpoint-*.md | review owner | absent | - |
 
 ## Open questions
 No open questions.
 
-## Last gate result
+## Last checkpoint review
+none
+
+## Decision to proceed
 none

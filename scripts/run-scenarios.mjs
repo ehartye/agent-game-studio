@@ -1,7 +1,7 @@
 // Runs the scenarios in tests/scenarios/scenarios.json against a real, non-interactive host with this
 // plugin loaded, and captures what happened. It never scores. Dependency-free.
 //
-//   node scripts/run-scenarios.mjs --out <dir> [--plugin <path>] [--ids R01,S01] [--kind routing,stop]
+//   node scripts/run-scenarios.mjs --out <dir> [--plugin <path>] [--ids R01,S01] [--kind routing,advise]
 //        [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--vault <path>] [--vault-guard strict|attributable] [--wiki-master <path>] [--dry-run]
 import { spawn, spawnSync } from 'node:child_process';
 import { cpSync, createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';

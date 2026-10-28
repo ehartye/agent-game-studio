@@ -28,7 +28,7 @@ decision-status: proposed
 ## Decision
 <the chosen option and why>
 
-For a waiver, name the gate or step, what is waived, who waived it and why.
+For a decision to proceed without a missing prerequisite, name the checkpoint or step, what is missing, the risk stated to the owner, the owner's words and the date.
 
 ## Consequences
 Good: <what improves>

@@ -7,7 +7,7 @@ pre-production
 minimal
 
 ## Next step
-Close the G2 evidence (game-quality).
+Close the Vertical slice evidence (game-quality).
 
 ## Blocked by
 nothing
@@ -27,11 +27,16 @@ none
 | Quality evidence | notes/quality-*.md | game-quality | draft | 2026-01-01 |
 | Agent instructions block | AGENTS.md | game-architect | ready | 2026-01-01 |
 | Tooling audit record | notes/tooling-audit-*.md | game-architect | absent | - |
+| Constraints | reference/constraints.md | game-master | absent | - |
+| Checkpoint review | reference/checkpoint-*.md | review owner | absent | - |
 
 ## Open questions
 | Question | Owner | Must be answered by | Status |
 |---|---|---|---|
-| Which collision approach does the stack use? | game-architect | G2 | open |
+| Which collision approach does the stack use? | game-architect | vertical-slice | open |
 
-## Last gate result
+## Last checkpoint review
+none
+
+## Decision to proceed
 none

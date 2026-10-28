@@ -5,7 +5,7 @@ depends-on: ["[[enemy-patrol]]"]
 # Patrol sound
 
 Fit: fits - P2, audible alert cue - 2026-01-01
-Target gate: G3
+Target checkpoint: scope-lock
 
 ## Implications
 - art: none
@@ -13,6 +13,7 @@ Target gate: G3
 - writing: none
 - architecture: none
 - quality: none
+- constraints touched: none
 
 ## Design artifacts
 none required

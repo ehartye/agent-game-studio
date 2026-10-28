@@ -29,6 +29,10 @@ Use the skill list the current session advertises. If the host offers no list, a
 
 Install the plugin and the wiki tooling with the host's own plugin or skill mechanism; see the host documentation. Do not guess a command.
 
+## Blind review
+
+Start a reviewer only if the host can run a second agent that has no shared context and cannot write. Give it file paths only: the checkpoint's criteria, the constraints page and the raw evidence, never the author's conclusions. If the host cannot, run no review and record it: set `blind-review: not-run` in the checkpoint review's frontmatter and write `no independent review ran - <the reason>` under Independent review. Do not review your own work and call it independent. If the owner declines the offer, set `blind-review: declined`.
+
 ## Limits
 
 This file states no host facts. Nothing here has been checked against any host's documentation.

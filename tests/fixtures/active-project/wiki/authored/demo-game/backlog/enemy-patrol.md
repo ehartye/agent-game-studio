@@ -5,7 +5,7 @@ depends-on: []
 # Enemy patrol
 
 Fit: fits - P2, telegraphed patrol paths - 2026-01-01
-Target gate: G3
+Target checkpoint: scope-lock
 
 ## Implications
 - art: reuse the existing enemy sprite
@@ -13,6 +13,7 @@ Target gate: G3
 - writing: a short lore blurb
 - architecture: none
 - quality: a recorded patrol-loop replay
+- constraints touched: none
 
 ## Design artifacts
 none required

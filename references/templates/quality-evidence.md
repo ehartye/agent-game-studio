@@ -9,10 +9,10 @@ ai-generated: true
 project: <project>
 kind: note
 ---
-# Quality evidence: <gate or item>
+# Quality evidence: <checkpoint or item>
 
-Supports: <G1 to G5, or the backlog item slug>
-Check owner: <role; at G2 list both check owners and write one Claims section per check owner, headed `## Claims: <role>`>
+Supports: <brief-approved | vertical-slice | scope-lock | content-lock | ship, or the backlog item slug>
+Check owner: <role; at vertical-slice list both check owners and write one Claims section per check owner, headed `## Claims: <role>`>
 
 Guidance used: <the verification guidance consulted, for what question, and the date; name it, do not copy from it; or: none>
 
@@ -25,7 +25,7 @@ Guidance used: <the verification guidance consulted, for what question, and the 
 Delete this section at the standard and full tiers, where the named document itself is required.
 
 ## Release criteria
-Optional. At the minimal tier, at G5, list the checkable release criteria here, one per line: <criterion>. Delete this section otherwise.
+Optional. At the minimal tier, at the ship checkpoint, list the checkable release criteria here, one per line: <criterion>. Delete this section otherwise.
 
 ## Defects open
 - <defect> - severity: <critical | other> - <link>

@@ -1,15 +1,18 @@
 # agent-game-studio
 
-Process skills and references that tell an AI agent which phase a game project is in, what comes next, who decides each question, and what evidence passes each gate. It is technology-agnostic and works for new projects and for adopting one that already exists. The shipped plugin is Markdown and JSON with no runtime; `scripts/` holds the repository's own tests and is not used at runtime.
+Process skills and references that tell an AI agent which phase a game project is in, what comes next, who decides each question, and what evidence a checkpoint review needs. It is technology-agnostic and works for new projects and for adopting one that already exists. The shipped plugin is Markdown and JSON with no runtime; `scripts/` holds the repository's own tests and is not used at runtime.
 
-Early (0.1.2). Three skills.
+Early (0.2.0). Five skills.
 
 ## What it gives the agent
 
 - **A state page** in the project's wiki that every session reads first: phase, next step, blockers, the artifact registry, open questions.
 - **Decision routing:** every kind of request has one owner, one document to read first and one required output.
 - **A work loop with stop rules:** intake, fit check, design readiness, sprint selection, build, verify, accept, update. A missing precondition stops the loop and is named.
-- **Phase gates** that pass on observed evidence, with you as the final gate.
+- **Advisory checkpoints** (Brief approved, Vertical slice, Scope lock, Content lock, Ship): the agent reviews standing against observed evidence, records it in a checkpoint review page and advises; you decide when to move on. A missing prerequisite is named with its risk, and the agent proceeds when you say go, recording your decision to proceed.
+- **A constraints page** listing the measurable requirements the game must meet (a performance target on named hardware, a platform, a size, a legal limit), each with a source, a check the author cannot edit, and a status. The agent proposes lines; only you approve, change or concede them.
+- **Blind review:** at a checkpoint review, an independent reviewer with no shared context reads only the criteria, the constraints and the raw evidence, and is never the author.
+- **Hand-offs** to the plugins that own craft and technology, keyed by situation in the [plugin map](references/plugin-map.md), with what to bring and where to record what comes back.
 - **A planning pass** that asks each discipline what a feature implies before work starts.
 - **Adoption** of an existing project in place: no renames, no overwrites, no deletions.
 - **A tooling audit** of the project's agent configuration, by proposal and with your approval.
@@ -19,10 +22,12 @@ Early (0.1.2). Three skills.
 | Skill | Use it for |
 |---|---|
 | `studio-start` | Orienting at the start of a session; bootstrapping a new project; adopting an existing one |
-| `game-master` | The brief and pillars; fit checks; course checks; art fit on key assets; acceptance |
-| `game-architect` | Technology decisions; the architecture page; tool readiness; agent instruction files and tooling; the tooling audit |
+| `game-master` | The brief and pillars; fit checks; course checks; art fit on key assets; acceptance; product constraints |
+| `game-architect` | Technology decisions; the architecture page; tool readiness; agent instruction files and tooling; the tooling audit; technical constraints |
+| `game-pm` | The backlog and generated roadmap; sprint selection as advice; the planning pass; the state page; change requests |
+| `game-quality` | The testing strategy and risk profile; performance budgets; the measurements behind constraints; quality evidence notes; evidence for a checkpoint review |
 
-The other roles (project manager, quality, writer, artist, designer) are followed directly from [decision routing](references/decision-routing.md) until their skills ship.
+The other roles (writer, artist, designer) are followed directly from [decision routing](references/decision-routing.md) until their skills ship.
 
 ## References
 

@@ -1,0 +1,6 @@
+platform requirements checklist, build demo-1.0.0, checked 2026-02-01
+[x] installs from the packaged build with no extra steps
+[x] starts and quits without errors
+[x] saves and restores progress
+[x] runs at the supported window sizes
+[x] store page text and screenshots match the build
