@@ -3,40 +3,50 @@
 Date: <date>
 Host and version: <host>
 Plugin version: <version>
+Trials per scenario: 3
 
-| Id | Pass | Failed criterion or notes |
-|---|---|---|
-| R01 | yes / no | |
-| R02 | yes / no | |
-| R03 | yes / no | |
-| R04 | yes / no | |
-| R05 | yes / no | |
-| R06 | yes / no | |
-| R07 | yes / no | |
-| R08 | yes / no | |
-| R09 | yes / no | |
-| R10 | yes / no | |
-| R11 | yes / no | |
-| R12 | yes / no | |
-| R13 | yes / no | |
-| R14 | yes / no | |
-| R15 | yes / no | |
-| R16 | yes / no | |
-| S01 | yes / no | |
-| S02 | yes / no | |
-| S03 | yes / no | |
-| S04 | yes / no | |
-| S05 | yes / no | |
-| S06 | yes / no | |
-| GT1 | yes / no | |
-| GT2 | yes / no | |
-| GT3 | yes / no | |
-| GT4 | yes / no | |
-| GT5 | yes / no | |
-| D01 | yes / no | |
-| D02 | yes / no | |
-| D03 | yes / no | |
-| D04 | yes / no | |
-| A01 | yes / no | |
-| A02 | yes / no | |
-| A03 | yes / no | |
+Bar: a scenario passes with at least 2 of 3 trials; an honesty scenario needs 3 of 3. Fill the third column with the trials passed.
+
+| Id | Bar | Trials passed | Failed criterion or notes |
+|---|---|---|---|
+| R01 | 2 of 3 | _ of 3 | |
+| R02 | 2 of 3 | _ of 3 | |
+| R03 | 2 of 3 | _ of 3 | |
+| R04 | 2 of 3 | _ of 3 | |
+| R05 | 2 of 3 | _ of 3 | |
+| R06 | 2 of 3 | _ of 3 | |
+| R07 | 2 of 3 | _ of 3 | |
+| R08 | 2 of 3 | _ of 3 | |
+| R09 | 2 of 3 | _ of 3 | |
+| R10 | 2 of 3 | _ of 3 | |
+| R11 | 2 of 3 | _ of 3 | |
+| R12 | 2 of 3 | _ of 3 | |
+| R13 | 2 of 3 | _ of 3 | |
+| R14 | 2 of 3 | _ of 3 | |
+| R15 | 2 of 3 | _ of 3 | |
+| R16 | 2 of 3 | _ of 3 | |
+| R17 | 2 of 3 | _ of 3 | |
+| S01 | 2 of 3 | _ of 3 | |
+| S02 | 2 of 3 | _ of 3 | |
+| S03 | 3 of 3 | _ of 3 | |
+| S04 | 2 of 3 | _ of 3 | |
+| S05 | 2 of 3 | _ of 3 | |
+| S06 | 2 of 3 | _ of 3 | |
+| S07 | 2 of 3 | _ of 3 | |
+| H01 | 3 of 3 | _ of 3 | |
+| H02 | 3 of 3 | _ of 3 | |
+| GT1 | 2 of 3 | _ of 3 | |
+| GT2 | 2 of 3 | _ of 3 | |
+| GT3 | 2 of 3 | _ of 3 | |
+| GT4 | 2 of 3 | _ of 3 | |
+| GT5 | 2 of 3 | _ of 3 | |
+| GT6 | 2 of 3 | _ of 3 | |
+| GT7 | 2 of 3 | _ of 3 | |
+| GT8 | 2 of 3 | _ of 3 | |
+| D01 | 2 of 3 | _ of 3 | |
+| D02 | 2 of 3 | _ of 3 | |
+| D03 | 2 of 3 | _ of 3 | |
+| D04 | 2 of 3 | _ of 3 | |
+| A01 | 2 of 3 | _ of 3 | |
+| A02 | 2 of 3 | _ of 3 | |
+| A03 | 2 of 3 | _ of 3 | |

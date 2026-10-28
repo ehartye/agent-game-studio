@@ -38,6 +38,8 @@ kind: reference
 | Quality evidence | notes/quality-*.md | game-quality | absent | - |
 | Agent instructions block | <instruction file name(s)> | game-architect | absent | - |
 | Tooling audit record | notes/tooling-audit-*.md | game-architect | absent | - |
+| Constraints | reference/constraints.md | game-master | absent | - |
+| Checkpoint review | reference/checkpoint-*.md | review owner | absent | - |
 
 At the standard and full tiers add one row per artifact of that tier from the artifact catalog. Delete this line. Set Last verified only when you actually ran or inspected the artifact's subject (for a document: re-read it against the code or the owner's statement and found it true); reading the page to answer a question does not count.
 

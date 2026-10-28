@@ -7,7 +7,7 @@ release
 minimal
 
 ## Next step
-Owner sign-off at G5.
+Owner sign-off at Ship.
 
 ## Blocked by
 nothing
@@ -27,9 +27,14 @@ none
 | Quality evidence | notes/quality-*.md | game-quality | ready | 2026-02-01 |
 | Agent instructions block | - | game-architect | absent | - |
 | Tooling audit record | notes/tooling-audit-*.md | game-architect | absent | - |
+| Constraints | reference/constraints.md | game-master | absent | - |
+| Checkpoint review | reference/checkpoint-*.md | review owner | absent | - |
 
 ## Open questions
 No open questions.
 
-## Last gate result
-G4 met - owner accepted 2026-01-28 - notes/quality-g4.md
+## Last checkpoint review
+content-lock reviewed - owner accepted 2026-01-28 - notes/quality-content-lock.md
+
+## Decision to proceed
+none

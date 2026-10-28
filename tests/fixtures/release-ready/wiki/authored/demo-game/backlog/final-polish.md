@@ -5,7 +5,7 @@ depends-on: []
 # Final polish
 
 Fit: fits - P2 - 2026-01-15
-Target gate: G5
+Target checkpoint: ship
 
 ## Implications
 - art: none
@@ -13,13 +13,14 @@ Target gate: G5
 - writing: none
 - architecture: none
 - quality: regression pass recorded
+- constraints touched: none
 
 ## Design artifacts
 none required
 
 ## Acceptance evidence
 Expected: a recorded regression pass.
-Recorded in: notes/quality-g5.md
+Recorded in: notes/quality-ship.md
 
 ## Art stage
 not-applicable

@@ -1,3 +1,4 @@
+/** @lane merge */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -173,8 +174,8 @@ test('assertOutsideRepo refuses folders inside or equal to the repository, inclu
 test('parseArgs applies defaults and parses lists and numbers', () => {
   const d = parseArgs(['--out', '/o']);
   assert.deepEqual(d, { out: '/o', vault: null, vaultGuard: 'attributable', wikiMaster: null, plugin: null, ids: null, kinds: null, trials: 1, concurrency: 3, model: null, maxBudgetUsd: 6, timeoutMin: 15, dryRun: false });
-  const p = parseArgs(['--out', '/o', '--vault', '/v', '--vault-guard', 'strict', '--wiki-master', '/wm', '--plugin', '/p', '--ids', 'R01,S01', '--kind', 'routing,stop', '--trials', '2', '--concurrency', '4', '--model', 'opus', '--max-budget-usd', '3.5', '--timeout-min', '5', '--dry-run']);
-  assert.deepEqual(p, { out: '/o', vault: '/v', vaultGuard: 'strict', wikiMaster: '/wm', plugin: '/p', ids: ['R01', 'S01'], kinds: ['routing', 'stop'], trials: 2, concurrency: 4, model: 'opus', maxBudgetUsd: 3.5, timeoutMin: 5, dryRun: true });
+  const p = parseArgs(['--out', '/o', '--vault', '/v', '--vault-guard', 'strict', '--wiki-master', '/wm', '--plugin', '/p', '--ids', 'R01,S01', '--kind', 'routing,advise', '--trials', '2', '--concurrency', '4', '--model', 'opus', '--max-budget-usd', '3.5', '--timeout-min', '5', '--dry-run']);
+  assert.deepEqual(p, { out: '/o', vault: '/v', vaultGuard: 'strict', wikiMaster: '/wm', plugin: '/p', ids: ['R01', 'S01'], kinds: ['routing', 'advise'], trials: 2, concurrency: 4, model: 'opus', maxBudgetUsd: 3.5, timeoutMin: 5, dryRun: true });
 });
 
 test('parseArgs rejects a missing --out, unknown flags and bad numbers', () => {
@@ -186,16 +187,16 @@ test('parseArgs rejects a missing --out, unknown flags and bad numbers', () => {
 });
 
 test('selectScenarios filters by id and kind and rejects unknown ids', () => {
-  const all = [{ id: 'R01', kind: 'routing' }, { id: 'S01', kind: 'stop' }, { id: 'S02', kind: 'stop' }];
+  const all = [{ id: 'R01', kind: 'routing' }, { id: 'S01', kind: 'advise' }, { id: 'S02', kind: 'advise' }];
   assert.deepEqual(selectScenarios(all, { ids: ['S01'], kinds: null }).map((s) => s.id), ['S01']);
-  assert.deepEqual(selectScenarios(all, { ids: null, kinds: ['stop'] }).map((s) => s.id), ['S01', 'S02']);
+  assert.deepEqual(selectScenarios(all, { ids: null, kinds: ['advise'] }).map((s) => s.id), ['S01', 'S02']);
   assert.equal(selectScenarios(all, { ids: null, kinds: null }).length, 3);
   assert.throws(() => selectScenarios(all, { ids: ['Z9'], kinds: null }), /unknown scenario id/);
 });
 
 test('renderSummary includes prompt, reply, status, tools, catalogue and each turn verbatim', () => {
   const t1 = parseTranscript(transcript);
-  const md = renderSummary({ scenario: { id: 'S01', prompt: 'Add a grapple hook mechanic.', kind: 'stop' }, reply: 'ok then', status: 'completed', exitCode: 0, durationMs: 5000, turns: [t1] });
+  const md = renderSummary({ scenario: { id: 'S01', prompt: 'Add a grapple hook mechanic.', kind: 'advise' }, reply: 'ok then', status: 'completed', exitCode: 0, durationMs: 5000, turns: [t1] });
   for (const needle of ['S01', 'Add a grapple hook mechanic.', 'ok then', 'completed', '0.42', 'agent-game-studio:studio-start', '/p/AGENTS.md', 'Write /p/new.md', 'git status --short', 'Phase: concept\nNext step: x\nBlocked by: nothing', 'game-master', '4 skills']) {
     assert.ok(md.includes(needle), `missing ${needle}`);
   }

@@ -1,6 +1,6 @@
-# Quality evidence: beta
+# Quality evidence: Content lock
 
-Supports: G4
+Supports: content-lock
 Check owner: game-quality
 Guidance used: none
 

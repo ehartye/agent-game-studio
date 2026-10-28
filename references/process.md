@@ -77,7 +77,7 @@ A blind review is an independent check of a checkpoint that does not rely on the
 - Its output is recorded in the checkpoint review's Independent review section as `reported` evidence. It never replaces `observed` evidence.
 - It is offered to the owner at each checkpoint review. In an autonomous run it runs without asking.
 - It replaces the outside-vendor second-opinion step. An outside opinion stays optional for a hard-to-reverse decision (see Evidence rules).
-- How to start one depends on the host: see [the Claude Code host file](hosts/claude-code.md) and [the generic host file](hosts/generic.md). When the host cannot start one, record `blind-review: not-run` with the reason.
+- How to start one depends on the host: see [the first host file](hosts/claude-code.md) and [the generic host file](hosts/generic.md). When the host cannot start one, record `blind-review: not-run` with the reason.
 
 ## Work loop
 

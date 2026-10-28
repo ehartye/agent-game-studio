@@ -1,6 +1,6 @@
-# Quality evidence: G2
+# Quality evidence: Vertical slice
 
-Supports: G2
+Supports: vertical-slice
 Check owner: game-quality
 Guidance used: none
 
