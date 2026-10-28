@@ -31,7 +31,23 @@ This plugin says what must be decided and what evidence proves it. Another plugi
 | Wiki scaffolding | any | `wiki-master:wiki-init` |
 | Project state brief | any | `wiki-master`'s `scripts/session-brief.mjs` (version 0.73.0 or later): finds the project from the repository's `origin` remote through a `repo:` line on the project's overview page, then prints the three-line report and what needs attention. Read-only |
 | Skill quality | any | `hartye-skills:yoda` |
-| Second opinion at a gate | any | `hartye-skills:rubber-duck` |
+| Blind review at a checkpoint | any | No plugin skill. [The process](process.md) defines it and the host file says how to start one. For an outside opinion on a hard-to-reverse decision, which stays optional: `hartye-skills:rubber-duck` |
+
+## Where to go next
+
+Use this when a situation needs craft or technology the plugin does not own. Find the situation, confirm the skill is in the session's list of available skills (if not, use the fallback chain below), load it, bring what the row says, and record what comes back where the row says. Where a row says "the stack's row", the Map above gives the skill for the project's stack.
+
+| Situation | Hand off to | Bring | Record the result |
+|---|---|---|---|
+| Choosing an engine or web stack | `agent-engine:engine-selection` | The state page, the brief and the constraints page | A technology decision record |
+| Building, structuring or running the game | The stack's row under "Structure and architecture" in the Map | The architecture page and the constraints page | "Engine guidance used" on the architecture page |
+| Measuring performance, or checking a constraint | The stack's row under "Quality, verification, performance" in the Map; for a packaged Unreal build, `agent-unreal:unreal-native` | The constraints page row, the target hardware and the conditions | The quality evidence note with raw output kept; the row's Status and Evidence link on the constraints page |
+| Deciding a testing strategy, or auditing the tests | `agent-tests:test-strategy`; for a suite that already feels bloated, `agent-tests:test-audit` | The risk profile and the constraints page | The test strategy and the quality evidence note |
+| Sprites, meshes and drawings | `agent-sprites:sprite-craft`, `agent-sprites:sprite-review`, `agent-sprites:sprite-verification`; `agent-meshes:mesh-believable`, `agent-meshes:mesh-quality-review`; `agent-draw:draw-authoring` | The art bible and the backlog item | The backlog item's Implications and Art stage |
+| Sound and music | `agent-beeps:beeps-craft`; the owner picks with `agent-beeps:beeps-audition` | The art bible and the backlog item | The owner's recorded pick in the backlog item |
+| Game text, dialogue and voice | `agent-prose:prose-dialog`, `agent-prose:prose-voice`, `agent-prose:prose-review` | The narrative bible and the glossary | The backlog item's Implications; the narrative bible |
+| Marketing and launch readiness | `agent-marketing:market-campaign` | The state page, the brief and the release criteria | The backlog item for the launch work; the Ship checkpoint review |
+| Writing or validating project documents | `wiki-master:wiki-author`; `wiki-master:wiki-health` | The document and its catalog entry | The document itself |
 
 ## Lookup procedure
 
@@ -46,14 +62,14 @@ Use this when the stack has no mapped skill for the purpose, the mapped skill is
 
 1. The engine-specific skill, if the map names one and it is available.
 2. Otherwise the general engine plugin: `agent-engine:engine-selection` and the stack's profile in it (how to install, drive and verify the stack, with limits), plus `agent-engine:engine-asset-import` for assets, `agent-engine:engine-visual-polish` for visuals and `agent-engine:engine-custom-shaders` for a custom renderer, where they apply.
-3. If that has nothing on the question, apply the agnostic requirements: (a) describe only what exists in the repository, in the architecture page's Stack, Structure and Review standard; (b) label each claim that matters `tested here`, `documented` (cite the source) or `general knowledge`; (c) say in the answer that no engine-specific guidance was used; (d) name the observed run that would confirm it. Then record an open question on the state page (owner: game-architect, must be answered by: none), and write the gap text (purpose, stack, question, what was missing) and include it in your answer. File it as a roadmap item for the general engine plugin if you can reach that roadmap; otherwise hand the owner the text. Do not add it to the project's own backlog or roadmap. If an open question for the same purpose and stack already exists, add nothing.
+3. If that has nothing on the question, apply the agnostic requirements: (a) describe only what exists in the repository, in the architecture page's Stack, Structure and Review standard; (b) label each claim that matters `tested here`, `documented` (cite the source) or `general knowledge`; (c) say in the answer that no engine-specific guidance was used; (d) name the observed run that would confirm it. Then record an open question on the state page (owner: game-architect, must be answered by: none), and write the gap text (purpose, stack, question, what was missing) and include it in your answer. File it as a roadmap item for the general engine plugin if you can reach that roadmap; otherwise hand the owner the text. Do not add it to the project's own backlog or roadmap. If an open question for the same purpose and stack already exists, add nothing. Include the gap text in the answer; never offer to write it later.
 
-For a purpose that is not engine structure, quality or assets (asset craft, text craft, launch readiness, second opinion), if the mapped skill is unavailable, apply the process's own checks, record an open question, and hand the owner the gap text for the plugin the map names for that purpose.
+For a purpose that is not engine structure, quality or assets (asset craft, text craft, launch readiness, outside opinion), if the mapped skill is unavailable, apply the process's own checks, record an open question, and hand the owner the gap text for the plugin the map names for that purpose.
 
 ## Overlaps this plugin must not duplicate
 
-- **Test phases and lanes:** `agent-tests:test-strategy` defines dev, test and production phases and lanes. game-quality maps its gates onto them (concept through production roughly to dev, beta to test, release and live to production) and defers to it.
-- **Launch readiness:** `agent-marketing` models launch gates. G5 points to it and keeps only the engineering release criteria.
+- **Test phases and lanes:** `agent-tests:test-strategy` defines dev, test and production phases and lanes. game-quality maps its checkpoints onto them (concept through production roughly to dev, beta to test, release and live to production) and defers to it.
+- **Launch readiness:** `agent-marketing` models launch readiness. The Ship checkpoint points to it and keeps only the engineering release criteria.
 - **Document formats and validation:** the wiki tooling above. The artifact catalog gives owner, path and ready definition only.
 - **Skill quality:** `hartye-skills:yoda`.
 

@@ -33,6 +33,16 @@ The session lists its available skills. Confirm a mapped skill's name appears in
 - For development: start `claude` with `--plugin-dir <path to a checkout>` to load the plugin for one session.
 - Install the wiki tooling the same way and initialise its vault before the first session.
 
+## Blind review
+
+Start the reviewer as a read-only subagent: a subagent whose tools are limited to reading and searching files (no editing, no shell, no network). Give it file paths only, never pasted text and never your own conclusions:
+
+- the path of the checkpoint review page, with its Criteria and Constraints sections as written before any verdict;
+- the path of the constraints page;
+- the paths of the raw evidence (logs, captures, test output, the built artifact).
+
+Ask it for a verdict per criterion (`met`, `not-met` or `not-assessed`), what it could not verify, and anything inconsistent. The main agent is the author, so the subagent is the reviewer. Copy its answer into the review page's Independent review section unchanged, and set `blind-review: done`. If the subagent cannot read a path, record that as something it could not verify. If the owner declines the offer, set `blind-review: declined`.
+
 ## Limits
 
 Project-scoped locations only. Rows and install forms were checked against the host's documentation on 2026-10-26; re-check when the host version changes. This adapter does not cover other hosts or user-level configuration.

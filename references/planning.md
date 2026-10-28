@@ -1,21 +1,21 @@
 # Planning
 
-Planning happens when game-pm creates or revises the plan. It is meant to catch what a feature implies for every discipline before work starts, not to be rigid. Every default here can be struck by the owner; game-pm may strike an ordering default with a recorded reason. Process and gates are in [the process](process.md); documents are in [the artifact catalog](artifact-catalog.md).
+Planning happens when game-pm creates or revises the plan. It is meant to catch what a feature implies for every discipline before work starts, not to be rigid. Every default here can be struck by the owner; game-pm may strike an ordering default with a recorded reason. Process and checkpoints are in [the process](process.md); documents are in [the artifact catalog](artifact-catalog.md).
 
 ## Planning pass
 
 For each feature:
 
 1. **Expand.** Each discipline answers "what does this feature imply for me?" from its checklist below. Answers are proposals the owner may strike.
-2. **Record.** Write the answers in the feature's backlog item under Implications. Each piece of real work becomes its own backlog item whose `depends-on` entry names its prerequisites.
+2. **Record.** Write the answers in the feature's backlog item under Implications, including each constraint on the constraints page (see [its template](templates/constraints.md)) that the feature touches. Only the owner adds or changes a constraint. Each piece of real work becomes its own backlog item whose `depends-on` entry names its prerequisites.
 3. **Sequence.** Apply the ordering defaults.
-4. **Group.** Fit the ordered items into sprints and gates (set each item's Target gate), confirming that the design artifacts each item needs are `ready`. If one is not, make producing it its own backlog item and add that item to the dependent item's `depends-on`.
+4. **Group.** Fit the ordered items into sprints and checkpoints (set each item's Target checkpoint), confirming that the design artifacts each item needs are `ready`. If one is not, make producing it its own backlog item and add that item to the dependent item's `depends-on`.
 
-After G1, adding a feature or a change request reruns the pass for that feature only.
+After Brief approved, adding a feature or a change request reruns the pass for that feature only.
 
 ## Rolling wave
 
-Plan in detail up to the next gate and in outline beyond it. Re-plan at each gate and on every change request. Do not detail work for gates that are more than one gate away.
+Plan in detail up to the next checkpoint and in outline beyond it. Re-plan at each checkpoint and on every change request. Do not detail work for checkpoints that are more than one checkpoint away.
 
 ## Discipline checklists
 
@@ -24,7 +24,7 @@ Plan in detail up to the next gate and in outline beyond it. Re-plan at each gat
 | game-artist | Animations, effects, sounds and music, environment pieces, interface art, using the needs matrix below |
 | game-writer | Text, dialogue, item and interface copy, and when text locks for localization |
 | game-architect | New tools or engine capabilities and whether they are ready; data formats; performance risk |
-| game-quality | Test instrumentation and evidence needed; budget impact; regression risk |
+| game-quality | Test instrumentation and evidence needed; budget impact; regression risk; how each touched constraint will be measured |
 | game-master | Fit against the pillars; whether a pillar must change |
 
 ## Needs matrix

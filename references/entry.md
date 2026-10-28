@@ -1,6 +1,6 @@
 # Entry
 
-Detail for the studio-start skill: where the wiki is, how to answer a how-to question, how a gate check and a scope change after G3 start. Values are in [the vocabulary](vocabulary.md); the sequence is in [the process](process.md).
+Detail for the studio-start skill: where the wiki is, how to answer a how-to question, how a checkpoint review and a scope change after Scope lock start. Values are in [the vocabulary](vocabulary.md); the sequence is in [the process](process.md).
 
 ## Find the wiki
 
@@ -27,15 +27,15 @@ A question about how to build, run, verify, structure or measure the project, or
 2. Write the record BEFORE composing the answer, even when nothing has been run: the "Engine guidance used" entry on the architecture page for structure and build questions; the quality evidence note for verification, run and measurement questions, with every claim `evidence: none` and its Guidance used line filled.
 3. Answer in a few sentences: the conclusion for this project and the next action. In chat, give the conclusion and cite the skill and reference that hold the details. At most ONE rule may be adopted, in a sentence that cites the guidance; if adopted, write it into the architecture page's review standard in the same operation, so it is a decision and not chatter.
 
-## Check or pass a gate
+## Review a checkpoint
 
-The result is `met` when every required evidence item is `observed`, `unmet` otherwise. Report the result, then ask the owner to accept (see How a gate is passed in the process). A gate check reports met or unmet from the evidence list alone; concerns beyond it go in a Notes line and never change the result.
+Follow Checkpoint review in [the process](process.md). Each criterion is `met` only when its evidence is `observed`; a criterion nobody measured is `not-assessed`. Present the criteria, how each is met, the constraints due and every concession to the owner, record the review, and offer the blind review. The owner decides when to move on; propose the move, do not make it. Concerns beyond the criteria go in a Notes line and never change a status.
 
-## Scope change after G3
+## Scope change after Scope lock
 
 1. game-pm writes the change request as a decision record that names the cut, or `none` with the owner's reason.
 2. game-master adds the fit ruling.
-3. Ask the owner to name the cut and to approve. Nothing is built unless the owner approves.
+3. Ask the owner to name the cut and to approve. Nothing is built until the owner approves, or says to proceed anyway, which is recorded as a decision to proceed.
 
 ## Refresh a stale page
 
@@ -44,4 +44,4 @@ The result is `met` when every required evidence item is `observed`, `unmet` oth
 3. Set the question answered.
 4. Report.
 
-Change Phase only through a gate result or an adoption placement; if Phase itself is contradicted, ask the owner whether to re-place it (adoption step 5).
+Change Phase only when the owner says to, after a checkpoint review or an adoption placement; if Phase itself is contradicted, ask the owner whether to re-place it (adoption step 5).
