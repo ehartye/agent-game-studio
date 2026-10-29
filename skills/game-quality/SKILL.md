@@ -53,4 +53,4 @@ Everything else advises: name the gap and its risk, offer the missing step, and 
 
 ## Where to go next
 
-Use [the Where to go next section of the plugin map](../../references/plugin-map.md#where-to-go-next) for measuring performance or checking a constraint, deciding a testing strategy or auditing the tests, and reviewing asset or text craft. Product constraints and acceptance against the pillars go to game-master; tool readiness goes to game-architect.
+Use [the Where to go next section of the plugin map](../../references/plugin-map.md#where-to-go-next) for measuring performance or checking a constraint, deciding a testing strategy or auditing the tests. Asset craft goes to game-artist, text craft to game-writer, product constraints and acceptance to game-master, tool readiness to game-architect.

@@ -111,6 +111,3 @@ A routing row's Required output is the output of the first step its owner perfor
 
 After Scope lock a change request names the cut that pays for it. game-pm writes it as a decision record that names the cut (or `none` with the owner's reason), game-master adds the fit ruling, and the agent asks the owner to name the cut and to approve. The request is written first and carries game-master's fit ruling. If the ruling is `does-not-fit` or `needs-pillar-change`, the request goes to the owner with that ruling, and nothing is built unless the owner approves or says to proceed, which is recorded as a decision to proceed. After Content lock the same applies to content. Changes to locked text, a locked asset or a signed-off contract make dependent sign-offs stale: set their registry status to `draft` and re-check them.
 
-## Before a role skill exists
-
-Until a role has its own skill, follow that role's row in [decision routing](decision-routing.md) and its entries in [the artifact catalog](artifact-catalog.md) directly. The agent performs that role's row and writes that role's artifacts itself, applying the same checks. It escalates to the owner only for what the role would escalate: a contested decision, a decision to proceed, a pillar change, or an approval that routing assigns to `owner`.

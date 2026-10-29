@@ -6,7 +6,8 @@ import { dirname, join, resolve } from 'node:path';
 import { ROOT, anchorLinks, existsExact, frontmatter, headingSlugs, links, posix, readRel, section, tables, walk } from './lib/md.mjs';
 
 const ROLES = ['game-master', 'game-architect', 'game-pm', 'game-quality', 'game-writer', 'game-artist', 'game-designer'];
-const EXPECTED_SKILLS = ['game-architect', 'game-master', 'game-pm', 'game-quality', 'studio-start'];
+const ADVISORS = ['game-writer', 'game-artist', 'game-designer'];
+const EXPECTED_SKILLS = ['game-architect', 'game-artist', 'game-designer', 'game-master', 'game-pm', 'game-quality', 'game-writer', 'studio-start'];
 const CHECKPOINTS = { 'brief-approved': 'Brief approved', 'vertical-slice': 'Vertical slice', 'scope-lock': 'Scope lock', 'content-lock': 'Content lock', ship: 'Ship' };
 const SLUGS = Object.keys(CHECKPOINTS);
 const LEGACY_FIXTURES = new Set(['legacy-codes']); // the one fixture that keeps the old page shape, to test the alias
@@ -47,12 +48,22 @@ const TEMPLATE_KIND = {
   'tooling-audit.md': 'note',
   'constraints.md': 'reference',
   'checkpoint-review.md': 'reference',
+  'art-bible.md': 'reference',
+  'narrative-bible.md': 'reference',
+  'asset-list.md': 'reference',
+  'design-spec.md': 'reference',
 };
 const WIKI_KEYS = ['type', 'created', 'updated', 'reviewed', 'status', 'sources', 'ai-generated', 'project', 'kind'];
 const STATE_FIELDS = ['Phase', 'Rigor tier', 'Next step', 'Blocked by', 'Current sprint', 'Artifact registry', 'Open questions', 'Last checkpoint review', 'Decision to proceed'];
 const CHECKPOINT_REVIEW_KEYS = ['checkpoint', 'standing', 'tip', 'review-date', 'blind-review', 'owner-acceptance'];
 const CHECKPOINT_REVIEW_SECTIONS = ['Criteria', 'Constraints at this checkpoint', 'Concessions and decisions to proceed', 'Claims the evidence does not support', 'Independent review', 'Open items'];
 const CONSTRAINT_COLUMNS = ['Constraint', 'Source', 'Conditions', 'How checked', 'Matters at', 'Status', 'Evidence', 'Concession'];
+const ASSET_COLUMNS = ['Asset', 'Stage', 'Provenance', 'Licence', 'Fit sign-off', 'Link'];
+const TEMPLATE_SECTIONS = {
+  'art-bible.md': ['Palette', 'Silhouette and readability rules', 'Tie-breaker', 'Named mistakes', 'Key assets that need fit sign-off', 'Approval'],
+  'narrative-bible.md': ['Canon', 'Character voices', 'Glossary', 'Where the text lives', 'Locked'],
+  'design-spec.md': ['System', 'Pillar served', 'Rules', 'Numbers', 'Edge cases', 'Diagrams, tables and mockups', 'Dependencies', 'Acceptance evidence expected', 'Fit ruling'],
+};
 
 const json = (rel) => JSON.parse(readRel(rel));
 const strip = (cell) => cell.replace(/`/g, '');
@@ -76,7 +87,7 @@ test('manifest is complete and the package version matches', () => {
   assert.equal(json('package.json').version, m.version);
 });
 
-test('the plugin ships exactly the five expected skills', () => {
+test('the plugin ships exactly the eight expected skills', () => {
   assert.deepEqual(skillDirs(), EXPECTED_SKILLS);
 });
 
@@ -106,6 +117,7 @@ test('every skill has matching frontmatter, a routing description, links to a re
     assert.ok(next, `${name}: has a Where to go next section`);
     assert.ok(links(next).some((l) => l.target.endsWith('references/plugin-map.md#where-to-go-next')), `${name}: Where to go next points to the plugin map`);
     assert.ok(Buffer.byteLength(text) <= SKILL_BUDGET_BYTES, `${name}: ${Buffer.byteLength(text)} bytes`);
+    assert.match(fm.data.description, /Not for /, `${name}: description keeps a Not for clause`);
   }
 });
 
@@ -154,9 +166,10 @@ test('process.md defines the phases, the five checkpoints, advise-ask-proceed, t
   assert.deepEqual(phases.rows.map((r) => r[0].split(' ')[0]), SETS.Phase);
   assert.deepEqual(phases.rows.map((r) => strip(r[1]).match(/\(([a-z-]+)\)$/)?.[1] ?? 'none'), ['none', ...SLUGS, 'none']);
   for (const [slug, name] of Object.entries(CHECKPOINTS)) assert.ok(phases.rows.some((r) => r[1] === `${name} (\`${slug}\`)`), `checkpoint ${name} (${slug})`);
-  for (const heading of ['Source of truth', 'Phases and checkpoints', 'Advise, ask, proceed', 'Rules that hold', 'Checkpoint review', 'Blind review', 'Work loop', 'Session rules', 'Evidence rules', 'Change control', 'Before a role skill exists']) {
+  for (const heading of ['Source of truth', 'Phases and checkpoints', 'Advise, ask, proceed', 'Rules that hold', 'Checkpoint review', 'Blind review', 'Work loop', 'Session rules', 'Evidence rules', 'Change control']) {
     assert.ok(section(text, heading), `section ${heading}`);
   }
+  assert.ok(!section(text, 'Before a role skill exists'), 'every role has a skill, so the section for a missing one is gone');
   assert.ok(!section(text, 'Waivers') && !section(text, 'Phases and gates'), 'the old gate sections are gone');
   assert.equal((section(text, 'Work loop').match(/^\d+\. \*\*/gm) ?? []).length, 8);
   assert.match(text, /A checkpoint reports where the project stands and what is missing\. It never blocks work\. The phase changes only when the owner says so; the agent proposes the change\./);
@@ -200,10 +213,16 @@ test('decision-routing.md has a valid roles table and a valid routing table', ()
   assert.deepEqual(roles.rows.map((r) => r[0].replace(/ \(.*\)$/, '')), ROLES);
   const routing = tableWith('references/decision-routing.md', 'Request');
   assert.deepEqual(routing.header, ['Request', 'Owner', 'Then', 'Read first', 'Required output']);
-  assert.equal(routing.rows.length, 17);
+  assert.equal(routing.rows.length, 18);
   assert.ok(routing.rows.some((r) => r[0] === 'What must this game satisfy, or is X a constraint' && strip(r[1]) === 'game-master' && strip(r[2]) === 'owner'), 'the constraints row');
   assert.ok(routing.rows.some((r) => r[0] === 'Scope change after Scope lock'), 'the scope change row is named for the checkpoint');
-  for (const owner of ['game-pm', 'game-quality']) assert.ok(routing.rows.some((r) => strip(r[1]) === owner), `${owner} owns a row`);  for (const [request, owner, then, readFirst, output] of routing.rows) {
+  for (const owner of ROLES) assert.ok(routing.rows.some((r) => strip(r[1]) === owner), `${owner} owns a row`);
+  const design = routing.rows.find((r) => r[0] === 'System, economy, level or interface design');
+  assert.ok(design, 'the design row');
+  assert.deepEqual([strip(design[1]), strip(design[2])], ['game-designer', 'game-master'], 'a design spec goes to game-master for the fit ruling');
+  assert.ok(strip(design[3]).includes('game-designer skill'), 'the design row names the skill');
+  assert.ok(routing.rows.some((r) => r[0] === 'Characters, level art, effects, marketing art'), 'level art belongs to the artist row, not the design row');
+  for (const [request, owner, then, readFirst, output] of routing.rows) {
     assert.ok(request && readFirst && output, `${request}: empty cell`);
     assert.ok([...ROLES, 'studio-start', 'none'].includes(strip(owner)), `${request}: owner "${owner}"`);
     assert.ok([...ROLES, 'owner', '-'].includes(strip(then)), `${request}: then "${then}"`);
@@ -280,6 +299,47 @@ test('the checkpoint review and constraints templates carry their keys, sections
   assert.match(backlog, /^Target checkpoint: <brief-approved \| vertical-slice \| scope-lock \| content-lock \| ship, or none>$/m);
   assert.match(backlog, /^- constraints touched: /m);
   assert.doesNotMatch(backlog, /Target gate/);
+});
+
+test('the art bible, narrative bible, asset list and design spec templates carry their sections and columns, and the lines an agent never fills say so', () => {
+  for (const [file, headings] of Object.entries(TEMPLATE_SECTIONS)) {
+    const text = readRel(`references/templates/${file}`);
+    assert.deepEqual([...text.matchAll(/^## (.+)$/gm)].map((m) => m[1]), headings, `${file}: sections in order`);
+  }
+  const assetText = readRel('references/templates/asset-list.md');
+  const assets = tableWith('references/templates/asset-list.md', 'Asset');
+  assert.deepEqual(assets.header, ASSET_COLUMNS);
+  assert.equal(assets.rows.length, 1, 'one worked example');
+  assert.ok(['human', 'AI-assisted', 'AI-generated'].includes(assets.rows[0][2]), 'the example names a provenance');
+  assert.equal(assets.rows[0][4], '-', 'fit sign-off is empty in the example');
+  assert.match(assetText, /an agent never fills it/);
+  // The column check fails when a column is dropped.
+  const without = tables(assetText.replace(' Provenance |', '').replace(' human |', '')).find((x) => x.header[0] === 'Asset');
+  assert.notDeepEqual(without.header, ASSET_COLUMNS, 'dropping the Provenance column changes the header');
+  assert.match(section(readRel('references/templates/art-bible.md'), 'Approval'), /An agent never fills this line\./);
+  assert.match(section(readRel('references/templates/narrative-bible.md'), 'Locked'), /An agent never fills this section\./);
+  const spec = readRel('references/templates/design-spec.md');
+  assert.deepEqual(tableWith('references/templates/design-spec.md', 'Number').header, ['Number', 'Value', 'Unit', 'Source']);
+  assert.match(section(spec, 'Diagrams, tables and mockups'), /^Optional\./);
+  assert.match(section(spec, 'Diagrams, tables and mockups'), /```mermaid/);
+  assert.match(section(spec, 'Diagrams, tables and mockups'), /the columns and which column is the key/);
+  assert.match(section(spec, 'Diagrams, tables and mockups'), /never embed a binary/);
+  assert.match(section(spec, 'Diagrams, tables and mockups'), /Must stay fixed:/);
+  assert.match(section(spec, 'Fit ruling'), /An agent never fills this line\./);
+  assert.match(readRel('references/templates/narrative-bible.md'), /the glossary lives here, not in a page of its own/);
+});
+
+test('the writer, artist and designer skills carry the advisor shape: numbered sections, Escalate to the owner, and the pointer to their template', () => {
+  const TEMPLATES = { 'game-writer': 'narrative-bible.md', 'game-artist': 'art-bible.md', 'game-designer': 'design-spec.md' };
+  for (const name of ADVISORS) {
+    const text = readRel(`skills/${name}/SKILL.md`);
+    assert.ok((text.match(/^## \d+\. /gm) ?? []).length >= 3, `${name}: numbered sections`);
+    assert.ok(section(text, 'Escalate to the owner'), `${name}: Escalate to the owner`);
+    assert.match(section(text, 'Rules that hold'), /\n\nEverything else advises: /, `${name}: the advisory sentence`);
+    assert.ok(links(text).some((l) => l.target.endsWith(`references/templates/${TEMPLATES[name]}`)), `${name}: links to ${TEMPLATES[name]}`);
+  }
+  assert.ok(links(readRel('skills/game-artist/SKILL.md')).some((l) => l.target.endsWith('references/templates/asset-list.md')), 'game-artist links to the asset list');
+  assert.match(section(readRel('skills/game-designer/SKILL.md'), 'Where to go next'), /No installed plugin covers design craft/);
 });
 
 test('the instruction block names the state page, the routing table, the advisory rules and studio-start', () => {
@@ -362,6 +422,7 @@ test('plugin-map.md has a purpose/stack/defer table covering every purpose and s
   assert.match(readRel('references/plugin-map.md'), /^## Fallback chain$/m);
 });
 
+
 test('plugin-map.md has a Where to go next table keyed by situation, and the fallback chain says to include the gap text in the answer', () => {
   const map = readRel('references/plugin-map.md');
   const t = tableWith('references/plugin-map.md', 'Situation');
@@ -371,6 +432,10 @@ test('plugin-map.md has a Where to go next table keyed by situation, and the fal
   for (const s of ['Choosing an engine or web stack', 'Measuring performance, or checking a constraint', 'Deciding a testing strategy, or auditing the tests', 'Writing or validating project documents']) assert.ok(situations.includes(s), `situation ${s}`);
   assert.ok(t.rows.filter((r) => /constraints page/.test(r[2])).length >= 3, 'the constraints page is brought where it applies');
   assert.ok(t.rows.some((r) => /Status and Evidence link/.test(r[3])), 'measured results go back to the constraint row');
+  const design = t.rows.find((r) => r[0] === 'Designing a system, economy, level or interface');
+  assert.ok(design, 'the design situation');
+  assert.match(design[1], /^No installed plugin covers design craft/);
+  assert.doesNotMatch(design[1], /agent-/, 'the design row names no plugin');
   assert.ok(section(map, 'Where to go next'), 'section');
   assert.match(section(map, 'Fallback chain'), /Include the gap text in the answer; never offer to write it later\./);
 });
@@ -456,6 +521,11 @@ test('fixtures conform to the templates they stand in for', () => {
     if (existsSync(statePath)) {
       const text = readFileSync(statePath, 'utf8');
       if (/^\| none \|/m.test(text)) bad.push(`${fx}: state page open questions use a none row`);
+    }
+    const narrative = join(wiki, 'reference', 'narrative-bible.md');
+    if (existsSync(narrative)) {
+      const text = readFileSync(narrative, 'utf8');
+      for (const h of TEMPLATE_SECTIONS['narrative-bible.md']) if (section(text, h) === null) bad.push(`${fx}: narrative bible section ${h}`);
     }
     const arch = join(wiki, 'architecture.md');
     if (existsSync(arch) && !/^## Tools$/m.test(readFileSync(arch, 'utf8'))) bad.push(`${fx}: architecture page has no Tools section`);
@@ -653,7 +723,7 @@ test('a backticked value after a status-like word belongs to a closed set', () =
 
 test('the reply starts with the report and the Routed line, in the skills and the instruction block', () => {
   const FIRST = /If this reply has not yet started with the three-line report and the `Routed: <request type> -> <owner>` line \(see studio-start, Route the request\), start it that way\./;
-  for (const name of ['game-master', 'game-architect', 'game-pm', 'game-quality']) {
+  for (const name of ROLES) {
     const body = readRel(`skills/${name}/SKILL.md`).split(/\r?\n/);
     const first = body[body.findIndex((l) => l.startsWith('# ')) + 2];
     assert.match(first, FIRST, `${name}: first line after the title`);

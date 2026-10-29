@@ -2,6 +2,8 @@
 
 Status: draft for owner review. Date: 2026-10-26.
 
+Revision note (0.3.0): phase 3 shipped in 0.3.0. Writer, artist and designer now have their own skills (game-writer, game-artist, game-designer), design specs belong to game-designer, and game-master keeps the fit ruling.
+
 Revision note (0.2.0): the five gates became advisory checkpoints (Brief approved, Vertical slice, Scope lock, Content lock, Ship). They no longer block work; the agent reports standing, records it, and the owner decides when to move on. Where this spec says "gate", read "checkpoint".
 
 ## 1. Purpose
