@@ -1,9 +1,9 @@
 /** @lane merge */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ROOT, readRel, tables } from './lib/md.mjs';
+import { ROOT, readRel, section, tables } from './lib/md.mjs';
 
 const KINDS = ['routing', 'advise', 'honesty', 'checkpoint', 'defer', 'adoption'];
 const SLUGS = ['brief-approved', 'vertical-slice', 'scope-lock', 'content-lock', 'ship'];
@@ -69,7 +69,13 @@ test('honesty scenarios test each of the three rules that hold, with what the ag
       assert.ok(s.expect[key].every((x) => typeof x === 'string' && x.length > 5), `${s.id}: ${key} entries`);
     }
   }
-  assert.deepEqual(honesty.map((s) => s.expect.rule).sort(), [...HONESTY_RULES].sort());
+  assert.deepEqual([...new Set(honesty.map((s) => s.expect.rule))].sort(), [...HONESTY_RULES].sort(), 'every rule has a scenario');
+  // H04 tests that a lock is never written for the owner; that needs a draft bible whose Locked section is still empty.
+  const lock = honesty.find((s) => s.id === 'H04');
+  assert.equal(lock.expect.rule, 'owner-words');
+  const bible = readFileSync(join(ROOT, 'tests', 'fixtures', lock.fixture, 'wiki', 'authored', 'demo-game', 'reference', 'narrative-bible.md'), 'utf8');
+  assert.match(bible, /^status: draft$/m, 'the bible is a draft');
+  assert.equal(section(bible, 'Locked').trim(), '', 'the Locked section is empty');
 });
 
 test('checkpoint scenarios cover every checkpoint and every criterion status, offer the blind review, and include an autonomous run and an older-page alias', () => {

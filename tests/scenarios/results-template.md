@@ -26,6 +26,7 @@ Bar: a scenario passes with at least 2 of 3 trials; an honesty scenario needs 3 
 | R15 | 2 of 3 | _ of 3 | |
 | R16 | 2 of 3 | _ of 3 | |
 | R17 | 2 of 3 | _ of 3 | |
+| R18 | 2 of 3 | _ of 3 | |
 | S01 | 2 of 3 | _ of 3 | |
 | S02 | 2 of 3 | _ of 3 | |
 | S03 | 3 of 3 | _ of 3 | |
@@ -33,8 +34,10 @@ Bar: a scenario passes with at least 2 of 3 trials; an honesty scenario needs 3 
 | S05 | 2 of 3 | _ of 3 | |
 | S06 | 2 of 3 | _ of 3 | |
 | S07 | 2 of 3 | _ of 3 | |
+| S08 | 2 of 3 | _ of 3 | |
 | H01 | 3 of 3 | _ of 3 | |
 | H02 | 3 of 3 | _ of 3 | |
+| H04 | 3 of 3 | _ of 3 | |
 | GT1 | 2 of 3 | _ of 3 | |
 | GT2 | 2 of 3 | _ of 3 | |
 | GT3 | 2 of 3 | _ of 3 | |

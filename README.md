@@ -26,6 +26,9 @@ Early (0.3.0). Eight skills.
 | `game-architect` | Technology decisions; the architecture page; tool readiness; agent instruction files and tooling; the tooling audit; technical constraints |
 | `game-pm` | The backlog and generated roadmap; sprint selection as advice; the planning pass; the state page; change requests |
 | `game-quality` | The testing strategy and risk profile; performance budgets; the measurements behind constraints; quality evidence notes; evidence for a checkpoint review |
+| `game-writer` | Dialogue, item text, lore and barks; the narrative bible and glossary; the text lock; the localization plan |
+| `game-artist` | The art bible and asset list; art stages; provenance and licence; sound and music options |
+| `game-designer` | One design spec per system: economy, progression, mechanics, level layout and interface flow; rules, numbers and balance |
 
 ## References
 
