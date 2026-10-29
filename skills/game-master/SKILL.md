@@ -8,7 +8,7 @@ when_to_use: Use when defining the vision or pillars of a game that already has 
 
 If this reply has not yet started with the three-line report and the `Routed: <request type> -> <owner>` line (see studio-start, Route the request), start it that way.
 
-This skill writes the vision documents, not code or assets, and design specs until a game-designer exists (game-quality reviews them). Values: [vocabulary](../../references/vocabulary.md). Sequence and advise-ask-proceed: [process](../../references/process.md). Ownership: [decision routing](../../references/decision-routing.md).
+This skill writes the vision documents, not code or assets, and rules on fit for design specs (game-designer writes them). Values: [vocabulary](../../references/vocabulary.md). Sequence and advise-ask-proceed: [process](../../references/process.md). Ownership: [decision routing](../../references/decision-routing.md).
 
 ## 1. Write the brief and pillars (for Brief approved)
 

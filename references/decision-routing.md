@@ -14,9 +14,7 @@ Each role decides some questions, writes some artifacts, and reviews the rest. A
 | game-quality | Whether it works and is ready; the quality bar, budgets and severity scale; release criteria; how each constraint is measured | Test strategy; quality evidence; the measurements behind constraints; release criteria (full tier) |
 | game-writer | Text, dialogue, canon and glossary; the localization lock | Narrative bible and glossary; localization plan (full tier) |
 | game-artist | Craft of art, animation, effects, sound and music; art bible compliance | Art bible; asset list (standard tier); asset entries (full tier) |
-| game-designer (phase 3) | System, economy, level and interface design | Design specs |
-
-Until game-designer exists, game-master owns design specs as a flagged exception and game-quality reviews them.
+| game-designer | System, economy, level and interface design | Design specs |
 
 ## Routing
 
@@ -34,9 +32,10 @@ In this table `Owner` is the responsible role. The human who owns the project is
 | What to do next, or sprint contents | game-pm | - | Backlog, artifact registry; the `game-pm` skill | Sprint list with design artifacts confirmed ready |
 | Plan creation or revision | game-pm | - | Brief, pillars, backlog; the `game-pm` skill | Plan from [the planning pass](planning.md) |
 | Scope change after Scope lock | game-pm | game-master | Backlog, pillars | Change request as a decision record naming the cut, or `none` with the owner's reason, with game-master's fit ruling; the owner is asked to name the cut and approve |
-| Dialogue, item text, lore | game-writer | - | Narrative bible | Text plus glossary and canon updates |
-| Characters, levels, effects, marketing art | game-artist | game-master | Art bible | Asset plus provenance entry; game-master signs off fit on key assets |
-| Sound or music selection | game-artist | owner | Art bible | The owner's recorded pick |
+| System, economy, level or interface design | game-designer | game-master | The brief, the pillars, the non-goals; the `game-designer` skill | A design spec for one system, linked to the pillar it serves, with game-master's fit ruling |
+| Dialogue, item text, lore | game-writer | - | Narrative bible; the `game-writer` skill | Text plus glossary and canon updates |
+| Characters, level art, effects, marketing art | game-artist | game-master | Art bible; the `game-artist` skill | Asset plus provenance entry; game-master signs off fit on key assets |
+| Sound or music selection | game-artist | owner | Art bible; the `game-artist` skill | The owner's recorded pick |
 | Does it work, is it ready, performance | game-quality | - | Test strategy, budgets, the constraints page; the `game-quality` skill | Observed evidence recorded against the checkpoint or constraint |
 | Status | game-pm | - | State page | The three-line report |
 | Joining an existing project | studio-start | - | The project | Adoption |
@@ -48,6 +47,6 @@ For "Scope change after Scope lock" the owner also approves the change request, 
 
 1. Match the request to the most specific row, by what is being asked and not by keywords. Where two rows fit, these win: "Scope change after Scope lock" over "New idea or feature" whenever the phase is beta, release or live (that is, the Scope lock review is recorded as `reviewed` or `reviewed-with-concessions`); "What must this game satisfy" over "Does it work" when the question is whether something is a constraint and not whether it is met; "Tooling cleanup" over "Agent instruction files, project skills, tooling" when the request is to remove, merge or audit existing tooling; "Status" and "Course check" over "What to do next". A request about something outside the game project matches "Anything else". A request to review a checkpoint matches "Does it work, is it ready, performance": the checkpoint's check owner in [the process](process.md) reports standing, and game-quality records the evidence. The owner decides when to move on. The Required output of a checkpoint review is its record at `reference/checkpoint-<slug>.md`, written in the same turn, with the blind review offered. For a checkpoint review, the checkpoint's criteria in the process replace the row's Read first. Do not split a request across owners unless a row names a `Then`.
 2. If no row fits, use the last row: record an open question on the state page and ask the owner. The exception is a request to build or continue an existing backlog item, which enters the work loop at step 2.
-3. A role without a skill (game-writer, game-artist, game-designer) is still the owner of its rows. Follow the row directly. game-pm and game-quality have skills; load them for their rows.
+3. Every role has a skill. Load the role's skill for its rows.
 4. An owner who is unsure escalates to the human owner. Never decide a question that belongs to another row: name that row's owner and hand it over.
 5. Read every document in Read first. If one is absent or not `ready`, say so. If the Required output cannot be produced without it, name the gap and the risk in two lines, offer the missing step first, and proceed when the owner says go, recording the decision to proceed (work loop step 3). Otherwise continue and record the gap as an open question.

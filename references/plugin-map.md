@@ -47,6 +47,7 @@ Use this when a situation needs craft or technology the plugin does not own. Fin
 | Sound and music | `agent-beeps:beeps-craft`; the owner picks with `agent-beeps:beeps-audition` | The art bible and the backlog item | The owner's recorded pick in the backlog item |
 | Game text, dialogue and voice | `agent-prose:prose-dialog`, `agent-prose:prose-voice`, `agent-prose:prose-review` | The narrative bible and the glossary | The backlog item's Implications; the narrative bible |
 | Marketing and launch readiness | `agent-marketing:market-campaign` | The state page, the brief and the release criteria | The backlog item for the launch work; the Ship checkpoint review |
+| Designing a system, economy, level or interface | No installed plugin covers design craft; follow the design spec template | The brief, the pillars and the non-goals | The design spec, with what comes back recorded in it |
 | Writing or validating project documents | `wiki-master:wiki-author`; `wiki-master:wiki-health` | The document and its catalog entry | The document itself |
 
 ## Lookup procedure
