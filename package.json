@@ -1,6 +1,6 @@
 {
   "name": "agent-game-studio",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "type": "module",
   "description": "Technology-agnostic game process skills and references for AI agents",

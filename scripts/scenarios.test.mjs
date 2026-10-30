@@ -102,9 +102,9 @@ test('checkpoint scenarios cover every checkpoint and every criterion status, of
   assert.deepEqual(cps.filter((s) => s.expect.alias).map((s) => s.fixture), ['legacy-codes']);
 });
 
-test('no prompt or reply writes an old gate code, and only the alias scenario uses the legacy-codes fixture', () => {
+test('no prompt or reply writes an old gate code, and only the alias scenario and the older-siblings scenario use the legacy-codes fixture', () => {
   for (const s of scenarios) for (const text of [s.prompt, s.reply ?? '']) assert.doesNotMatch(text, /\bG[1-5]\b|\bgate\b/i, `${s.id}: old wording`);
-  assert.deepEqual(scenarios.filter((s) => s.fixture === 'legacy-codes').map((s) => s.kind), ['checkpoint']);
+  assert.deepEqual(scenarios.filter((s) => s.fixture === 'legacy-codes').map((s) => s.id), ['GT8', 'A04']);
 });
 
 test('defer scenarios cover the mapped, fallback and gap paths', () => {

@@ -11,6 +11,8 @@ kind: reference
 ---
 # Studio state: <project>
 
+Record a version, a count or a pull request state where its source lives (the installed plugin, the folder listing, the pull request). Elsewhere on this page link the source or say how to read it. If a copy is kept, it carries the date and how it was read.
+
 ## Phase
 <adopt | concept | pre-production | production | beta | release | live>
 

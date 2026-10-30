@@ -23,7 +23,7 @@ This skill writes the vision documents, not code or assets, and rules on fit for
 
 1. No brief at status `ready` means no pillars on record, so no verdict is possible. Advise and offer to write the brief first; if the owner says go on, record a decision to proceed and give no verdict.
 2. If the request has no backlog item, ask game-pm to create it. You write only its fit-verdict line.
-3. Give one verdict (definitions: vocabulary) and record it in the backlog item: `Fit: <verdict> - <reason, citing pillars as P1.. and non-goals as N1..> - <date>`.
+3. Give one verdict (definitions: vocabulary) and record it in the backlog item, replacing any `pending`: `Fit: <verdict> - <reason, citing pillars as P1.. and non-goals as N1..> - <date>`.
    - `fits`: name the pillar served and confirm no non-goal is broken. A new idea ends here: ask the owner whether to plan it.
    - `does-not-fit`: name the non-goal broken, or say no pillar needs it. Tell the owner; the item stays `planned` until the owner accepts the verdict, then ask game-pm to set it `dropped`. If the owner says to build it anyway, record a decision to proceed and tell game-pm.
    - `needs-pillar-change`: name the pillar edit that would make it fit. Ask game-pm to set the item `blocked` with the reason; the owner decides.

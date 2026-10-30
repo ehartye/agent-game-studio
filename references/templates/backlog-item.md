@@ -12,9 +12,11 @@ backlog-status: planned
 depends-on: []
 ---
 <!-- depends-on: quoted wikilinks to backlog items in this project, for example ["[[other-slug]]"], or []. Delete this comment. -->
+<!-- A new item has no verdict yet: write `Fit: pending - <why there is no verdict yet> - <YYYY-MM-DD>`; game-master replaces it. Delete this comment. -->
+<!-- In an adopted project, write a new item to this template and the vocabulary, not to the shape of older items, and do not rewrite older items unless the owner asks. Delete this comment. -->
 # <Item title>
 
-Fit: <fits | does-not-fit | needs-pillar-change> - <P and N numbers (P2 is pillar 2, N1 is non-goal 1) and the reason; for needs-pillar-change the exact edit; for a process document the next checkpoint reviews: process document for <checkpoint name>> - <YYYY-MM-DD>
+Fit: <fits | does-not-fit | needs-pillar-change | pending> - <P and N numbers (P2 is pillar 2, N1 is non-goal 1) and the reason; for needs-pillar-change the exact edit; for pending why there is no verdict yet, for example waiting for game-master's fit check; for a process document the next checkpoint reviews: process document for <checkpoint name>> - <YYYY-MM-DD>
 Target checkpoint: <brief-approved | vertical-slice | scope-lock | content-lock | ship, or none>
 
 ## Implications

@@ -55,4 +55,4 @@ Mockup or blockout: <link to a mockup or blockout kept outside the wiki; never e
 - <what a reviewer will observe to accept the system: a capture, a test result or a playtest note>
 
 ## Fit ruling
-<empty until game-master gives it, as fits, does-not-fit or needs-pillar-change, with a date and their reason. An agent never fills this line.>
+<empty until game-master gives it, as `fits`, `does-not-fit` or `needs-pillar-change`, with a date and their reason; empty means `pending`. An agent never fills this line.>
