@@ -18,7 +18,7 @@ const SETS = {
   'Artifact status': ['ready', 'draft', 'absent', 'reconstructed', 'conflicting'],
   'Backlog status': ['planned', 'in-progress', 'shipped', 'blocked', 'dropped'],
   'Art stage': ['brief', 'reference-approved', 'draft', 'craft-review', 'isolated-signoff', 'integrated', 'in-context-signoff', 'locked', 'not-applicable'],
-  'Fit verdict': ['fits', 'does-not-fit', 'needs-pillar-change'],
+  'Fit verdict': ['fits', 'does-not-fit', 'needs-pillar-change', 'pending'],
   Checkpoint: [...SLUGS, 'none'],
   'Criterion status': ['met', 'not-met', 'not-assessed'],
   'Checkpoint standing': ['open', 'reviewed', 'reviewed-with-concessions'],
@@ -158,6 +158,12 @@ test('vocabulary.md defines every closed set exactly', () => {
   const t = tableWith('references/vocabulary.md', 'Set');
   const got = Object.fromEntries(t.rows.map((r) => [r[0], strip(r[1]).split(',').map((v) => v.trim())]));
   assert.deepEqual(got, SETS);
+  // Every file that lists the whole Fit set lists it with `pending`, and the backlog template's Fit line carries the set in order.
+  const word = (v) => new RegExp(String.raw`(?<![\w-])${v}(?![\w-])`);
+  const listers = [...walk(join(ROOT, 'references'), ['.md']), ...walk(join(ROOT, 'skills'), ['.md'])].filter((f) => SETS['Fit verdict'].slice(0, 3).every((v) => word(v).test(readFileSync(f, 'utf8'))));
+  assert.ok(listers.length >= 5, 'the files that list the Fit set were found');
+  assert.deepEqual(listers.filter((f) => !/(?:`pending`|\| pending\b|Fit: pending)/.test(readFileSync(f, 'utf8'))).map((f) => posix(f.slice(ROOT.length + 1))), [], 'files that list the Fit set without pending');
+  assert.ok(readRel('references/templates/backlog-item.md').split(/\r?\n/).some((l) => l.startsWith(`Fit: <${SETS['Fit verdict'].join(' | ')}`)), 'the backlog template Fit line carries the set in order');
 });
 
 test('process.md defines the phases, the five checkpoints, advise-ask-proceed, the three rules, the checkpoint review, the blind review and the eight-step work loop', () => {
@@ -272,6 +278,13 @@ test('wiki templates carry the authored-page keys and the right kind', () => {
 test('the state page template carries every required field as a heading', () => {
   const text = readRel('references/templates/state-page.md');
   for (const field of STATE_FIELDS) assert.match(text, new RegExp(`^## ${field}$`, 'm'), field);
+});
+
+test('the architecture and state page templates say a version, a count or a pull request state is recorded where its source lives', () => {
+  for (const rel of ['references/templates/architecture.md', 'references/templates/state-page.md']) {
+    const blocks = readRel(rel).split(/\r?\n\s*\r?\n/);
+    assert.ok(blocks.some((b) => ['version', 'count', 'pull request', 'source', 'record'].every((w) => b.toLowerCase().includes(w))), `${rel}: a record-at-the-source note naming version, count and pull request state`);
+  }
 });
 
 test('the checkpoint review and constraints templates carry their keys, sections and columns, and the backlog template carries the checkpoint fields', () => {
@@ -507,8 +520,10 @@ test('fixtures conform to the templates they stand in for', () => {
       for (const f of readdirSync(backlog).filter((n) => n.endsWith('.md'))) {
         const text = readFileSync(join(backlog, f), 'utf8');
         const where = `${fx}/backlog/${f}`;
-        if (!/^Fit: (?:fits|does-not-fit|needs-pillar-change) - .+ - \d{4}-\d{2}-\d{2}$/m.test(text)) bad.push(`${where}: Fit line`);
-        if (!new RegExp(`^Target checkpoint: (?:${SLUGS.join('|')}|none)$`, 'm').test(text)) bad.push(`${where}: Target checkpoint line`);
+        if (!/^Fit: (?:(?:fits|does-not-fit|needs-pillar-change) - .+ - \d{4}-\d{2}-\d{2}|pending(?: - .+)?)$/m.test(text)) bad.push(`${where}: Fit line`);
+        // The legacy fixture's sibling items keep the older line; every other fixture uses the checkpoint name.
+        const target = LEGACY_FIXTURES.has(fx) ? /^Target gate: (?:G[1-5]|none)$/m : new RegExp(`^Target checkpoint: (?:${SLUGS.join('|')}|none)$`, 'm');
+        if (!target.test(text)) bad.push(`${where}: Target ${LEGACY_FIXTURES.has(fx) ? 'gate' : 'checkpoint'} line`);
         for (const key of ['art', 'sound', 'writing', 'architecture', 'quality', 'constraints touched']) {
           if (!new RegExp(`^- ${key}: .+$`, 'm').test(text)) bad.push(`${where}: Implications ${key}`);
         }
@@ -584,6 +599,10 @@ test('the old codes G1 to G5 and the word gate appear in no fixture except the l
   assert.equal(section(state, 'Phase').trim(), 'production');
   assert.ok(existsSync(join(old, 'notes', 'quality-g2.md')), 'the older note keeps its coded name');
   assert.match(readFileSync(join(old, 'notes', 'quality-g2.md'), 'utf8'), /^Supports: G2$/m);
+  // Sibling backlog items keep the older Target line, so a new item has an older convention to be told apart from.
+  const siblings = readdirSync(join(old, 'backlog')).filter((n) => n.endsWith('.md'));
+  assert.ok(siblings.length >= 2, 'at least two older sibling backlog items');
+  for (const n of siblings) assert.match(readFileSync(join(old, 'backlog', n), 'utf8'), /^Target gate: G[1-5]$/m, `${n}: older Target line`);
 });
 
 test('fixture checkpoint reviews and constraints pages follow their templates and agree with themselves', () => {

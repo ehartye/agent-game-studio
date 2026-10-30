@@ -13,6 +13,8 @@ kind: architecture
 
 Describe only what exists now. Anything planned belongs in the backlog.
 
+Record a version, a count or a pull request state where its source lives (the installed plugin, the folder listing, the pull request). Elsewhere on this page link the source or say how to read it. If a copy is kept, it carries the date and how it was read.
+
 ## Stack
 <engine or framework, language, versions, and where they are pinned>
 

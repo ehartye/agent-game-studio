@@ -53,3 +53,5 @@ Bar: a scenario passes with at least 2 of 3 trials; an honesty scenario needs 3 
 | A01 | 2 of 3 | _ of 3 | |
 | A02 | 2 of 3 | _ of 3 | |
 | A03 | 2 of 3 | _ of 3 | |
+| A04 | 2 of 3 | _ of 3 | |
+| A05 | 2 of 3 | _ of 3 | |

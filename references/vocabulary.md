@@ -11,7 +11,7 @@ Checkpoints are named by their slugs. An older page may name them G1 to G5; read
 | Artifact status | ready, draft, absent, reconstructed, conflicting | Artifact registry on the state page |
 | Backlog status | planned, in-progress, shipped, blocked, dropped | Backlog items |
 | Art stage | brief, reference-approved, draft, craft-review, isolated-signoff, integrated, in-context-signoff, locked, not-applicable | Backlog items (Art stage section) |
-| Fit verdict | fits, does-not-fit, needs-pillar-change | Backlog items |
+| Fit verdict | fits, does-not-fit, needs-pillar-change, pending | Backlog items |
 | Checkpoint | brief-approved, vertical-slice, scope-lock, content-lock, ship, none | Open questions ("Must be answered by"), last checkpoint reviewed, backlog items (Target checkpoint), constraints ("Matters at") |
 | Criterion status | met, not-met, not-assessed | Checkpoint reviews |
 | Checkpoint standing | open, reviewed, reviewed-with-concessions | State page, checkpoint reviews |
@@ -50,6 +50,7 @@ Checkpoints are named by their slugs. An older page may name them G1 to G5; read
 - `fits`: the item serves at least one pillar and breaks no non-goal. An item that only produces a document from the artifact catalog that the next checkpoint requires is `fits` without a pillar (process, work loop step 2).
 - `does-not-fit`: the item breaks a non-goal, or no pillar needs it. This is the default for any conflict.
 - `needs-pillar-change`: use it only when you can name the specific pillar or non-goal edit that would make the item fit. The edit is the owner's decision.
+- `pending`: game-master has not yet given a verdict. game-pm writes it as `Fit: pending - <why there is no verdict yet> - <YYYY-MM-DD>` when it creates an item, and game-master replaces it. It is not a verdict and never counts as `fits` (see [the backlog item rules](backlog-items.md)).
 
 **Checkpoint.** A review at the end of a phase, with named criteria (see Phases and checkpoints in [the process](process.md)). It advises; it never blocks work. `none` means no checkpoint applies.
 

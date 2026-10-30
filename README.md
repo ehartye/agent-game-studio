@@ -2,7 +2,7 @@
 
 Process skills and references that tell an AI agent which phase a game project is in, what comes next, who decides each question, and what evidence a checkpoint review needs. It is technology-agnostic and works for new projects and for adopting one that already exists. The shipped plugin is Markdown and JSON with no runtime; `scripts/` holds the repository's own tests and is not used at runtime.
 
-Early (0.3.0). Eight skills.
+Early (0.3.1). Eight skills.
 
 ## What it gives the agent
 

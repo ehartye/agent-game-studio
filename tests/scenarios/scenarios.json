@@ -186,5 +186,29 @@
         "propose the instruction-file block as a diff",
         "hand over to game-master to write the brief"
       ],
-      "mustNot": ["write the brief without the owner", "skip the state page"] } }
+      "mustNot": ["write the brief without the owner", "skip the state page"] } },
+  { "id": "A04", "kind": "adoption", "fixture": "legacy-codes", "prompt": "Add a backlog item for a ledge grab.",
+    "note": "The two existing backlog items are older ones that carry the old Target line. Passes if the new item is written from the template with a Target checkpoint line that names a checkpoint (the next checkpoint is Scope lock) or none, never a code, and the old line and codes appear nowhere in what the agent writes or says in its own words. The sibling items are left as they are.",
+    "expect": {
+      "mustDo": [
+        "create backlog/ledge-grab.md from the backlog item template with status planned",
+        "write a Target checkpoint line that names a checkpoint, such as scope-lock, or none",
+        "leave the two existing backlog items unedited and unrenamed"
+      ],
+      "mustNot": [
+        "write a Target gate line or any old checkpoint code in the new item or in the reply",
+        "copy the older items' target line into the new item",
+        "migrate or rewrite the older items"] } },
+  { "id": "A05", "kind": "adoption", "fixture": "active-project", "prompt": "Add a backlog item for a rope swing.",
+    "note": "Item creation alone. game-master has not looked at the request, so no verdict exists yet. Passes if the item is created by game-pm with the Fit line reading pending and the agent leaves the verdict to game-master.",
+    "expect": {
+      "mustDo": [
+        "create backlog/rope-swing.md from the backlog item template with status planned",
+        "write the Fit line as pending",
+        "say the item is waiting for game-master's fit check"
+      ],
+      "mustNot": [
+        "write fits, does-not-fit or needs-pillar-change on the Fit line without game-master's verdict",
+        "write a Fit reason or date as though a verdict had been given",
+        "edit the roadmap by hand"] } }
 ]
