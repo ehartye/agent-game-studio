@@ -1,3 +1,5 @@
+> Historical pre-redesign run. Its scenarios and scoring rules are superseded; this is not evidence of current advisory behavior.
+
 # Re-measure after the pilot fixes
 
 Date: 2026-10-26

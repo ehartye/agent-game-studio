@@ -1,19 +1,17 @@
 // Pure helpers for scripts/run-scenarios.mjs. No I/O except realpath lookups in assertOutsideRepo.
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { existsSync, realpathSync } from 'node:fs';
 import { isAbsolute, relative, resolve } from 'node:path';
 
-export const GENERIC_REPLY = 'Use your best judgement and state your assumption.';
-
 export const READ_TOOLS = ['Read', 'Glob', 'Grep'];
-export const OTHER_TOOLS = ['Skill', 'Bash(git *)', 'Bash(node *wiki-master*)', 'Bash(WIKI_MASTER_VAULT=* node *wiki-master*)'];
-export const GAME_STUDIO_SKILLS = ['game-master', 'studio-start', 'game-architect'];
+export const OTHER_TOOLS = ['Skill', 'Bash(git *)', 'Bash(node *wiki-master*)', 'Bash(WIKI_MASTER_VAULT=* node *wiki-master*)', 'Bash(node verify-patrol.mjs)'];
+export const GAME_STUDIO_SKILLS = ['game-master', 'studio-start', 'game-architect', 'game-pm', 'game-quality', 'game-writer', 'game-artist', 'game-designer'];
 const DEFAULTS = { trials: 1, concurrency: 3, maxBudgetUsd: 6, timeoutMin: 15 };
 
-// The second turn: scenarios with a reply, and every adoption scenario.
+// A second turn occurs only when the scenario explicitly supplies one.
 export function replyFor(scenario) {
-  if (scenario.reply) return scenario.reply;
-  return scenario.kind === 'adoption' ? GENERIC_REPLY : null;
+  return scenario.reply ?? null;
 }
 
 // --- paths -----------------------------------------------------------------
@@ -123,10 +121,27 @@ export function compareVault(before, after) {
   return changes.length ? changes.join('; ') : null;
 }
 
+// Safe persistent evidence; guards continue to compare the original in-memory snapshots.
+export function sanitizeVaultSnapshot(snapshot) {
+  return {
+    available: snapshot.available === true,
+    readExitCodes: snapshot.readExitCodes,
+    head: snapshot.head,
+    changedFileCount: snapshot.readExitCodes?.status === 0 ? snapshot.status.split(/\r?\n/).filter((line) => line.trim()).length : null,
+    statusSha256: snapshot.readExitCodes?.status === 0 ? createHash('sha256').update(snapshot.status).digest('hex') : null,
+  };
+}
+
+export function permissionConfiguration(dangerouslySkipPermissions = false) {
+  return dangerouslySkipPermissions === true
+    ? { mode: 'bypassPermissions', flags: ['--dangerously-skip-permissions'], requiresExternalIsolation: true }
+    : { mode: 'dontAsk', flags: ['--permission-mode', 'dontAsk'], requiresExternalIsolation: false };
+}
+
 // --- run construction ------------------------------------------------------
 
 // Argument array and environment for one host invocation. Never goes through a shell.
-export function buildRun({ prompt, plugin, cacheDir, projectDir, maxBudgetUsd, model, resume, vault = null, scratchVault = null, extraAllowed = [] }, baseEnv = process.env) {
+export function buildRun({ prompt, plugin, cacheDir, projectDir, maxBudgetUsd, model, resume, vault = null, scratchVault = null, extraAllowed = [], dangerouslySkipPermissions = false }, baseEnv = process.env) {
   const args = ['-p', prompt];
   if (resume) args.push('--resume', resume);
   const guards = vaultGuards(vault);
@@ -134,7 +149,7 @@ export function buildRun({ prompt, plugin, cacheDir, projectDir, maxBudgetUsd, m
     '--plugin-dir', plugin,
     '--output-format', 'stream-json',
     '--verbose',
-    '--permission-mode', 'dontAsk',
+    ...permissionConfiguration(dangerouslySkipPermissions).flags,
     '--allowedTools', ...READ_TOOLS, ...confineWrites(projectDir), ...(scratchVault ? scratchVaultRules(scratchVault) : []), ...OTHER_TOOLS, ...extraAllowed,
     ...(guards.length ? ['--disallowedTools', ...guards] : []),
     '--add-dir', plugin, '--add-dir', cacheDir, ...(scratchVault ? ['--add-dir', scratchVault] : []),
@@ -147,7 +162,7 @@ export function buildRun({ prompt, plugin, cacheDir, projectDir, maxBudgetUsd, m
 // --- command line ----------------------------------------------------------
 
 export function parseArgs(argv) {
-  const o = { out: null, vault: null, wikiMaster: null, vaultGuard: 'attributable', plugin: null, ids: null, kinds: null, trials: DEFAULTS.trials, concurrency: DEFAULTS.concurrency, model: null, maxBudgetUsd: DEFAULTS.maxBudgetUsd, timeoutMin: DEFAULTS.timeoutMin, dryRun: false };
+  const o = { out: null, vault: null, wikiMaster: null, vaultGuard: 'attributable', plugin: null, ids: null, kinds: null, trials: DEFAULTS.trials, concurrency: DEFAULTS.concurrency, model: null, maxBudgetUsd: DEFAULTS.maxBudgetUsd, timeoutMin: DEFAULTS.timeoutMin, dryRun: false, dangerouslySkipPermissions: false };
   const list = (v) => v.split(',').map((s) => s.trim()).filter(Boolean);
   const num = (flag, v, { integer = true } = {}) => {
     const n = Number(v);
@@ -156,6 +171,7 @@ export function parseArgs(argv) {
   };
   for (let i = 0; i < argv.length; i++) {
     const flag = argv[i];
+    if (flag === '--dangerously-skip-permissions') { o.dangerouslySkipPermissions = true; continue; }
     if (flag === '--dry-run') { o.dryRun = true; continue; }
     const known = ['--out', '--vault', '--wiki-master', '--vault-guard', '--plugin', '--ids', '--kind', '--trials', '--concurrency', '--model', '--max-budget-usd', '--timeout-min'];
     if (!known.includes(flag)) throw new Error(`unknown option ${flag}`);
@@ -312,12 +328,17 @@ export function renderSummary({ scenario, reply = null, status, exitCode, durati
 
 // --- vault attribution -----------------------------------------------------
 
-// State of the real vault. Untracked files are listed one by one. A missing or non-git folder reads as head null.
+// State of the real vault. Failed reads remain explicitly unavailable, not inspected-clean.
 export function vaultSnapshot(vault) {
   const run = (...a) => spawnSync('git', ['-C', vault, ...a], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
   const head = run('rev-parse', 'HEAD');
   const status = run('status', '--short', '-uall');
-  return { head: head.status === 0 ? head.stdout.trim() : null, status: status.status === 0 ? status.stdout : '' };
+  return {
+    available: head.status === 0 && status.status === 0,
+    readExitCodes: { head: head.status, status: status.status },
+    head: head.status === 0 ? head.stdout.trim() : null,
+    status: status.status === 0 ? status.stdout : '',
+  };
 }
 
 const norm = (s) => s.replaceAll('\\', '/').toLowerCase();
@@ -392,4 +413,26 @@ export function evaluateVault({ texts, vault, before, after, slugs }) {
   if (slugPaths.length) reasons.push(`the vault gained project page(s): ${slugPaths.join(', ')}`);
   const verdict = reasons.length ? 'touched' : attempts.length ? 'attempted' : 'clean';
   return { verdict, attempts, slugPaths, reasons };
+}
+
+
+// Terminate only this runner's owned child. A fallback cannot promise descendant cleanup;
+// the caller still waits for close and must not detach a child it failed to terminate.
+export function killTree(child, { platform = process.platform, taskkill = spawnSync, report = console.warn } = {}) {
+  if (child.exitCode != null || child.signalCode != null) return { requested: false, method: 'already-exited' };
+  if (platform === 'win32') {
+    let result;
+    try {
+      result = taskkill('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore', timeout: 5000, windowsHide: true });
+    } catch (error) {
+      result = { status: null, error };
+    }
+    if (!result.error && result.status === 0) return { requested: true, method: 'taskkill' };
+    report(`taskkill failed for owned PID ${child.pid} (exit ${result.status ?? 'none'}, error ${result.error?.code ?? 'none'}); trying child.kill. Descendant cleanup is not confirmed.`);
+  }
+  let requested = false;
+  let errorCode = 'none';
+  try { requested = child.kill('SIGKILL'); } catch (error) { errorCode = error.code ?? 'unknown'; }
+  if (!requested) report(`Could not terminate owned PID ${child.pid} (error ${errorCode}); it may still be running. The runner will keep waiting for close; stop this owned process through the existing executor boundary.`);
+  return { requested, method: 'child.kill' };
 }

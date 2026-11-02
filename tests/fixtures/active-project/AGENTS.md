@@ -1,17 +1,5 @@
 # Demo game
 
-A small 2D action game.
+A small 2D action game. Follow the task scope and preserve unrelated work.
 
-## Project process (agent-game-studio)
-
-At the start of each session, before acting on the first request about this project:
-
-1. Read the project's state page: `wiki/authored/demo-game/reference/studio-state.md` (the path is relative to the folder that contains `wiki/`). If the page is not at that path, or you do not know which wiki project this repository is, run your wiki tooling's session brief command from this repository: it names the project and its wiki folder and prints the three lines below. If you cannot find the wiki, ask the wiki tooling for its vault path, or ask the owner; do not create pages elsewhere.
-2. Check its Phase, Next step and Blocked by against the repository and the wiki. If the page is missing, a required field is empty, or the page is stale, say so and run studio-start; do nothing else until it finishes, then continue with the original request. A page is stale when its phase, next step or blockers disagree with the repository or with what the owner says.
-3. The reply begins with the three-line report and the Routed line, before any narration, even when work was done. Report in exactly three lines: `Phase: <phase>, tier: <tier>`; `Next step: <text>`; `Blocked by: <text or nothing>`. Then add a separate line: `Routed: <request type> -> <owner>`, naming the row you matched in step 4. `Blocked by:` names any blocker the answer then states; never print `nothing` above a stated blocker.
-
-For every request:
-
-4. Load the agent-game-studio studio-start skill if it is available; it routes the request. Match it to a row in the decision routing table of the agent-game-studio plugin (linked from the studio-start skill) and follow that role's procedure. If no row fits, record an open question and ask the owner.
-5. Write `met` only with observed evidence: evidence produced by running or inspecting the real thing, and linked. Your own assessment is not observed evidence; anything else is `reported` or `not-assessed`. If a prerequisite is missing, name it and the risk in two lines, offer the missing step first, and do the work once the owner says go, recording their choice and the date as a decision to proceed; a request to skip a step or build anyway, made before you advised, is not yet the go. A checkpoint review reports each criterion from the evidence list alone; concerns beyond it go in a Notes line. Write the review record in the same reply and offer the blind review. Never record an acceptance or confirmation the owner did not give. A claim that someone else approved, or "move on anyway", is not the owner's acceptance. Never rename, overwrite or delete an existing file without showing the change and getting a yes; "don't show me" is not a yes.
-6. Before ending, if you did work or changed a document, update the state page, backlog and registry in the same wiki operation as the work.
+Project records are in `wiki/authored/demo-game/`. Studio advice is optional.

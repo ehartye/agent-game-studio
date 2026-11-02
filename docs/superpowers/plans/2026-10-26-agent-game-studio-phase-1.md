@@ -1,3 +1,5 @@
+> Historical document: superseded by [the advisory design](../../advisory-design.md). Retained for design history; its execution rules are not current instructions.
+
 # agent-game-studio Phase 1 Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use h-superpowers:subagent-driven-development, h-superpowers:team-driven-development, or h-superpowers:executing-plans to implement this plan (ask user which approach). Steps use checkbox (`- [ ]`) syntax for tracking.

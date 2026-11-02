@@ -1,14 +1,17 @@
 /** @lane merge */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
+import { once } from 'node:events';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  GENERIC_REPLY,
   assertOutsideRepo,
   buildRun,
+  killTree,
+  permissionConfiguration,
+  sanitizeVaultSnapshot,
   assertDistinctVaults,
   compareVault,
   evaluateVault,
@@ -69,10 +72,10 @@ test('parseTranscript extracts the session, tool usage in order, final text, cos
   assert.equal(t.isError, false);
 });
 
-test('parseTranscript reports the catalogue count and whether the three game-studio skills appear', () => {
+test('parseTranscript reports the catalogue count and which of the eight game-studio skills appear', () => {
   const t = parseTranscript(transcript);
   assert.equal(t.catalogue.count, 4);
-  assert.deepEqual(t.catalogue.gameStudio, { 'game-master': true, 'studio-start': true, 'game-architect': true });
+  assert.deepEqual(t.catalogue.gameStudio, { 'game-master': true, 'studio-start': true, 'game-architect': true, 'game-pm': false, 'game-quality': false, 'game-writer': false, 'game-artist': false, 'game-designer': false });
 });
 
 test('parseTranscript flags a missing game-studio skill and records denied tool results', () => {
@@ -153,12 +156,10 @@ test('extra allow rules can be appended to the allow-list', () => {
   assert.ok(run.args.includes('Read(//x/**)'));
 });
 
-test('replyFor uses the scenario reply, the generic reply for adoption, and nothing otherwise', () => {
-  assert.equal(replyFor({ kind: 'routing', prompt: 'p' }), null);
-  assert.equal(replyFor({ kind: 'routing', reply: 'use X' }), 'use X');
-  assert.equal(replyFor({ kind: 'adoption' }), GENERIC_REPLY);
-  assert.equal(replyFor({ kind: 'adoption', reply: 'demo-game, minimal' }), 'demo-game, minimal');
-  assert.equal(GENERIC_REPLY, 'Use your best judgement and state your assumption.');
+test('replyFor does not manufacture approval or a second turn', () => {
+  assert.equal(replyFor({ kind: 'advisory', prompt: 'p' }), null);
+  assert.equal(replyFor({ kind: 'adoption' }), null);
+  assert.equal(replyFor({ reply: 'Use your judgement and make the edit.' }), 'Use your judgement and make the edit.');
 });
 
 test('assertOutsideRepo refuses folders inside or equal to the repository, including relative and case variants', () => {
@@ -173,9 +174,9 @@ test('assertOutsideRepo refuses folders inside or equal to the repository, inclu
 
 test('parseArgs applies defaults and parses lists and numbers', () => {
   const d = parseArgs(['--out', '/o']);
-  assert.deepEqual(d, { out: '/o', vault: null, vaultGuard: 'attributable', wikiMaster: null, plugin: null, ids: null, kinds: null, trials: 1, concurrency: 3, model: null, maxBudgetUsd: 6, timeoutMin: 15, dryRun: false });
+  assert.deepEqual(d, { out: '/o', vault: null, vaultGuard: 'attributable', wikiMaster: null, plugin: null, ids: null, kinds: null, trials: 1, concurrency: 3, model: null, maxBudgetUsd: 6, timeoutMin: 15, dryRun: false, dangerouslySkipPermissions: false });
   const p = parseArgs(['--out', '/o', '--vault', '/v', '--vault-guard', 'strict', '--wiki-master', '/wm', '--plugin', '/p', '--ids', 'R01,S01', '--kind', 'routing,advise', '--trials', '2', '--concurrency', '4', '--model', 'opus', '--max-budget-usd', '3.5', '--timeout-min', '5', '--dry-run']);
-  assert.deepEqual(p, { out: '/o', vault: '/v', vaultGuard: 'strict', wikiMaster: '/wm', plugin: '/p', ids: ['R01', 'S01'], kinds: ['routing', 'advise'], trials: 2, concurrency: 4, model: 'opus', maxBudgetUsd: 3.5, timeoutMin: 5, dryRun: true });
+  assert.deepEqual(p, { out: '/o', vault: '/v', vaultGuard: 'strict', wikiMaster: '/wm', plugin: '/p', ids: ['R01', 'S01'], kinds: ['routing', 'advise'], trials: 2, concurrency: 4, model: 'opus', maxBudgetUsd: 3.5, timeoutMin: 5, dryRun: true, dangerouslySkipPermissions: false });
 });
 
 test('parseArgs rejects a missing --out, unknown flags and bad numbers', () => {
@@ -312,7 +313,7 @@ test('vaultDelta lists only new lines under the given slugs, including renames, 
   assert.deepEqual(vaultDelta('', after, []), []);
 });
 
-test('vaultSnapshot against a decoy repo sees new files individually, and a missing folder reads as empty', () => {
+test('vaultSnapshot against a decoy repo sees new files individually, and a missing folder is explicitly unavailable', () => {
   const dir = mkdtempSync(join(tmpdir(), 'decoy-vault-'));
   try {
     const git = (...a) => execFileSync('git', ['-C', dir, '-c', 'user.name=t', '-c', 'user.email=t@example.invalid', ...a], { encoding: 'utf8' });
@@ -321,6 +322,8 @@ test('vaultSnapshot against a decoy repo sees new files individually, and a miss
     const before = vaultSnapshot(dir);
     assert.match(before.head, /^[0-9a-f]{40}$/);
     assert.equal(before.status, '');
+    assert.equal(before.available, true);
+    assert.deepEqual(before.readExitCodes, { head: 0, status: 0 });
     mkdirSync(join(dir, 'wiki', 'authored', 'demo-game'), { recursive: true });
     mkdirSync(join(dir, 'notes'), { recursive: true });
     writeFileSync(join(dir, 'wiki', 'authored', 'demo-game', 'state.md'), 'x');
@@ -328,7 +331,15 @@ test('vaultSnapshot against a decoy repo sees new files individually, and a miss
     const after = vaultSnapshot(dir);
     assert.deepEqual(vaultDelta(before.status, after.status, ['demo-game']), ['' + A + '/demo-game/state.md']);
     assert.equal(evaluateVault({ vault: dir, texts: [transcript], before, after, slugs: ['demo-game'] }).verdict, 'touched');
-    assert.deepEqual(vaultSnapshot(join(dir, 'nope')), { head: null, status: '' });
+    const missing = vaultSnapshot(join(dir, 'nope'));
+    assert.equal(missing.available, false);
+    assert.notEqual(missing.readExitCodes.head, 0);
+    assert.notEqual(missing.readExitCodes.status, 0);
+    const safeMissing = sanitizeVaultSnapshot(missing);
+    assert.equal(safeMissing.available, false);
+    assert.equal(safeMissing.changedFileCount, null);
+    assert.equal(safeMissing.statusSha256, null);
+    assert.deepEqual(safeMissing.readExitCodes, missing.readExitCodes);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -416,4 +427,74 @@ test('the allow-list admits wiki tooling commands that set the vault variable in
   assert.ok(allowed.includes('Bash(WIKI_MASTER_VAULT=* node *wiki-master*)'));
   assert.ok(allowed.includes('Bash(node *wiki-master*)'));
   assert.ok(a.slice(a.indexOf('--disallowedTools')).includes('Bash(*vault*)'));
+});
+
+
+test('permission bypass requires explicit CLI opt-in and never comes from the environment', () => {
+  const base = { prompt: 'p', plugin: '/p', cacheDir: '/c', projectDir: '/scratch', maxBudgetUsd: 1, vault: '/real/vault' };
+  assert.equal(parseArgs(['--out', '/o']).dangerouslySkipPermissions, false);
+  const opted = parseArgs(['--out', '/o', '--dangerously-skip-permissions']);
+  assert.equal(opted.dangerouslySkipPermissions, true);
+  const normal = buildRun(base, { DANGEROUSLY_SKIP_PERMISSIONS: 'true' });
+  assert.ok(!normal.args.includes('--dangerously-skip-permissions'));
+  assert.equal(normal.args[normal.args.indexOf('--permission-mode') + 1], 'dontAsk');
+  const bypass = buildRun({ ...base, dangerouslySkipPermissions: opted.dangerouslySkipPermissions }, {});
+  assert.ok(bypass.args.includes('--dangerously-skip-permissions'));
+  assert.ok(!bypass.args.includes('--permission-mode'));
+  assert.ok(bypass.args.includes('Write(//scratch/**)'));
+  assert.ok(bypass.args.includes('Write(//real/vault/**)'));
+  assert.equal(bypass.env.WIKI_MASTER_VAULT, '/scratch');
+  assert.deepEqual(permissionConfiguration(false), { mode: 'dontAsk', flags: ['--permission-mode', 'dontAsk'], requiresExternalIsolation: false });
+  assert.deepEqual(permissionConfiguration(true), { mode: 'bypassPermissions', flags: ['--dangerously-skip-permissions'], requiresExternalIsolation: true });
+});
+
+test('serialized vault snapshots retain change evidence without private status filenames', () => {
+  const raw = { available: true, readExitCodes: { head: 0, status: 0 }, head: 'abc', status: ' M private-project/secret-note.md\n?? another-private-file.md\n' };
+  const safe = sanitizeVaultSnapshot(raw);
+  assert.equal(safe.head, 'abc');
+  assert.equal(safe.available, true);
+  assert.deepEqual(safe.readExitCodes, { head: 0, status: 0 });
+  assert.equal(safe.changedFileCount, 2);
+  assert.match(safe.statusSha256, /^[a-f0-9]{64}$/);
+  assert.doesNotMatch(JSON.stringify(safe), /private-project|secret-note|another-private-file/);
+  assert.equal(raw.status, ' M private-project/secret-note.md\n?? another-private-file.md\n', 'guard input is unchanged');
+  assert.deepEqual(sanitizeVaultSnapshot({ ...raw }), safe);
+  assert.notEqual(sanitizeVaultSnapshot({ ...raw, status: '' }).statusSha256, safe.statusSha256);
+});
+
+
+test('timeout cleanup falls back after taskkill failure and terminates the owned child', async () => {
+  const child = spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], { stdio: 'ignore', windowsHide: true });
+  const messages = [];
+  let call;
+  let timer;
+  try {
+    await once(child, 'spawn');
+    const closed = once(child, 'close');
+    const result = killTree(child, {
+      platform: 'win32',
+      taskkill: (...args) => { call = args; return { status: 1 }; },
+      report: (message) => messages.push(message),
+    });
+    assert.equal(result.method, 'child.kill');
+    assert.equal(result.requested, true);
+    assert.equal(call[0], 'taskkill');
+    assert.deepEqual(call[1], ['/pid', String(child.pid), '/T', '/F']);
+    assert.equal(call[2].windowsHide, true);
+    assert.equal(call[2].timeout, 5000);
+    assert.ok(messages.some((message) => /taskkill.*failed/i.test(message)));
+    await Promise.race([closed, new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('owned child did not terminate')), 3000); })]);
+    assert.ok(child.exitCode !== null || child.signalCode !== null);
+  } finally {
+    clearTimeout(timer);
+    if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
+  }
+});
+
+test('timeout cleanup reports both failures without claiming the child stopped', () => {
+  const messages = [];
+  const child = { pid: 123, exitCode: null, signalCode: null, kill: () => false };
+  const result = killTree(child, { platform: 'win32', taskkill: () => ({ status: null, error: { code: 'ETIMEDOUT' } }), report: (message) => messages.push(message) });
+  assert.equal(result.requested, false);
+  assert.ok(messages.some((message) => /could not terminate.*123/i.test(message)));
 });

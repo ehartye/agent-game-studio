@@ -1,13 +1,14 @@
 // Runs the scenarios in tests/scenarios/scenarios.json against a real, non-interactive host with this
 // plugin loaded, and captures what happened. It never scores. Dependency-free.
 //
-//   node scripts/run-scenarios.mjs --out <dir> [--plugin <path>] [--ids R01,S01] [--kind routing,advise]
-//        [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--vault <path>] [--vault-guard strict|attributable] [--wiki-master <path>] [--dry-run]
+//   node scripts/run-scenarios.mjs --out <dir> [--plugin <path>] [--ids A01,H01] [--kind autonomy,honesty]
+//        [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--vault <path>] [--vault-guard strict|attributable] [--wiki-master <path>] [--dry-run] [--dangerously-skip-permissions]
 import { spawn, spawnSync } from 'node:child_process';
 import { cpSync, createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 import { delimiter, join, resolve } from 'node:path';
-import { GENERIC_REPLY, assertDistinctVaults, assertOutsideRepo, buildRun, compareVault, newestVersion, evaluateVault, isSecretName, maskSecrets, parseArgs, parseTranscript, renderSummary, replyFor, selectScenarios, vaultSnapshot } from './lib/runner.mjs';
+import { assertDistinctVaults, assertOutsideRepo, buildRun, killTree, permissionConfiguration, sanitizeVaultSnapshot, compareVault, newestVersion, evaluateVault, isSecretName, maskSecrets, parseArgs, parseTranscript, renderSummary, replyFor, selectScenarios, vaultSnapshot } from './lib/runner.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const FILE_CAP = 20 * 1024;
@@ -84,13 +85,8 @@ function fixtureSlugs(fixture) {
   return [...new Set([...own, 'demo-game'])];
 }
 
-function killTree(child) {
-  if (process.platform === 'win32') spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
-  else child.kill('SIGKILL');
-}
-
 // Runs the host once. Resolves with { exitCode, timedOut, spawnError }.
-function runHost(exe, { args, env }, cwd, transcriptPath, stderrPath, timeoutMs, active) {
+export function runHost(exe, { args, env }, cwd, transcriptPath, stderrPath, timeoutMs, active) {
   return new Promise((done) => {
     const out = createWriteStream(transcriptPath);
     const err = createWriteStream(stderrPath);
@@ -106,7 +102,16 @@ function runHost(exe, { args, env }, cwd, transcriptPath, stderrPath, timeoutMs,
     child.stdout.pipe(out);
     child.stderr.pipe(err);
     const timer = setTimeout(() => { timedOut = true; killTree(child); }, timeoutMs);
-    child.on('error', (e) => { active.delete(child); clearTimeout(timer); out.end(); err.end(); done({ exitCode: null, timedOut, spawnError: String(e) }); });
+    child.on('error', (e) => {
+      if (child.pid) {
+        // A failed kill can emit error after spawn. Keep ownership until close;
+        // resolving here would silently abandon a possibly running host.
+        console.error(`Owned host process ${child.pid} error; awaiting close: ${e.code ?? e.message}`);
+        return;
+      }
+      active.delete(child); clearTimeout(timer); out.end(); err.end();
+      done({ exitCode: null, timedOut, spawnError: String(e) });
+    });
     child.on('close', (code) => {
       active.delete(child);
       clearTimeout(timer);
@@ -147,7 +152,7 @@ async function runOne(ctx, scenario, trial) {
   try {
     prepareProject(project, scenario.fixture);
     let scratchVault = null;
-    if (!fixtureHasWiki(scenario.fixture)) {
+    if (scenario.scratchWiki === true && !fixtureHasWiki(scenario.fixture)) {
       assertDistinctVaults(paths.vault, ctx.vault);
       const t0 = Date.now();
       createScratchVault(paths.vault, ctx.wikiMaster);
@@ -155,7 +160,7 @@ async function runOne(ctx, scenario, trial) {
       entry.scratchVault = { path: scratchVault, wikiMaster: ctx.wikiMaster, initMs: Date.now() - t0 };
     }
     const vaultBefore = vaultSnapshot(ctx.vault);
-    const base = { plugin, cacheDir, projectDir: project, scratchVault, vault: ctx.vault, maxBudgetUsd: opts.maxBudgetUsd, model: opts.model, extraAllowed: ctx.extraAllowed };
+    const base = { plugin, cacheDir, projectDir: project, scratchVault, vault: ctx.vault, maxBudgetUsd: opts.maxBudgetUsd, model: opts.model, extraAllowed: ctx.extraAllowed, dangerouslySkipPermissions: opts.dangerouslySkipPermissions };
     const timeoutMs = opts.timeoutMin * 60_000;
     const turns = [];
     let first = await runHost(exe, buildRun({ ...base, prompt: scenario.prompt }), project, paths.transcript, paths.stderr, timeoutMs, ctx.active);
@@ -173,11 +178,12 @@ async function runOne(ctx, scenario, trial) {
     }
     const after = vaultSnapshot(ctx.vault);
     entry.runStatus = status;
-    entry.vault = { guard: opts.vaultGuard, before: vaultBefore, after };
+    entry.vault = { guard: opts.vaultGuard, observationAvailable: vaultBefore.available && after.available, before: sanitizeVaultSnapshot(vaultBefore), after: sanitizeVaultSnapshot(after) };
+    if (!entry.vault.observationAvailable) console.warn(`${name}: real-vault snapshot read unavailable; no inspected-clean claim is supported (read exit codes recorded in index).`);
     let stop = null;
     if (opts.vaultGuard === 'strict') {
       const changed = compareVault(ctx.vaultBefore, after);
-      if (changed) { status = 'vault-changed'; entry.vault.change = changed; stop = changed; }
+      if (changed) { status = 'vault-changed'; entry.vault.change = 'real vault snapshot changed (raw status withheld)'; stop = 'real vault snapshot changed (raw status withheld)'; }
     } else {
       const texts = [readIfExists(paths.transcript), readIfExists(paths.transcript2)];
       const verdict = evaluateVault({ texts, vault: ctx.vault, before: vaultBefore, after, slugs: fixtureSlugs(scenario.fixture) });
@@ -215,6 +221,8 @@ async function pool(items, size, work) {
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
+  const permission = permissionConfiguration(opts.dangerouslySkipPermissions);
+  if (permission.requiresExternalIsolation) console.warn('WARNING: --dangerously-skip-permissions bypasses Claude permission checks. Run only inside external OS/executor isolation. Scratch paths and retained deny rules are not sufficient isolation in this mode. This option does not authorize crossing executor boundaries or escalation.');
   const outDir = resolve(opts.out);
   assertOutsideRepo(outDir, ROOT);
   const plugin = resolve(opts.plugin ?? ROOT);
@@ -226,20 +234,21 @@ async function main() {
 
   if (opts.dryRun) {
     console.log(`Would run ${jobs.length} run(s) into ${outDir} with plugin ${plugin}`);
-    for (const { s, trial } of jobs) console.log(`  ${s.id}-t${trial}  fixture=${s.fixture}  ${fixtureHasWiki(s.fixture) ? 'vault=project copy' : 'vault=scratch vault'}  reply=${replyFor(s) ? JSON.stringify(replyFor(s)) : 'none'}`);
-    const { args } = buildRun({ prompt: '<prompt>', plugin, cacheDir, projectDir: '<project>', vault: join(homedir(), '.wiki-master-vault'), maxBudgetUsd: opts.maxBudgetUsd, model: opts.model });
+    for (const { s, trial } of jobs) console.log(`  ${s.id}-t${trial}  fixture=${s.fixture}  ${s.scratchWiki === true && !fixtureHasWiki(s.fixture) ? 'vault=scratch vault' : 'vault=project copy'}  reply=${replyFor(s) ? JSON.stringify(replyFor(s)) : 'none'}`);
+    const { args } = buildRun({ prompt: '<prompt>', plugin, cacheDir, projectDir: '<project>', vault: join(homedir(), '.wiki-master-vault'), maxBudgetUsd: opts.maxBudgetUsd, model: opts.model, dangerouslySkipPermissions: opts.dangerouslySkipPermissions });
     console.log(`  claude ${args.map((a) => (/\s/.test(a) ? JSON.stringify(a) : a)).join(' ')}`);
     return;
   }
 
   const exe = resolveHost();
-  const wikiMaster = scenarios.some((s) => !fixtureHasWiki(s.fixture)) ? findWikiMaster(opts.wikiMaster, cacheDir) : null;
+  const wikiMaster = scenarios.some((s) => s.scratchWiki === true && !fixtureHasWiki(s.fixture)) ? findWikiMaster(opts.wikiMaster, cacheDir) : null;
   mkdirSync(outDir, { recursive: true });
   const vault = resolve(opts.vault ?? join(homedir(), '.wiki-master-vault'));
   const ctx = { opts, plugin, cacheDir, exe, outDir, vault, wikiMaster, vaultBefore: vaultSnapshot(vault), active: new Set(), abortMessage: null, extraAllowed: [] };
-  console.log(`real vault ${vault}: HEAD ${ctx.vaultBefore.head ?? 'none'}, ${ctx.vaultBefore.status.trim() ? ctx.vaultBefore.status.trim().split(/\r?\n/).length : 0} changed file(s) at start`);
+  const initialObservation = sanitizeVaultSnapshot(ctx.vaultBefore);
+  console.log(`real vault ${vault}: ${initialObservation.available ? 'snapshot available' : 'snapshot read unavailable'}, HEAD ${initialObservation.head ?? 'unavailable'}, changed file count ${initialObservation.changedFileCount ?? 'unavailable'}, read exit codes ${JSON.stringify(initialObservation.readExitCodes)}`);
   const runs = [];
-  const writeIndex = () => writeFileSync(join(outDir, 'index.json'), `${JSON.stringify({ plugin, vault, model: opts.model, genericReply: GENERIC_REPLY, startedAt, runs }, null, 2)}\n`);
+  const writeIndex = () => writeFileSync(join(outDir, 'index.json'), `${JSON.stringify({ plugin, vault, model: opts.model, configuration: { ...opts, permission }, initialVaultObservation: initialObservation, startedAt, runs }, null, 2)}\n`);
   const startedAt = new Date().toISOString();
   await pool(jobs, opts.concurrency, async ({ s, trial }) => {
     console.log(`start ${s.id}-t${trial}`);
@@ -259,4 +268,6 @@ async function main() {
   }
 }
 
-main().catch((e) => { console.error(e.message ?? e); process.exit(1); });
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((e) => { console.error(e.message ?? e); process.exit(1); });
+}

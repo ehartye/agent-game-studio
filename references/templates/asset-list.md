@@ -9,14 +9,14 @@ ai-generated: true
 project: <project>
 kind: reference
 ---
-# Asset list: <project>
+# Asset inventory: <project>
 
-Every asset the game ships, one row each. Add a row when an asset is planned and update its Stage as it moves.
+Optional template for the project's wiki. Adapt sections to the task and existing wiki conventions; do not create a second state record outside the wiki.
 
-Stage is the asset's art stage, as the process reference defines it. Provenance is human, AI-assisted or AI-generated. Licence names the licence or terms the asset is used under, or `own work`. Fit sign-off is filled only for key assets named in the art bible, with game-master's date; it stays `-` for the rest and an agent never fills it. Link is the asset's path or its asset entry.
+Link asset files in their existing implementation locations. This wiki inventory tracks relevant assets without copying them.
 
-| Asset | Stage | Provenance | Licence | Fit sign-off | Link |
+| Asset | Status | Source/provenance | Licence/terms | Version or location | Follow-up |
 |---|---|---|---|---|---|
-| Demo coin pickup sprite | concept | human | own work | - | assets/demo-coin.png |
+| <asset> | <project status> | <human, AI-assisted, AI-generated, or unknown; source> | <terms or unknown> | <link> | <work or uncertainty> |
 
-The row above is a worked example. Replace it with the project's own assets.
+Record actual selections or approvals only when they occurred. Missing provenance stays unknown; do not invent it.
