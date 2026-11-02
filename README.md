@@ -2,7 +2,7 @@
 
 Eight optional skills for game-development advice and maintaining useful project documents and backlog items. Studio helps a project think and keep its records accurate; the project and its owner decide how work is executed, tested and accepted.
 
-Early (0.4.0). The plugin ships Markdown and JSON, with no runtime. Repository scripts validate the plugin and provide a separate scenario harness.
+Early (0.4.1). The plugin ships Markdown and JSON, with no runtime. Repository scripts validate the plugin and provide a separate scenario harness.
 
 ## Skills
 

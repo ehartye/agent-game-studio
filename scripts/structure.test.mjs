@@ -9,9 +9,11 @@ const SKILLS = ['game-architect', 'game-artist', 'game-designer', 'game-master',
 
 test('wiki integration uses the current public role interface', () => {
   const map = readRel('references/plugin-map.md');
-  assert.doesNotMatch(map, /wiki-master:wiki-(?:author|health)\b/);
-  assert.match(map, /wiki-master:wiki-user/);
-  assert.match(map, /wiki-master:wiki-maintainer/);
+  assert.doesNotMatch(map, /wiki-master:wiki-(?:author|health|user|init)\b/);
+  for (const role of ['search', 'project', 'setup']) {
+    assert.ok(map.includes(`wiki-master:wiki-${role}`), `missing ${role} routing`);
+  }
+  assert.match(map, /Wiki tooling remains optional for advice and source work/);
 });
 const productFiles = () => [...walk(join(ROOT, 'skills'), ['.md']), ...walk(join(ROOT, 'references'), ['.md']), join(ROOT, 'README.md')];
 
