@@ -2,12 +2,12 @@
 // plugin loaded, and captures what happened. It never scores. Dependency-free.
 //
 //   node scripts/run-scenarios.mjs --out <dir> [--plugin <path>] [--ids A01,H01] [--kind autonomy,honesty]
-//        [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--vault <path>] [--vault-guard strict|attributable] [--wiki-master <path>] [--dry-run]
+//        [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--vault <path>] [--vault-guard strict|attributable] [--wiki-master <path>] [--dry-run] [--dangerously-skip-permissions]
 import { spawn, spawnSync } from 'node:child_process';
 import { cpSync, createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { delimiter, join, resolve } from 'node:path';
-import { assertDistinctVaults, assertOutsideRepo, buildRun, compareVault, newestVersion, evaluateVault, isSecretName, maskSecrets, parseArgs, parseTranscript, renderSummary, replyFor, selectScenarios, vaultSnapshot } from './lib/runner.mjs';
+import { assertDistinctVaults, assertOutsideRepo, buildRun, permissionConfiguration, sanitizeVaultSnapshot, compareVault, newestVersion, evaluateVault, isSecretName, maskSecrets, parseArgs, parseTranscript, renderSummary, replyFor, selectScenarios, vaultSnapshot } from './lib/runner.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const FILE_CAP = 20 * 1024;
@@ -155,7 +155,7 @@ async function runOne(ctx, scenario, trial) {
       entry.scratchVault = { path: scratchVault, wikiMaster: ctx.wikiMaster, initMs: Date.now() - t0 };
     }
     const vaultBefore = vaultSnapshot(ctx.vault);
-    const base = { plugin, cacheDir, projectDir: project, scratchVault, vault: ctx.vault, maxBudgetUsd: opts.maxBudgetUsd, model: opts.model, extraAllowed: ctx.extraAllowed };
+    const base = { plugin, cacheDir, projectDir: project, scratchVault, vault: ctx.vault, maxBudgetUsd: opts.maxBudgetUsd, model: opts.model, extraAllowed: ctx.extraAllowed, dangerouslySkipPermissions: opts.dangerouslySkipPermissions };
     const timeoutMs = opts.timeoutMin * 60_000;
     const turns = [];
     let first = await runHost(exe, buildRun({ ...base, prompt: scenario.prompt }), project, paths.transcript, paths.stderr, timeoutMs, ctx.active);
@@ -173,11 +173,12 @@ async function runOne(ctx, scenario, trial) {
     }
     const after = vaultSnapshot(ctx.vault);
     entry.runStatus = status;
-    entry.vault = { guard: opts.vaultGuard, before: vaultBefore, after };
+    entry.vault = { guard: opts.vaultGuard, observationAvailable: vaultBefore.available && after.available, before: sanitizeVaultSnapshot(vaultBefore), after: sanitizeVaultSnapshot(after) };
+    if (!entry.vault.observationAvailable) console.warn(`${name}: real-vault snapshot read unavailable; no inspected-clean claim is supported (read exit codes recorded in index).`);
     let stop = null;
     if (opts.vaultGuard === 'strict') {
       const changed = compareVault(ctx.vaultBefore, after);
-      if (changed) { status = 'vault-changed'; entry.vault.change = changed; stop = changed; }
+      if (changed) { status = 'vault-changed'; entry.vault.change = 'real vault snapshot changed (raw status withheld)'; stop = 'real vault snapshot changed (raw status withheld)'; }
     } else {
       const texts = [readIfExists(paths.transcript), readIfExists(paths.transcript2)];
       const verdict = evaluateVault({ texts, vault: ctx.vault, before: vaultBefore, after, slugs: fixtureSlugs(scenario.fixture) });
@@ -215,6 +216,8 @@ async function pool(items, size, work) {
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
+  const permission = permissionConfiguration(opts.dangerouslySkipPermissions);
+  if (permission.requiresExternalIsolation) console.warn('WARNING: --dangerously-skip-permissions bypasses Claude permission checks. Run only inside external OS/executor isolation. Scratch paths and retained deny rules are not sufficient isolation in this mode. This option does not authorize crossing executor boundaries or escalation.');
   const outDir = resolve(opts.out);
   assertOutsideRepo(outDir, ROOT);
   const plugin = resolve(opts.plugin ?? ROOT);
@@ -227,7 +230,7 @@ async function main() {
   if (opts.dryRun) {
     console.log(`Would run ${jobs.length} run(s) into ${outDir} with plugin ${plugin}`);
     for (const { s, trial } of jobs) console.log(`  ${s.id}-t${trial}  fixture=${s.fixture}  ${s.scratchWiki === true && !fixtureHasWiki(s.fixture) ? 'vault=scratch vault' : 'vault=project copy'}  reply=${replyFor(s) ? JSON.stringify(replyFor(s)) : 'none'}`);
-    const { args } = buildRun({ prompt: '<prompt>', plugin, cacheDir, projectDir: '<project>', vault: join(homedir(), '.wiki-master-vault'), maxBudgetUsd: opts.maxBudgetUsd, model: opts.model });
+    const { args } = buildRun({ prompt: '<prompt>', plugin, cacheDir, projectDir: '<project>', vault: join(homedir(), '.wiki-master-vault'), maxBudgetUsd: opts.maxBudgetUsd, model: opts.model, dangerouslySkipPermissions: opts.dangerouslySkipPermissions });
     console.log(`  claude ${args.map((a) => (/\s/.test(a) ? JSON.stringify(a) : a)).join(' ')}`);
     return;
   }
@@ -237,9 +240,10 @@ async function main() {
   mkdirSync(outDir, { recursive: true });
   const vault = resolve(opts.vault ?? join(homedir(), '.wiki-master-vault'));
   const ctx = { opts, plugin, cacheDir, exe, outDir, vault, wikiMaster, vaultBefore: vaultSnapshot(vault), active: new Set(), abortMessage: null, extraAllowed: [] };
-  console.log(`real vault ${vault}: HEAD ${ctx.vaultBefore.head ?? 'none'}, ${ctx.vaultBefore.status.trim() ? ctx.vaultBefore.status.trim().split(/\r?\n/).length : 0} changed file(s) at start`);
+  const initialObservation = sanitizeVaultSnapshot(ctx.vaultBefore);
+  console.log(`real vault ${vault}: ${initialObservation.available ? 'snapshot available' : 'snapshot read unavailable'}, HEAD ${initialObservation.head ?? 'unavailable'}, changed file count ${initialObservation.changedFileCount ?? 'unavailable'}, read exit codes ${JSON.stringify(initialObservation.readExitCodes)}`);
   const runs = [];
-  const writeIndex = () => writeFileSync(join(outDir, 'index.json'), `${JSON.stringify({ plugin, vault, model: opts.model, startedAt, runs }, null, 2)}\n`);
+  const writeIndex = () => writeFileSync(join(outDir, 'index.json'), `${JSON.stringify({ plugin, vault, model: opts.model, configuration: { ...opts, permission }, initialVaultObservation: initialObservation, startedAt, runs }, null, 2)}\n`);
   const startedAt = new Date().toISOString();
   await pool(jobs, opts.concurrency, async ({ s, trial }) => {
     console.log(`start ${s.id}-t${trial}`);

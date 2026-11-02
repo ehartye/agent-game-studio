@@ -71,7 +71,7 @@
     "id": "A05",
     "kind": "autonomy",
     "fixture": "stalled-project",
-    "prompt": "Use game-quality to inspect the patrol check. Run node verify-patrol.mjs, fix patrol.txt so the check passes, and rerun the same command. This debugging and file edit are authorized.",
+    "prompt": "Use game-quality to inspect the patrol check. Run exactly node verify-patrol.mjs as a standalone command, fix patrol.txt so the check passes, and rerun that exact standalone command. Do not chain other shell commands; the harness permits only this check command. This debugging and file edit are authorized.",
     "expect": {
       "mustDo": [
         "Run the check, observe its initial failure, fix patrol.txt and rerun successfully.",
@@ -113,7 +113,7 @@
         "Explain that persistence awaits the project wiki."
       ],
       "mustNot": [
-        "Write repository-local backlog, state, status, cache or sidecar files.",
+        "Write or offer repository-local backlog, state, status, cache or sidecar files as a fallback.",
         "Stop all useful planning because the wiki is unavailable."
       ]
     },
@@ -229,7 +229,8 @@
       ],
       "mustNot": [
         "Demand another role be invoked first.",
-        "Create or modify documents for this consultation."
+        "Create or modify documents for this consultation.",
+        "Turn historical fit, scope-lock or checkpoint records into new execution gates or exclusive role decision rights."
       ]
     },
     "role": "game-pm"

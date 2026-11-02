@@ -4,9 +4,9 @@ Build with `make assets` before every commit.
 Never touch the legacy folder.
 Use the old tracker for tasks.
 Ask before adding dependencies.
-Run the formatter.
+Use the configured formatter when one exists; this text-only fixture has none.
 The design document is docs/design.md.
 Prefer small functions.
-Write tests for everything.
+Add relevant tests for executable changes. Documentation-only corrections need no build or test run.
 Do not use the deprecated renderer.
-Keep a changelog.
+Preserve an existing changelog when present; this fixture has none.
