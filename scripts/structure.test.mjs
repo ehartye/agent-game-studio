@@ -6,6 +6,13 @@ import { dirname, join, resolve } from 'node:path';
 import { ROOT, anchorLinks, existsExact, frontmatter, headingSlugs, links, posix, readRel, walk } from './lib/md.mjs';
 
 const SKILLS = ['game-architect', 'game-artist', 'game-designer', 'game-master', 'game-pm', 'game-quality', 'game-writer', 'studio-start'];
+
+test('wiki integration uses the current public role interface', () => {
+  const map = readRel('references/plugin-map.md');
+  assert.doesNotMatch(map, /wiki-master:wiki-(?:author|health)\b/);
+  assert.match(map, /wiki-master:wiki-user/);
+  assert.match(map, /wiki-master:wiki-maintainer/);
+});
 const productFiles = () => [...walk(join(ROOT, 'skills'), ['.md']), ...walk(join(ROOT, 'references'), ['.md']), join(ROOT, 'README.md')];
 
 // These are regressions for concrete directives removed in the advisory redesign, not a

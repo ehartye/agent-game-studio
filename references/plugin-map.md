@@ -27,7 +27,7 @@ Studio offers game-development advice and wiki document maintenance. Specialist 
 | Asset craft | sound and music | `agent-beeps:beeps-craft`; `agent-beeps:beeps-audition` for comparing options |
 | Text and dialogue craft | any | `agent-prose:prose-dialog`, `agent-prose:prose-voice`, `agent-prose:prose-review` |
 | Launch and store readiness | any | `agent-marketing:market-campaign` |
-| Document authoring and roadmap | any | `wiki-master:wiki-author` for documents and the generated roadmap; `wiki-master:wiki-health` for validation |
+| Document authoring and roadmap | any | `wiki-master:wiki-user` in authoring mode for documents, the generated roadmap and validation of changed pages; `wiki-master:wiki-maintainer` in health mode only for a requested whole-vault report |
 | Wiki scaffolding | any | `wiki-master:wiki-init` |
 | Skill quality | any | `hartye-skills:yoda` |
 | Optional second opinion | any | `hartye-skills:rubber-duck`, subject to authorization for sending project content to another provider |
@@ -44,7 +44,9 @@ Cite guidance when it supports the answer. Consulting it does not require an arc
 
 ## Wiki records
 
-All Studio-maintained project state lives in the project's wiki, its single canonical home. `wiki-master:wiki-author` and `wiki-master:wiki-health` can help author and validate those records when available. Use the project's existing wiki tooling and schema; Studio does not require a particular plugin for advice or source work.
+The integration below targets wiki-master 0.88.0 or later and its five-role interface. Wiki tooling remains optional for advice and source work.
+
+All Studio-maintained project state lives in the project's wiki, its single canonical home. `wiki-master:wiki-user` in authoring mode can maintain and validate changed records when available. Use `wiki-master:wiki-maintainer` in health mode only for a requested whole-vault report. Use the project's existing wiki tooling and schema; Studio does not require a particular plugin for advice or source work.
 
 Do not write repository-local state, sidecar trackers or duplicate progress. Existing project-owned documents are not automatically Studio state: link them without relocating or deleting them. A requested transition to Studio maintenance should establish one canonical wiki record within scope.
 
