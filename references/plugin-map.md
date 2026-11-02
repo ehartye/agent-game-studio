@@ -27,7 +27,7 @@ This plugin says what must be decided and what evidence proves it. Another plugi
 | Asset craft | sound and music | `agent-beeps:beeps-craft`; the owner picks by `agent-beeps:beeps-audition` |
 | Text and dialogue craft | any | `agent-prose:prose-dialog`, `agent-prose:prose-voice`, `agent-prose:prose-review` |
 | Launch and store readiness | any | `agent-marketing:market-campaign` |
-| Document authoring and roadmap | any | `wiki-master:wiki-author` for documents and the generated roadmap; `wiki-master:wiki-health` for validation |
+| Document authoring and roadmap | any | `wiki-master:wiki-user` in authoring mode for documents, the generated roadmap and validation of the changed pages; `wiki-master:wiki-maintainer` in health mode for a requested whole-vault report |
 | Wiki scaffolding | any | `wiki-master:wiki-init` |
 | Project state brief | any | `wiki-master`'s `scripts/session-brief.mjs` (version 0.73.0 or later): finds the project from the repository's `origin` remote through a `repo:` line on the project's overview page, then prints the three-line report and what needs attention. Read-only |
 | Skill quality | any | `hartye-skills:yoda` |
@@ -48,7 +48,7 @@ Use this when a situation needs craft or technology the plugin does not own. Fin
 | Game text, dialogue and voice | `agent-prose:prose-dialog`, `agent-prose:prose-voice`, `agent-prose:prose-review` | The narrative bible and the glossary | The backlog item's Implications; the narrative bible |
 | Marketing and launch readiness | `agent-marketing:market-campaign` | The state page, the brief and the release criteria | The backlog item for the launch work; the Ship checkpoint review |
 | Designing a system, economy, level or interface | No installed plugin covers design craft; follow the design spec template | The brief, the pillars and the non-goals | The design spec, with what comes back recorded in it |
-| Writing or validating project documents | `wiki-master:wiki-author`; `wiki-master:wiki-health` | The document and its catalog entry | The document itself |
+| Writing or validating project documents | `wiki-master:wiki-user` in authoring mode; `wiki-master:wiki-maintainer` in health mode only for a requested whole-vault report | The document and its catalog entry | The document itself |
 
 ## Lookup procedure
 
