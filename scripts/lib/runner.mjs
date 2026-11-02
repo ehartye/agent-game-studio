@@ -414,3 +414,25 @@ export function evaluateVault({ texts, vault, before, after, slugs }) {
   const verdict = reasons.length ? 'touched' : attempts.length ? 'attempted' : 'clean';
   return { verdict, attempts, slugPaths, reasons };
 }
+
+
+// Terminate only this runner's owned child. A fallback cannot promise descendant cleanup;
+// the caller still waits for close and must not detach a child it failed to terminate.
+export function killTree(child, { platform = process.platform, taskkill = spawnSync, report = console.warn } = {}) {
+  if (child.exitCode != null || child.signalCode != null) return { requested: false, method: 'already-exited' };
+  if (platform === 'win32') {
+    let result;
+    try {
+      result = taskkill('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore', timeout: 5000, windowsHide: true });
+    } catch (error) {
+      result = { status: null, error };
+    }
+    if (!result.error && result.status === 0) return { requested: true, method: 'taskkill' };
+    report(`taskkill failed for owned PID ${child.pid} (exit ${result.status ?? 'none'}, error ${result.error?.code ?? 'none'}); trying child.kill. Descendant cleanup is not confirmed.`);
+  }
+  let requested = false;
+  let errorCode = 'none';
+  try { requested = child.kill('SIGKILL'); } catch (error) { errorCode = error.code ?? 'unknown'; }
+  if (!requested) report(`Could not terminate owned PID ${child.pid} (error ${errorCode}); it may still be running. The runner will keep waiting for close; stop this owned process through the existing executor boundary.`);
+  return { requested, method: 'child.kill' };
+}

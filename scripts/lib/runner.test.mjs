@@ -1,13 +1,15 @@
 /** @lane merge */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
+import { once } from 'node:events';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   assertOutsideRepo,
   buildRun,
+  killTree,
   permissionConfiguration,
   sanitizeVaultSnapshot,
   assertDistinctVaults,
@@ -458,4 +460,41 @@ test('serialized vault snapshots retain change evidence without private status f
   assert.equal(raw.status, ' M private-project/secret-note.md\n?? another-private-file.md\n', 'guard input is unchanged');
   assert.deepEqual(sanitizeVaultSnapshot({ ...raw }), safe);
   assert.notEqual(sanitizeVaultSnapshot({ ...raw, status: '' }).statusSha256, safe.statusSha256);
+});
+
+
+test('timeout cleanup falls back after taskkill failure and terminates the owned child', async () => {
+  const child = spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], { stdio: 'ignore', windowsHide: true });
+  const messages = [];
+  let call;
+  let timer;
+  try {
+    await once(child, 'spawn');
+    const closed = once(child, 'close');
+    const result = killTree(child, {
+      platform: 'win32',
+      taskkill: (...args) => { call = args; return { status: 1 }; },
+      report: (message) => messages.push(message),
+    });
+    assert.equal(result.method, 'child.kill');
+    assert.equal(result.requested, true);
+    assert.equal(call[0], 'taskkill');
+    assert.deepEqual(call[1], ['/pid', String(child.pid), '/T', '/F']);
+    assert.equal(call[2].windowsHide, true);
+    assert.equal(call[2].timeout, 5000);
+    assert.ok(messages.some((message) => /taskkill.*failed/i.test(message)));
+    await Promise.race([closed, new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('owned child did not terminate')), 3000); })]);
+    assert.ok(child.exitCode !== null || child.signalCode !== null);
+  } finally {
+    clearTimeout(timer);
+    if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
+  }
+});
+
+test('timeout cleanup reports both failures without claiming the child stopped', () => {
+  const messages = [];
+  const child = { pid: 123, exitCode: null, signalCode: null, kill: () => false };
+  const result = killTree(child, { platform: 'win32', taskkill: () => ({ status: null, error: { code: 'ETIMEDOUT' } }), report: (message) => messages.push(message) });
+  assert.equal(result.requested, false);
+  assert.ok(messages.some((message) => /could not terminate.*123/i.test(message)));
 });

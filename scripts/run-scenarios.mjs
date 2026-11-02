@@ -6,8 +6,9 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { cpSync, createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 import { delimiter, join, resolve } from 'node:path';
-import { assertDistinctVaults, assertOutsideRepo, buildRun, permissionConfiguration, sanitizeVaultSnapshot, compareVault, newestVersion, evaluateVault, isSecretName, maskSecrets, parseArgs, parseTranscript, renderSummary, replyFor, selectScenarios, vaultSnapshot } from './lib/runner.mjs';
+import { assertDistinctVaults, assertOutsideRepo, buildRun, killTree, permissionConfiguration, sanitizeVaultSnapshot, compareVault, newestVersion, evaluateVault, isSecretName, maskSecrets, parseArgs, parseTranscript, renderSummary, replyFor, selectScenarios, vaultSnapshot } from './lib/runner.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const FILE_CAP = 20 * 1024;
@@ -84,13 +85,8 @@ function fixtureSlugs(fixture) {
   return [...new Set([...own, 'demo-game'])];
 }
 
-function killTree(child) {
-  if (process.platform === 'win32') spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
-  else child.kill('SIGKILL');
-}
-
 // Runs the host once. Resolves with { exitCode, timedOut, spawnError }.
-function runHost(exe, { args, env }, cwd, transcriptPath, stderrPath, timeoutMs, active) {
+export function runHost(exe, { args, env }, cwd, transcriptPath, stderrPath, timeoutMs, active) {
   return new Promise((done) => {
     const out = createWriteStream(transcriptPath);
     const err = createWriteStream(stderrPath);
@@ -106,7 +102,16 @@ function runHost(exe, { args, env }, cwd, transcriptPath, stderrPath, timeoutMs,
     child.stdout.pipe(out);
     child.stderr.pipe(err);
     const timer = setTimeout(() => { timedOut = true; killTree(child); }, timeoutMs);
-    child.on('error', (e) => { active.delete(child); clearTimeout(timer); out.end(); err.end(); done({ exitCode: null, timedOut, spawnError: String(e) }); });
+    child.on('error', (e) => {
+      if (child.pid) {
+        // A failed kill can emit error after spawn. Keep ownership until close;
+        // resolving here would silently abandon a possibly running host.
+        console.error(`Owned host process ${child.pid} error; awaiting close: ${e.code ?? e.message}`);
+        return;
+      }
+      active.delete(child); clearTimeout(timer); out.end(); err.end();
+      done({ exitCode: null, timedOut, spawnError: String(e) });
+    });
     child.on('close', (code) => {
       active.delete(child);
       clearTimeout(timer);
@@ -263,4 +268,6 @@ async function main() {
   }
 }
 
-main().catch((e) => { console.error(e.message ?? e); process.exit(1); });
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((e) => { console.error(e.message ?? e); process.exit(1); });
+}
