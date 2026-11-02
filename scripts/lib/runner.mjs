@@ -3,17 +3,14 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, realpathSync } from 'node:fs';
 import { isAbsolute, relative, resolve } from 'node:path';
 
-export const GENERIC_REPLY = 'Use your best judgement and state your assumption.';
-
 export const READ_TOOLS = ['Read', 'Glob', 'Grep'];
-export const OTHER_TOOLS = ['Skill', 'Bash(git *)', 'Bash(node *wiki-master*)', 'Bash(WIKI_MASTER_VAULT=* node *wiki-master*)'];
-export const GAME_STUDIO_SKILLS = ['game-master', 'studio-start', 'game-architect'];
+export const OTHER_TOOLS = ['Skill', 'Bash(git *)', 'Bash(node *wiki-master*)', 'Bash(WIKI_MASTER_VAULT=* node *wiki-master*)', 'Bash(node verify-patrol.mjs)'];
+export const GAME_STUDIO_SKILLS = ['game-master', 'studio-start', 'game-architect', 'game-pm', 'game-quality', 'game-writer', 'game-artist', 'game-designer'];
 const DEFAULTS = { trials: 1, concurrency: 3, maxBudgetUsd: 6, timeoutMin: 15 };
 
-// The second turn: scenarios with a reply, and every adoption scenario.
+// A second turn occurs only when the scenario explicitly supplies one.
 export function replyFor(scenario) {
-  if (scenario.reply) return scenario.reply;
-  return scenario.kind === 'adoption' ? GENERIC_REPLY : null;
+  return scenario.reply ?? null;
 }
 
 // --- paths -----------------------------------------------------------------

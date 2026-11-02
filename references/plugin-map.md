@@ -1,21 +1,21 @@
 # Plugin map
 
-This plugin says what must be decided and what evidence proves it. Another plugin says how. This is the only file in the plugin that names engines, tools or other plugins. Skills refer to purposes ("engine architecture guidance"), then look the purpose up here.
+Studio offers game-development advice and wiki document maintenance. Specialist plugins hold technology and craft guidance. This map centralizes their names so Studio need not duplicate their procedures. Consult relevant available guidance when it helps, without a mandatory lookup or record-writing ceremony.
 
 ## Map
 
 | Purpose | Stack | Defer to |
 |---|---|---|
 | Engine choice | any | `agent-engine:engine-selection` |
-| Structure and architecture | Phaser | `agent-engine:engine-phaser`; for cross-game or tool coordination, `agent-engine:phaser-architecture` |
+| Structure and architecture | Phaser | `agent-phaser:engine-phaser`; for cross-game or tool coordination, `agent-phaser:phaser-architecture` |
 | Structure and architecture | R3F / three.js | `agent-engine:engine-r3f` |
 | Structure and architecture | Babylon.js | `agent-engine:engine-babylon` |
 | Structure and architecture | Unreal (C++) | `agent-unreal:unreal-architecture` for project structure, module boundaries and where state belongs; `agent-unreal:unreal-gameplay`, `agent-unreal:unreal-rendering`, `agent-unreal:unreal-procedural` for system choices; `agent-unreal:unreal-native` for build and packaging |
 | Structure and architecture | UEFN | `agent-unreal:uefn` |
-| Structure and architecture | Custom | Fallback chain, item 2 onward |
-| Structure and architecture | Unity | Fallback chain, item 2 onward |
-| Structure and architecture | Godot | Fallback chain, item 2 onward |
-| Quality, verification, performance | Phaser | `agent-engine:phaser-verification` |
+| Structure and architecture | Custom | Available guidance or project documentation |
+| Structure and architecture | Unity | Available guidance or project documentation |
+| Structure and architecture | Godot | Available guidance or project documentation |
+| Quality, verification, performance | Phaser | `agent-phaser:phaser-verification` |
 | Quality, verification, performance | R3F / three.js | `agent-engine:engine-r3f` |
 | Quality, verification, performance | Babylon.js | `agent-engine:engine-babylon` |
 | Quality, verification, performance | Unreal (C++) | `agent-unreal:unreal-quality` for test and measurement practice; `agent-unreal:unreal-native` for running builds, captures and profiles |
@@ -24,60 +24,32 @@ This plugin says what must be decided and what evidence proves it. Another plugi
 | Asset craft | sprites | `agent-sprites:sprite-craft`, `agent-sprites:sprite-review`, `agent-sprites:sprite-verification` |
 | Asset craft | meshes | `agent-meshes:mesh-believable`, `agent-meshes:mesh-quality-review` |
 | Asset craft | drawings | `agent-draw:draw-authoring` |
-| Asset craft | sound and music | `agent-beeps:beeps-craft`; the owner picks by `agent-beeps:beeps-audition` |
+| Asset craft | sound and music | `agent-beeps:beeps-craft`; `agent-beeps:beeps-audition` for comparing options |
 | Text and dialogue craft | any | `agent-prose:prose-dialog`, `agent-prose:prose-voice`, `agent-prose:prose-review` |
 | Launch and store readiness | any | `agent-marketing:market-campaign` |
 | Document authoring and roadmap | any | `wiki-master:wiki-author` for documents and the generated roadmap; `wiki-master:wiki-health` for validation |
 | Wiki scaffolding | any | `wiki-master:wiki-init` |
-| Project state brief | any | `wiki-master`'s `scripts/session-brief.mjs` (version 0.73.0 or later): finds the project from the repository's `origin` remote through a `repo:` line on the project's overview page, then prints the three-line report and what needs attention. Read-only |
 | Skill quality | any | `hartye-skills:yoda` |
-| Blind review at a checkpoint | any | No plugin skill. [The process](process.md) defines it and the host file says how to start one. For an outside opinion on a hard-to-reverse decision, which stays optional: `hartye-skills:rubber-duck` |
+| Optional second opinion | any | `hartye-skills:rubber-duck`, subject to authorization for sending project content to another provider |
 
-## Where to go next
+## Using the map
 
-Use this when a situation needs craft or technology the plugin does not own. Find the situation, confirm the skill is in the session's list of available skills (if not, use the fallback chain below), load it, bring what the row says, and record what comes back where the row says. Where a row says "the stack's row", the Map above gives the skill for the project's stack.
+Find the relevant purpose and the project's actual stack. Confirm a named skill is available before relying on it, and load only guidance relevant to the task. Bring useful existing context, not a required packet of Studio documents. A missing mapped skill does not block ordinary work.
 
-| Situation | Hand off to | Bring | Record the result |
-|---|---|---|---|
-| Choosing an engine or web stack | `agent-engine:engine-selection` | The state page, the brief and the constraints page | A technology decision record |
-| Building, structuring or running the game | The stack's row under "Structure and architecture" in the Map | The architecture page and the constraints page | "Engine guidance used" on the architecture page |
-| Measuring performance, or checking a constraint | The stack's row under "Quality, verification, performance" in the Map; for a packaged Unreal build, `agent-unreal:unreal-native` | The constraints page row, the target hardware and the conditions | The quality evidence note with raw output kept; the row's Status and Evidence link on the constraints page |
-| Deciding a testing strategy, or auditing the tests | `agent-tests:test-strategy`; for a suite that already feels bloated, `agent-tests:test-audit` | The risk profile and the constraints page | The test strategy and the quality evidence note |
-| Sprites, meshes and drawings | `agent-sprites:sprite-craft`, `agent-sprites:sprite-review`, `agent-sprites:sprite-verification`; `agent-meshes:mesh-believable`, `agent-meshes:mesh-quality-review`; `agent-draw:draw-authoring` | The art bible and the backlog item | The backlog item's Implications and Art stage |
-| Sound and music | `agent-beeps:beeps-craft`; the owner picks with `agent-beeps:beeps-audition` | The art bible and the backlog item | The owner's recorded pick in the backlog item |
-| Game text, dialogue and voice | `agent-prose:prose-dialog`, `agent-prose:prose-voice`, `agent-prose:prose-review` | The narrative bible and the glossary | The backlog item's Implications; the narrative bible |
-| Marketing and launch readiness | `agent-marketing:market-campaign` | The state page, the brief and the release criteria | The backlog item for the launch work; the Ship checkpoint review |
-| Designing a system, economy, level or interface | No installed plugin covers design craft; follow the design spec template | The brief, the pillars and the non-goals | The design spec, with what comes back recorded in it |
-| Writing or validating project documents | `wiki-master:wiki-author`; `wiki-master:wiki-health` | The document and its catalog entry | The document itself |
+If no mapped guidance fits, use project documentation, available specialist guidance or authoritative technical documentation. Distinguish what was tested here, documented elsewhere and inferred. Explain a material guidance gap when useful; do not create an issue in another project's backlog automatically.
 
-## Lookup procedure
+Useful general engine support includes `agent-engine:engine-selection`, `agent-engine:engine-asset-import`, `agent-engine:engine-visual-polish` and `agent-engine:engine-custom-shaders`. Choose only what applies. Game-system design can use Studio's optional [design template](templates/design-spec.md).
 
-1. Read the stack from the architecture page or the decision records.
-2. Find the purpose and stack in the map. A row whose stack is `any` adds to the stack's row (or to the fallback chain) and never replaces it.
-3. The lookup is triggered by any question about how to build, structure, run, verify or measure the project, or which tool to use, whether or not it mentions architecture. Confirm the named skill appears in the session's list of available skills. If it does, load it and follow it for how; when a row names several skills, load only those the question touches. In your answer, name the skill, give the conclusion for this project and the next action in a few sentences, and cite where the details live. In chat, say which skill and reference hold the details and name the next action. At most ONE rule may be adopted, in a sentence that cites the guidance; if adopted, write it into the architecture page's review standard in the same operation, so it is a decision and not chatter. Do not copy its procedures, commands, thresholds or lists into a project document; the details stay in the guidance. A stack with no row for a purpose uses the fallback chain.
-4. Record the guidance used BEFORE you answer, even when the answer is a question to the owner: which guidance, for what question, and the date. Structure and architecture guidance goes under "Engine guidance used" on the architecture page. Verification guidance goes on the "Guidance used" line of the quality evidence note; if nothing has been run yet, write the note anyway with every claim marked `evidence: none` and `Evidence: none`. Asset or text craft guidance goes in the backlog item's Implications.
+Cite guidance when it supports the answer. Consulting it does not require an architecture entry, quality note, state update or backlog item. When maintaining a record, keep only the useful project decision and link specialist details.
 
-## Fallback chain
+## Wiki records
 
-Use this when the stack has no mapped skill for the purpose, the mapped skill is not available, or it is available but has nothing on the question.
+All Studio-maintained project state lives in the project's wiki, its single canonical home. `wiki-master:wiki-author` and `wiki-master:wiki-health` can help author and validate those records when available. Use the project's existing wiki tooling and schema; Studio does not require a particular plugin for advice or source work.
 
-1. The engine-specific skill, if the map names one and it is available.
-2. Otherwise the general engine plugin: `agent-engine:engine-selection` and the stack's profile in it (how to install, drive and verify the stack, with limits), plus `agent-engine:engine-asset-import` for assets, `agent-engine:engine-visual-polish` for visuals and `agent-engine:engine-custom-shaders` for a custom renderer, where they apply.
-3. If that has nothing on the question, apply the agnostic requirements: (a) describe only what exists in the repository, in the architecture page's Stack, Structure and Review standard; (b) label each claim that matters `tested here`, `documented` (cite the source) or `general knowledge`; (c) say in the answer that no engine-specific guidance was used; (d) name the observed run that would confirm it. Then record an open question on the state page (owner: game-architect, must be answered by: none), and write the gap text (purpose, stack, question, what was missing) and include it in your answer. File it as a roadmap item for the general engine plugin if you can reach that roadmap; otherwise hand the owner the text. Do not add it to the project's own backlog or roadmap. If an open question for the same purpose and stack already exists, add nothing. Include the gap text in the answer; never offer to write it later.
-
-For a purpose that is not engine structure, quality or assets (asset craft, text craft, launch readiness, outside opinion), if the mapped skill is unavailable, apply the process's own checks, record an open question, and hand the owner the gap text for the plugin the map names for that purpose.
-
-## Overlaps this plugin must not duplicate
-
-- **Test phases and lanes:** `agent-tests:test-strategy` defines dev, test and production phases and lanes. game-quality maps its checkpoints onto them (concept through production roughly to dev, beta to test, release and live to production) and defers to it.
-- **Launch readiness:** `agent-marketing` models launch readiness. The Ship checkpoint points to it and keeps only the engineering release criteria.
-- **Document formats and validation:** the wiki tooling above. The artifact catalog gives owner, path and ready definition only.
-- **Skill quality:** `hartye-skills:yoda`.
-
-## Dependencies
-
-The wiki tooling (`wiki-master`, version 0.55.0 or later, for the validated `depends-on` field on backlog items) is a hard dependency: the state page, backlog, roadmap and decision records live in the project's wiki. Its session brief (0.73.0 or later) is optional: without it, find the wiki as the next section says. Everything else in this map is optional; when it is missing, use the fallback chain.
+Do not write repository-local state, sidecar trackers or duplicate progress. Existing project-owned documents are not automatically Studio state: link them without relocating or deleting them. A requested transition to Studio maintenance should establish one canonical wiki record within scope.
 
 ## Finding the wiki vault
 
-When no instruction file names the project and its state page, run the session brief (the Project state brief row) from the project's repository. It names the project, its wiki folder and how it matched, and prints the state page's three lines. If it says no project is bound, adoption proposes the `repo:` line (see [adoption](adoption.md)); until then pass `--project <slug>`. Its list of artifacts not verified for a long time is a prompt to re-verify them when you next touch them; it does not make the state page stale (stale is defined in [the vocabulary](vocabulary.md)). Without the session brief, the wiki tooling's vault is the folder named by the `WIKI_MASTER_VAULT` environment variable, or the folder the tooling's own resolution reports (ask the tooling for its vault path). The project's pages are in `<vault>/wiki/authored/<slug>/`. [Entry](entry.md#find-the-wiki) gives the order in which to look.
+Use the wiki paths already established by the user or project instructions. For projects using `wiki-master`, its configured `WIKI_MASTER_VAULT` or its own vault-resolution helper identifies the vault. Its optional `scripts/session-brief.mjs` can locate a project through its existing repository binding; it is a discovery aid, not a startup requirement or response format.
+
+Do not invent a binding, create a state directory in the repository or write elsewhere because discovery failed. Continue advice and authorized implementation, and report any requested wiki update that remains pending. Ask for the canonical destination only when a necessary write cannot otherwise be located.

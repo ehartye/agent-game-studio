@@ -6,7 +6,6 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  GENERIC_REPLY,
   assertOutsideRepo,
   buildRun,
   assertDistinctVaults,
@@ -69,10 +68,10 @@ test('parseTranscript extracts the session, tool usage in order, final text, cos
   assert.equal(t.isError, false);
 });
 
-test('parseTranscript reports the catalogue count and whether the three game-studio skills appear', () => {
+test('parseTranscript reports the catalogue count and which of the eight game-studio skills appear', () => {
   const t = parseTranscript(transcript);
   assert.equal(t.catalogue.count, 4);
-  assert.deepEqual(t.catalogue.gameStudio, { 'game-master': true, 'studio-start': true, 'game-architect': true });
+  assert.deepEqual(t.catalogue.gameStudio, { 'game-master': true, 'studio-start': true, 'game-architect': true, 'game-pm': false, 'game-quality': false, 'game-writer': false, 'game-artist': false, 'game-designer': false });
 });
 
 test('parseTranscript flags a missing game-studio skill and records denied tool results', () => {
@@ -153,12 +152,10 @@ test('extra allow rules can be appended to the allow-list', () => {
   assert.ok(run.args.includes('Read(//x/**)'));
 });
 
-test('replyFor uses the scenario reply, the generic reply for adoption, and nothing otherwise', () => {
-  assert.equal(replyFor({ kind: 'routing', prompt: 'p' }), null);
-  assert.equal(replyFor({ kind: 'routing', reply: 'use X' }), 'use X');
-  assert.equal(replyFor({ kind: 'adoption' }), GENERIC_REPLY);
-  assert.equal(replyFor({ kind: 'adoption', reply: 'demo-game, minimal' }), 'demo-game, minimal');
-  assert.equal(GENERIC_REPLY, 'Use your best judgement and state your assumption.');
+test('replyFor does not manufacture approval or a second turn', () => {
+  assert.equal(replyFor({ kind: 'advisory', prompt: 'p' }), null);
+  assert.equal(replyFor({ kind: 'adoption' }), null);
+  assert.equal(replyFor({ reply: 'Use your judgement and make the edit.' }), 'Use your judgement and make the edit.');
 });
 
 test('assertOutsideRepo refuses folders inside or equal to the repository, including relative and case variants', () => {

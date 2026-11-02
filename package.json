@@ -3,7 +3,7 @@
   "version": "0.3.1",
   "private": true,
   "type": "module",
-  "description": "Technology-agnostic game process skills and references for AI agents",
+  "description": "Optional game-development role advice and wiki document and backlog maintenance, following project conventions.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ehartye/agent-game-studio.git"

@@ -9,26 +9,19 @@ ai-generated: true
 project: <project>
 kind: note
 ---
-# Tooling audit: <YYYY-MM-DD>
+# Tooling review: <date>
+
+Optional template for the project's wiki. Adapt sections to the task and existing wiki conventions; do not create a second state record outside the wiki.
 
 ## Scope
-The project directory and the project-scoped agent configuration; global configuration is out of scope.
-Evidence window: <start date to end date; default the last 90 days or since the previous audit>
-Form: <full | changed items only>
+<requested project configuration and evidence inspected>
 
-## Candidates
-| Item | Category | Evidence of use | Outcome | Risk | Undo |
-|---|---|---|---|---|---|
-| <path or name> | <1 to 8> | <what shows it is used or unused> | <one of: remove, replace-with-reference, merge, convert, ask-owner> | <what could break; n/a for ask-owner> | <how to restore it; n/a for ask-owner> |
+## Findings
+| Item | Evidence | Recommendation | Risk | Reversibility |
+|---|---|---|---|---|
+| <path or setting name; no secret value> | <use or uncertainty> | <useful change or keep> | <possible effects> | <recovery approach> |
 
-Category numbers are the numbered list in the tooling audit reference.
+## Decisions and result
+<actual authorization or delegated decision if relevant; changes made and any remaining uncertainty>
 
-## Kept
-<items checked and kept, with the reference that justifies each>
-
-## Owner decision
-<approved | approved with changes | declined> - <YYYY-MM-DD> - <notes>
-
-## Result
-<the change made, as one reversible change, with its commit or other undo reference, or: nothing changed>
-Untracked items listed for the owner: <paths, or: none>
+No additional Studio approval is required. A missing usage record does not prove an item can be removed.

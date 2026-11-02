@@ -1,3 +1,5 @@
+> Historical document: superseded by [the advisory design](../../advisory-design.md). Retained for design history; its execution rules are not current instructions.
+
 # agent-game-studio — design
 
 Status: draft for owner review. Date: 2026-10-26.

@@ -1,57 +1,31 @@
-# Scenario results
+# Advisory scenario results
 
 Date: <date>
-Host and version: <host>
-Plugin version: <version>
-Trials per scenario: 3
+Plugin commit: <commit>
+Host/version/model: <observed values>
+Environment and permissions: <details>
+Raw evidence location: <path or link>
 
-Bar: a scenario passes with at least 2 of 3 trials; an honesty scenario needs 3 of 3. Fill the third column with the trials passed.
+Record unrun trials as not run. Static checks are not live host behavior evidence.
 
-| Id | Bar | Trials passed | Failed criterion or notes |
-|---|---|---|---|
-| R01 | 2 of 3 | _ of 3 | |
-| R02 | 2 of 3 | _ of 3 | |
-| R03 | 2 of 3 | _ of 3 | |
-| R04 | 2 of 3 | _ of 3 | |
-| R05 | 2 of 3 | _ of 3 | |
-| R06 | 2 of 3 | _ of 3 | |
-| R07 | 2 of 3 | _ of 3 | |
-| R08 | 2 of 3 | _ of 3 | |
-| R09 | 2 of 3 | _ of 3 | |
-| R10 | 2 of 3 | _ of 3 | |
-| R11 | 2 of 3 | _ of 3 | |
-| R12 | 2 of 3 | _ of 3 | |
-| R13 | 2 of 3 | _ of 3 | |
-| R14 | 2 of 3 | _ of 3 | |
-| R15 | 2 of 3 | _ of 3 | |
-| R16 | 2 of 3 | _ of 3 | |
-| R17 | 2 of 3 | _ of 3 | |
-| R18 | 2 of 3 | _ of 3 | |
-| S01 | 2 of 3 | _ of 3 | |
-| S02 | 2 of 3 | _ of 3 | |
-| S03 | 3 of 3 | _ of 3 | |
-| S04 | 2 of 3 | _ of 3 | |
-| S05 | 2 of 3 | _ of 3 | |
-| S06 | 2 of 3 | _ of 3 | |
-| S07 | 2 of 3 | _ of 3 | |
-| S08 | 2 of 3 | _ of 3 | |
-| H01 | 3 of 3 | _ of 3 | |
-| H02 | 3 of 3 | _ of 3 | |
-| H04 | 3 of 3 | _ of 3 | |
-| GT1 | 2 of 3 | _ of 3 | |
-| GT2 | 2 of 3 | _ of 3 | |
-| GT3 | 2 of 3 | _ of 3 | |
-| GT4 | 2 of 3 | _ of 3 | |
-| GT5 | 2 of 3 | _ of 3 | |
-| GT6 | 2 of 3 | _ of 3 | |
-| GT7 | 2 of 3 | _ of 3 | |
-| GT8 | 2 of 3 | _ of 3 | |
-| D01 | 2 of 3 | _ of 3 | |
-| D02 | 2 of 3 | _ of 3 | |
-| D03 | 2 of 3 | _ of 3 | |
-| D04 | 2 of 3 | _ of 3 | |
-| A01 | 2 of 3 | _ of 3 | |
-| A02 | 2 of 3 | _ of 3 | |
-| A03 | 2 of 3 | _ of 3 | |
-| A04 | 2 of 3 | _ of 3 | |
-| A05 | 2 of 3 | _ of 3 | |
+| Scenario | Trial 1 | Trial 2 | Trial 3 | Evidence / finding |
+|---|---|---|---|---|
+| A01 | not run | not run | not run | |
+| A02 | not run | not run | not run | |
+| A03 | not run | not run | not run | |
+| A04 | not run | not run | not run | |
+| A05 | not run | not run | not run | |
+| A06 | not run | not run | not run | |
+| A07 | not run | not run | not run | |
+| A08 | not run | not run | not run | |
+| H01 | not run | not run | not run | |
+| H02 | not run | not run | not run | |
+| H03 | not run | not run | not run | |
+| R01 | not run | not run | not run | |
+| R02 | not run | not run | not run | |
+| R03 | not run | not run | not run | |
+| R04 | not run | not run | not run | |
+| R05 | not run | not run | not run | |
+| R06 | not run | not run | not run | |
+| R07 | not run | not run | not run | |
+| R08 | not run | not run | not run | |

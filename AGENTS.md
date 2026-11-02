@@ -6,7 +6,7 @@ Instructions for agents that change this repository. They are not for agents tha
 
 When adding content to agent-game-studio's skills, do not re-create the content of skills in our other agent-* plugins (engine, unreal, sprites, meshes, draw, beeps, prose, tests, marketing and the rest). When a skill needs that content, reference the plugin instead.
 
-- This plugin owns process: phases, gates, routing, the state page, the work loop and the document formats. Technology and craft guidance belongs to the other plugins.
+- This plugin offers optional role advice, process guidance and wiki document/backlog maintenance. It adds no execution controls, approval gates or file-handling policy to consumer projects. Technology and craft guidance belongs to the other plugins.
 - References to other plugins live in `references/plugin-map.md`. Skills and other references point to the map; the hygiene test enforces it.
 - If another plugin lacks something this one needs, raise it as an enhancement for that plugin. Do not fill the gap here.
 

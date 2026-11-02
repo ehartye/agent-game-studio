@@ -1,43 +1,34 @@
-# Artifact catalog
+# Optional wiki records
 
-Every standard document has one owner, one location, one template and a definition of ready. Paths are relative to `wiki/authored/<project>/` unless the Path column says otherwise. Authoring and validation of the documents follow the wiki tooling named in [the plugin map](plugin-map.md); this catalog gives only owner, path and ready definition. Status values are in [the vocabulary](vocabulary.md).
+Studio-maintained project state lives exclusively in the project's wiki: one canonical home, no repository-local state, sidecar trackers or duplicate progress. Roles are typical stewards, not exclusive writers. A consultation may require no records.
 
-## Catalog
+Example paths below are relative to the project's wiki folder. Use established wiki paths and formats; templates are optional. Existing project-owned documents are not automatically Studio state. Link them without automatically relocating, deleting or replacing their content.
 
-| Artifact | Tier | Path | Owner | Template | Ready means |
-|---|---|---|---|---|---|
-| State page | minimal | reference/studio-state.md | game-pm | state-page.md | Every field filled; Next step present; checked against the repository this session; an empty Open questions section reads "No open questions." |
-| Game brief | minimal | overview.md | game-master | game-brief.md | One-sentence player experience; 3 to 5 pillars, each stating what it means and what it rules out; numbered non-goals; the owner's approval date |
-| Decision record | minimal | decisions/<slug>-adr.md | decider | decision-record.md | Context, at least two options, Decision, consequences (good and bad), Decision-makers and Status filled; the frontmatter decision-status equals the Status section |
-| Architecture | minimal | architecture.md | game-architect | architecture.md | Describes only what exists; matches the repository; Engine guidance used, Review standard and Tools sections filled; the Verified date equals the registry's Last verified |
-| Backlog item | minimal | backlog/<slug>.md | game-pm | backlog-item.md | Fit line and Target checkpoint recorded; all six Implications lines filled (none counts); Art stage filled (`not-applicable` counts); depends-on valid; Design artifacts lists what the work needs or says none required; expected acceptance evidence stated. Whether the listed artifacts are ready is checked at work-loop step 3, not here |
-| Roadmap | minimal | roadmap.md | game-pm | generated | Generated from the backlog items and regenerated since the last backlog change; never edited by hand outside its generated region |
-| Quality evidence | minimal | notes/quality-<checkpoint-or-item-slug>.md (lowercase, for example `notes/quality-vertical-slice.md` or `notes/quality-enemy-patrol.md`) | game-quality | quality-evidence.md | Names the checkpoint or item it supports; a Guidance used line (or none); each claim has what was run, how, the result, a link and its own evidence value; open defects listed |
-| Agent instructions block | minimal | the project's agent instruction file(s) | game-architect | instruction-block.md | Contains the process block with <project> replaced by the project's wiki folder name and the three format slots left as written; each line approved by the owner (an approved diff, or the audit's Owner decision); the files agree with each other |
-| Tooling audit record | minimal | notes/tooling-audit-<YYYY-MM-DD>.md | game-architect | tooling-audit.md | Every candidate has evidence, an outcome, a risk and an undo; the owner's decision is recorded |
-| Constraints | minimal | reference/constraints.md | game-master | constraints.md | One table row per constraint: the constraint in plain words, Source (document and date, or marked as without a source), Conditions (hardware, settings), How checked (a check the author cannot edit, with raw output kept as evidence), Matters at (a checkpoint slug), Status, Evidence link, Concession link; the owner has approved every row; an empty page reads "No constraints." |
-| Checkpoint review | minimal | reference/checkpoint-<slug>.md (the checkpoint's slug, for example `reference/checkpoint-vertical-slice.md`) | the checkpoint's first-named review owner | checkpoint-review.md | Frontmatter keys `checkpoint`, `standing`, `tip`, `review-date`, `blind-review` and `owner-acceptance` present (`owner-acceptance` stays empty until the owner gives it); a Criteria row for each criterion with its status, evidence value and link; the sections Constraints at this checkpoint, Concessions and decisions to proceed, Claims the evidence does not support, Independent review (or the label "no independent review ran" with the reason) and Open items; the `standing` agrees with the rows |
-| Art bible | standard | reference/art-bible.md | game-artist | art-bible.md | Palette, silhouette and readability rules approved by game-master; a named tie-breaker; a list of named mistakes |
-| Narrative bible and glossary | standard | reference/narrative-bible.md | game-writer | narrative-bible.md | Canon, character voices, and glossary entries with one definition each; a Locked section with the lock date once the owner has locked the text at Content lock |
-| Test strategy | standard | reference/test-strategy.md | game-quality | later | Risk map, quality bar, performance budgets, severity scale, and the lanes the tests run in |
-| Asset list | standard | reference/asset-list.md | game-artist | asset-list.md | Every shipped asset with its stage, its provenance (human, AI-assisted or AI-generated) and its licence |
-| Design spec | standard | reference/design-<system>.md | game-designer | design-spec.md | Rules, numbers and edge cases for one system, linked to the pillar it serves |
-| Risk register | full | reference/risk-register.md | game-pm | later | Each risk has an owner, a trigger and a response |
-| Release criteria | full | reference/release-criteria.md | game-quality | later | Checkable criteria for Ship, each with the evidence that satisfies it |
-| Localization plan | full | reference/localization-plan.md | game-writer | later | Text lock date, languages, and the hand-off kit |
-| Postmortem | full | notes/postmortem-<phase>.md | game-pm | later | What went right and wrong, including attempts that failed |
-| Asset entry | full | reference/assets/<id>.md | game-artist | later | Capabilities, needs, stage, sign-offs with the version signed, and dependencies |
+| Artifact | Useful for | Typical maintainer | Example wiki path | Template |
+|---|---|---|---|---|
+| State page | Orientation and record links | game-pm / studio-start | reference/studio-state.md | [state-page.md](templates/state-page.md) |
+| Game brief | Experience, pillars and tradeoffs | game-master | overview.md | [game-brief.md](templates/game-brief.md) |
+| Architecture | Structure and technical direction | game-architect | architecture.md | [architecture.md](templates/architecture.md) |
+| Decision record | Rationale and consequences | Relevant role | decisions/<slug>-adr.md | [decision-record.md](templates/decision-record.md) |
+| Backlog item | Outcome, dependencies and verification | game-pm | backlog/<slug>.md | [backlog-item.md](templates/backlog-item.md) |
+| Roadmap | Priorities and status | game-pm | roadmap.md | Existing wiki format or generator |
+| Quality evidence | Results and limits | game-quality | notes/quality-<item>.md | [quality-evidence.md](templates/quality-evidence.md) |
+| Constraints | Sourced requirements and measurements | Relevant role | reference/constraints.md | [constraints.md](templates/constraints.md) |
+| Checkpoint review | Requested milestone assessment | Relevant role | reference/checkpoint-<slug>.md | [checkpoint-review.md](templates/checkpoint-review.md) |
+| Art bible | Visual and audio direction | game-artist | reference/art-bible.md | [art-bible.md](templates/art-bible.md) |
+| Asset list | Status, provenance and licence | game-artist | reference/asset-list.md | [asset-list.md](templates/asset-list.md) |
+| Narrative bible and glossary | Canon, voices and terminology | game-writer | reference/narrative-bible.md | [narrative-bible.md](templates/narrative-bible.md) |
+| Design spec | Rules, balance and experiments | game-designer | reference/design-<system>.md | [design-spec.md](templates/design-spec.md) |
+| Test strategy | Risks and checks | game-quality | reference/test-strategy.md | Project testing guidance |
+| Localization plan | Languages and handoff | game-writer | reference/localization-plan.md | Project format |
+| Tooling review | Requested configuration assessment | game-architect | notes/tooling-audit-<date>.md | [tooling-audit.md](templates/tooling-audit.md) |
 
-`Template` is `later` where the template ships in a later phase, and `generated` where the wiki tooling produces the document.
+## Maintenance
 
-## Rules
+Distinguish implemented facts, proposals, estimates and decisions. Cite reconstructed content's sources. Verification dates mean the subject was checked then; reading a page alone does not reverify a build.
 
-- **One writer.** The Owner column names the only role that writes the document. Others review. The one exception: studio-start writes the first version of the state page on game-pm's behalf at bootstrap or adoption; nothing else changes owner. A checkpoint's quality evidence note is written in sections by the review owners (see Phases and checkpoints in the process), each writing only their own `## Claims: <role>` section. `decider` means the role whose routing row the decision falls under; when the owner decides (a decision to proceed, a tier change, a conflict resolution), the agent in that session writes the record and names the owner in Decision-makers. The constraints page has three keepers: game-master keeps product constraints, game-architect technical constraints and game-quality the measurements (Status and Evidence link). Agents propose rows; only the owner approves, changes, concedes or removes one.
-- **Tier.** Until the owner sets a tier, use `minimal`. The owner sets the tier at bootstrap or adoption and may raise it at design readiness or at a checkpoint. A project may adopt a higher-tier document earlier when work needs it; once adopted it gets a registry row and its ready definition applies. Lowering the tier mid-phase needs a decision record.
-- **Registry.** Every kind of document in the project's tier has one row on the state page: artifact, path, owner, status, last verified. A row whose path is a folder or a pattern covers every file it matches: `ready` only when every file is `ready`, `absent` when it matches none, otherwise `draft`; Last verified is the earliest date among them. Set Last verified only when you actually ran or inspected the artifact's subject (for a document: re-read it against the code or the owner's statement and found it true); reading the page to answer a question does not count.
-- **ADR suffix.** `-adr` in a decision record's file name stands for architecture decision record.
-- **Template slots.** A document that still contains a `<...>` template slot or instruction is `draft`.
-- **Page status.** The frontmatter `status` key is the wiki's page maturity. Never write an artifact status into it. Artifact status lives only in the state page registry.
-- **Fit verdicts** live in the backlog item, as does a `pending` Fit line (no verdict yet; it is not a decision). A fit verdict becomes a decision record only when the owner overrides it, or accepts a `needs-pillar-change` by changing a pillar or non-goal.
-- **Reconstructed documents** carry, on the first line after the title heading, `Reconstructed <YYYY-MM-DD> from <code, history or the owner's account>; not yet confirmed by the owner.` Their registry status is `reconstructed`. A reconstructed document is always a new file; an existing file is never relabelled. When the owner confirms, the line becomes `Reconstructed <YYYY-MM-DD> from <source>; confirmed by the owner <YYYY-MM-DD>.` and the status `ready`.
-- **Outputs without a template of their own.** A change request is a decision record. A tool-readiness sign-off is the architecture page's Tools section plus the decision record. A course check is reported in the conversation and, if it changes the Next step, on the state page.
+Keep only useful registry entries. No tier, acceptance field or instruction block is compulsory. [Instruction files](instruction-files.md) may contain an optional static pointer, never a second state home.
+
+If wiki access is unavailable, continue advice and source work; report pending wiki writes without creating a substitute elsewhere. Implementation assets and raw test outputs remain where project tooling puts them and are linked from wiki records.
+
+See [vocabulary](vocabulary.md) and [the plugin map](plugin-map.md).

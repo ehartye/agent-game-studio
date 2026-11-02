@@ -11,24 +11,19 @@ kind: architecture
 ---
 # Architecture: <project>
 
-Describe only what exists now. Anything planned belongs in the backlog.
+Optional template for the project's wiki. Adapt sections to the task and existing wiki conventions; do not create a second state record outside the wiki.
 
-Record a version, a count or a pull request state where its source lives (the installed plugin, the folder listing, the pull request). Elsewhere on this page link the source or say how to read it. If a copy is kept, it carries the date and how it was read.
+## Current structure
+<stack, versions and their sources; main systems, boundaries and data flow>
 
-## Stack
-<engine or framework, language, versions, and where they are pinned>
+## Technical options and decisions
+<significant choices, tradeoffs and links to decision records; distinguish implemented structure from proposals>
 
-## Structure
-<the main folders and what each holds>
+## Risks and dependencies
+<known limitations, performance concerns and technical dependencies>
 
-## Engine guidance used
-<for each piece of engine-specific guidance consulted: which guidance, for what question, and the date; or: none consulted>
+## Guidance used
+<relevant specialist guidance and sources, if useful>
 
-## Review standard
-<what a change must show before it is accepted>
-
-## Tools
-<each tool the project depends on: ready or not ready, who signed off, date, and the decision record; or: none>
-
-## Verified
-<YYYY-MM-DD> against <commit or build>. When this page is ready, this date equals its Last verified in the registry.
+## Verification
+<what was actually inspected or run, revision, date and limits; leave unknown facts unknown>

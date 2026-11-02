@@ -1,13 +1,13 @@
 // Runs the scenarios in tests/scenarios/scenarios.json against a real, non-interactive host with this
 // plugin loaded, and captures what happened. It never scores. Dependency-free.
 //
-//   node scripts/run-scenarios.mjs --out <dir> [--plugin <path>] [--ids R01,S01] [--kind routing,advise]
+//   node scripts/run-scenarios.mjs --out <dir> [--plugin <path>] [--ids A01,H01] [--kind autonomy,honesty]
 //        [--trials N] [--concurrency N] [--model <name>] [--max-budget-usd N] [--timeout-min N] [--vault <path>] [--vault-guard strict|attributable] [--wiki-master <path>] [--dry-run]
 import { spawn, spawnSync } from 'node:child_process';
 import { cpSync, createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { delimiter, join, resolve } from 'node:path';
-import { GENERIC_REPLY, assertDistinctVaults, assertOutsideRepo, buildRun, compareVault, newestVersion, evaluateVault, isSecretName, maskSecrets, parseArgs, parseTranscript, renderSummary, replyFor, selectScenarios, vaultSnapshot } from './lib/runner.mjs';
+import { assertDistinctVaults, assertOutsideRepo, buildRun, compareVault, newestVersion, evaluateVault, isSecretName, maskSecrets, parseArgs, parseTranscript, renderSummary, replyFor, selectScenarios, vaultSnapshot } from './lib/runner.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const FILE_CAP = 20 * 1024;
@@ -147,7 +147,7 @@ async function runOne(ctx, scenario, trial) {
   try {
     prepareProject(project, scenario.fixture);
     let scratchVault = null;
-    if (!fixtureHasWiki(scenario.fixture)) {
+    if (scenario.scratchWiki === true && !fixtureHasWiki(scenario.fixture)) {
       assertDistinctVaults(paths.vault, ctx.vault);
       const t0 = Date.now();
       createScratchVault(paths.vault, ctx.wikiMaster);
@@ -226,20 +226,20 @@ async function main() {
 
   if (opts.dryRun) {
     console.log(`Would run ${jobs.length} run(s) into ${outDir} with plugin ${plugin}`);
-    for (const { s, trial } of jobs) console.log(`  ${s.id}-t${trial}  fixture=${s.fixture}  ${fixtureHasWiki(s.fixture) ? 'vault=project copy' : 'vault=scratch vault'}  reply=${replyFor(s) ? JSON.stringify(replyFor(s)) : 'none'}`);
+    for (const { s, trial } of jobs) console.log(`  ${s.id}-t${trial}  fixture=${s.fixture}  ${s.scratchWiki === true && !fixtureHasWiki(s.fixture) ? 'vault=scratch vault' : 'vault=project copy'}  reply=${replyFor(s) ? JSON.stringify(replyFor(s)) : 'none'}`);
     const { args } = buildRun({ prompt: '<prompt>', plugin, cacheDir, projectDir: '<project>', vault: join(homedir(), '.wiki-master-vault'), maxBudgetUsd: opts.maxBudgetUsd, model: opts.model });
     console.log(`  claude ${args.map((a) => (/\s/.test(a) ? JSON.stringify(a) : a)).join(' ')}`);
     return;
   }
 
   const exe = resolveHost();
-  const wikiMaster = scenarios.some((s) => !fixtureHasWiki(s.fixture)) ? findWikiMaster(opts.wikiMaster, cacheDir) : null;
+  const wikiMaster = scenarios.some((s) => s.scratchWiki === true && !fixtureHasWiki(s.fixture)) ? findWikiMaster(opts.wikiMaster, cacheDir) : null;
   mkdirSync(outDir, { recursive: true });
   const vault = resolve(opts.vault ?? join(homedir(), '.wiki-master-vault'));
   const ctx = { opts, plugin, cacheDir, exe, outDir, vault, wikiMaster, vaultBefore: vaultSnapshot(vault), active: new Set(), abortMessage: null, extraAllowed: [] };
   console.log(`real vault ${vault}: HEAD ${ctx.vaultBefore.head ?? 'none'}, ${ctx.vaultBefore.status.trim() ? ctx.vaultBefore.status.trim().split(/\r?\n/).length : 0} changed file(s) at start`);
   const runs = [];
-  const writeIndex = () => writeFileSync(join(outDir, 'index.json'), `${JSON.stringify({ plugin, vault, model: opts.model, genericReply: GENERIC_REPLY, startedAt, runs }, null, 2)}\n`);
+  const writeIndex = () => writeFileSync(join(outDir, 'index.json'), `${JSON.stringify({ plugin, vault, model: opts.model, startedAt, runs }, null, 2)}\n`);
   const startedAt = new Date().toISOString();
   await pool(jobs, opts.concurrency, async ({ s, trial }) => {
     console.log(`start ${s.id}-t${trial}`);

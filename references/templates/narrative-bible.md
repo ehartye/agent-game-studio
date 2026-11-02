@@ -9,25 +9,23 @@ ai-generated: true
 project: <project>
 kind: reference
 ---
-# Narrative bible and glossary: <project>
+# Narrative and glossary: <project>
 
-The facts, voices and terms every line of text in the game is checked against. This page is one document: the glossary lives here, not in a page of its own.
+Optional template for the project's wiki. Adapt sections to the task and existing wiki conventions; do not create a second state record outside the wiki.
 
 ## Canon
-<the settled facts of the world, its history and its rules, one per line; anything not settled belongs in the open questions on the state page>
+<settled world facts, history and rules; separate proposals and uncertainty>
 
 ## Character voices
-- <character> - <how they speak: vocabulary, rhythm, what they never say, and one sample line>
+<voice goals, vocabulary, rhythm and sample lines>
 
 ## Glossary
-One definition per term. A term with two meanings is two terms.
-
-| Term | Definition | Do not confuse with |
+| Term | Meaning | Context |
 |---|---|---|
-| <term> | <one sentence> | <a nearby term, or: -> |
+| <term> | <definition> | <usage or ambiguity> |
 
-## Where the text lives
-<the path of the game's own text, such as its strings or dialogue files. The text stays there; this page never holds a copy.>
+## Text and localization
+<links to implementation text, target languages, string constraints and localization work>
 
-## Locked
-<empty until the owner locks the text at Content lock, then the lock date and the owner's words. An agent never fills this section.>
+## Decisions and open work
+<actual choices, known continuity issues and links to wiki backlog items; text locks only if the project uses them>

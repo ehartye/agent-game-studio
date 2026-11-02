@@ -12,27 +12,25 @@ decision-status: proposed
 ---
 # <Decision title>
 
+Optional template for the project's wiki. Adapt sections to the task and existing wiki conventions; do not create a second state record outside the wiki.
+
 ## Status
-<proposed | accepted | superseded | deprecated>, <YYYY-MM-DD>. Keep decision-status in the frontmatter equal to this. If superseded: name the superseding record as a wikilink.
+<proposed, accepted, superseded or the project's own status; date and superseding record when relevant; keep consistent with decision-status when using this metadata>
 
 ## Decision-makers
-<who decided; who was consulted; who was informed>
+<who decided and who was consulted; distinguish explicit delegation from personal owner approval>
 
 ## Context
-<the problem and the constraints, in a few sentences>
+<problem, goals and relevant constraints>
 
 ## Options considered
-1. <Option>: <one line>
-2. <Option>: <one line>
+<credible alternatives and tradeoffs appropriate to the decision>
 
 ## Decision
-<the chosen option and why>
-
-For a decision to proceed without a missing prerequisite, name the checkpoint or step, what is missing, the risk stated to the owner, the owner's words and the date.
+<choice, rationale and source; distinguish proposal from actual decision>
 
 ## Consequences
-Good: <what improves>
-Bad: <what it costs or risks; a record with no costs is incomplete>
+<benefits, costs, risks and follow-up>
 
 ## Evidence
-<for each claim that matters: tested here, documented (with the source), or general knowledge. Tested here counts as observed; documented and general knowledge count as reported>
+<what was tested or inspected, what is documented, what remains an estimate; links and limits>

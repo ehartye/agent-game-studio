@@ -1,3 +1,5 @@
+> Historical pre-redesign run. Its scenarios and scoring rules are superseded; this is not evidence of current advisory behavior.
+
 # Real-host results, phase 3 role skills (0.3.0)
 
 Date: 2026-10-29

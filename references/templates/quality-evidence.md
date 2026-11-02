@@ -9,27 +9,27 @@ ai-generated: true
 project: <project>
 kind: note
 ---
-# Quality evidence: <checkpoint or item>
+# Quality evidence: <item or question>
 
-Supports: <brief-approved | vertical-slice | scope-lock | content-lock | ship, or the backlog item slug>
-Check owner: <role; at vertical-slice list both check owners and write one Claims section per check owner, headed `## Claims: <role>`>
+Optional template for the project's wiki. Adapt sections to the task and existing wiki conventions; do not create a second state record outside the wiki.
 
-Guidance used: <the verification guidance consulted, for what question, and the date; name it, do not copy from it; or: none>
+## Scope
+<question, revision and conditions checked>
 
-## Claims
-- <claim> - evidence: <observed | reported | none> - <what was run, how, on what build, and the result; name each version from a reading (a log line, the program's own report or a command's output), because a version taken from a label or an unchecked file is reported> - <link or path>
+Guidance used: <relevant guidance, or none>
 
-## Minimal-tier substitutes
-- <art bible | test strategy | performance budgets | locked text | asset provenance audit> - evidence: <observed | reported | none> - <what was checked, how, and the observed result>
+## Results
+| Claim or check | Basis | Method and result | Evidence | Limits |
+|---|---|---|---|---|
+| <claim> | <observed, reported or none> | <what ran or was inspected; outcome> | <link> | <what this does not establish> |
 
-Delete this section at the standard and full tiers, where the named document itself is required.
+Name versions from actual readings when available. An unchecked label is reported, not verified.
+
+## Iterations
+<relevant failures, changes and rerun results; do not rewrite a failure as a pass>
+
+## Defects and follow-up
+<real issues, project severity and links to wiki work items>
 
 ## Release criteria
-Optional. At the minimal tier, at the ship checkpoint, list the checkable release criteria here, one per line: <criterion>. Delete this section otherwise.
-
-## Defects open
-- <defect> - severity: <critical | other> - <link>
-
-If there are none, write: none.
-
-Evidence: <the lowest value among the claims above; observed is the highest and none the lowest>
+<optional project-specific criteria if relevant; do not introduce a release gate>

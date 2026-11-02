@@ -1,21 +1,10 @@
-# Host adapters
+# Host notes
 
-The plugin's method is written without naming any agent host's tools. An adapter records the few facts that differ by host. Add an adapter only for a host whose documentation you have checked. Host names appear only in this folder (and in the plugin manifest each host requires).
+These notes help discover capabilities and existing configuration. They do not prescribe instruction-file organization, an authoritative file or approval rules.
 
-## Contract
+- [Generic host](generic.md)
+- [Claude Code](claude-code.md)
 
-An adapter is a short file with these six headings:
+Use the host's advertised skills and tools, permissions and project conventions. Delegation and independent review depend on capabilities and authorization; neither is compulsory.
 
-- `## Instruction files`: the file name(s) the host reads for project instructions, how they combine, and whether one can import another.
-- `## Where the audit categories live`: for each of the eight categories in [the tooling audit](../tooling-audit.md), where the host keeps it for a project (or "not applicable").
-- `## Checking skill availability`: how to see which skills the current session has, so the plugin-map lookup can confirm a mapped skill exists.
-- `## Install`: how to install this plugin and the wiki tooling for the host, using only command forms checked against the host's documentation, otherwise a pointer to that documentation.
-- `## Blind review`: how to start a reviewer with no shared context for a checkpoint review (see the blind review definition in [the process](../process.md)), or what to record when the host cannot.
-- `## Limits`: what the adapter does not cover, and the date its rows were last checked against the host's documentation.
-
-## Adapters
-
-Use the adapter for the host you are running in. If none exists or you cannot tell, use generic.
-
-- [generic](generic.md): use when no adapter fits.
-- [claude-code](claude-code.md)
+Studio-maintained state belongs only in the project's wiki. An optional static instruction pointer does not become a tracker.
