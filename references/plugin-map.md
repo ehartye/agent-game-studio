@@ -31,7 +31,7 @@ Studio offers game-development advice and wiki document maintenance. Specialist 
 | Document authoring and roadmap | any | `wiki-master:wiki-project` for original documents, the generated roadmap and required validation of changed pages |
 | Wiki checks and scaffolding | any | `wiki-master:wiki-setup` for validation-only requests, whole-vault reports, diagnostics and initialization |
 | Skill quality | any | `hartye-skills:yoda` |
-| Optional second opinion | any | `hartye-skills:rubber-duck`, subject to authorization for sending project content to another provider |
+| Optional second opinion | any | `hartye-skills:other-guy`, which only the user can start: suggest typing `/other-guy`, and say that it sends project content to another provider |
 
 ## Using the map
 
